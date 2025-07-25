@@ -1,24 +1,33 @@
 package controller;
 
 import java.util.List;
+import java.util.Map;
+
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import model.GameModel;
+import model.GameScene;
 import model.GameState;
+import model.InventoryItem;
+import model.ItemType;
+import model.SceneLoader;
+import java.io.File;
 import view.*;
-import view.ChoiceScreenView;
-
 public class MainController {
 
     private final Stage stage;
     private final GameModel model;
     private final BorderPane rootPane;
+    private final SceneLoader loader;
+    // private Map<ItemType, List<InventoryItem>> currentInventory;
 
     public MainController(Stage stage) {
         this.stage = stage;
         this.model = new GameModel();
         this.rootPane = new BorderPane();
+        this.loader = new SceneLoader("src/data/scenes.json"); 
+        // this.currentInventory = model.getInventory();  
     }
 
     public void startApp() {
@@ -79,49 +88,32 @@ public void updateView() {
     }
 
     private void showFirstChoiceView() {
-        var choices = List.of(
-            new ChoiceScreenView.Choice("Drive", "imgs/armoredCarImg.jpg", "drive"),
-            new ChoiceScreenView.Choice("Walk", "imgs/walkingImg.jpg", "walk")
-        );
+        GameScene scene = loader.getSceneById("start"); // "start" is your first scene's ID in JSON
+        if (scene == null) {
+            System.err.println("Scene not found: start");
+            return;
+        }
+
+        model.subtractHealth(scene.getHealthChange());
 
         ChoiceScreenView view = new ChoiceScreenView(
-            model.getHealth(),
-            "The street you're on is quiet ... but you hear zombies groaning in the distance.\n" +
-            "You need to make a choice. What will you do?\n\nDo you want to drive or walk?",
-            choices,
+           model.getHealth(),
+            scene.getPrompt(),
+            scene.getChoices(),
             model.isDarkMode(),
-
-            selectedChoice -> {
-                if (selectedChoice.id().equals("walk")) {
-                    model.subtractHealth(30); 
-                }
-                model.setCurrentState(GameState.ENDING);
+            model.getInventory(),
+            choice -> {
+                model.subtractHealth(choice.getHealthEffect());
+                model.setCurrentState(GameState.ENDING); 
                 updateView();
             },
-
-            // When dark mode is toggled:
             () -> {
                 model.toggleDarkMode();
-                showFirstChoiceView(); 
+                updateView();
             }
         );
-        rootPane.setTop(null); 
-        rootPane.setCenter(view);
+
+        rootPane.setTop(view.getTopBar());
+        rootPane.setCenter(view.getLayout());
     }
-
-    // private void applyFirstChoiceTheme(VBox layout, TopBarView topBar) {
-    //     boolean dark = model.isDarkMode();
-
-    //     // Shared color logic
-    //     layout.setStyle("-fx-background-color: " + Theme.getBodyBackground(dark) + ";");
-
-    //     // Get label and style it
-    //     layout.getChildren().stream()
-    //         .filter(node -> node instanceof Label)
-    //         .map(node -> (Label) node)
-    //         .forEach(label -> label.setStyle("-fx-text-fill: " + Theme.getTextColor(dark) + ";"));
-
-    //     // Top bar handles itself
-    //     topBar.applyTheme(dark);
-    // }
 }

@@ -28,4 +28,10 @@ public class Theme {
     public static void applyButtonStyle(Button button, boolean dark) {
         button.setStyle(getButtonStyle(dark));
     }
+    public static String getInventoryBackground(boolean dark) {
+        return dark ? "#2e2e2e" : "#f0f0f0";
+    }
+    public static String getBorderColor(boolean dark) {
+        return dark ? "#444444" : "#cccccc";
+    }
 }

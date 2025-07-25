@@ -1,0 +1,6 @@
+[
+  { "name": "Handgun", "type": "WEAPON" },
+  { "name": "Granola Bars", "type": "CONSUMABLE" },
+  { "name": "Bottled Water", "type": "CONSUMABLE" },
+  { "name": "Map of the City", "type": "KEY_ITEM" }
+]

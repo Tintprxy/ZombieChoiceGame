@@ -1,12 +1,32 @@
 package model;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class GameModel {
     private boolean isDarkMode;
     private GameState currentState = GameState.TITLE;
     private int health = 100;
+    private Map<ItemType, List<InventoryItem>> inventory = new HashMap<>();
+    private static final int MAX_CONSUMABLES = 3;
+    private static final int MAX_KEY_ITEMS = 1;
+    private static final int MAX_WEAPONS = 2;
 
     public GameModel() {
         isDarkMode = false;
+
+        // Ensure all categories are initialized
+        for (ItemType type : ItemType.values()) {
+            inventory.put(type, new ArrayList<>());
+        }
+
+        // Load from JSON only
+        List<InventoryItem> initialItems = InventoryLoader.load("src/data/inventory.json");
+        for (InventoryItem item : initialItems) {
+            addItem(item);
+        }
     }
 
     public boolean isDarkMode() {
@@ -39,5 +59,34 @@ public class GameModel {
 
     public void addHealth(int amount) {
         setHealth(health + amount);
+    }
+    
+    public boolean addItem(InventoryItem item) {
+
+        inventory.putIfAbsent(item.getType(), new ArrayList<>());
+
+        List<InventoryItem> items = inventory.get(item.getType());
+
+        int limit = switch (item.getType()) {
+            case WEAPON -> MAX_WEAPONS;
+            case CONSUMABLE -> MAX_CONSUMABLES;
+            case KEY_ITEM -> MAX_KEY_ITEMS;
+        };
+
+        if (items.size() >= limit) return false;
+
+        items.add(item);
+        return true;
+    }
+
+    public boolean removeItem(String itemName) {
+        for (List<InventoryItem> items : inventory.values()) {
+            if (items.removeIf(i -> i.getName().equals(itemName))) return true;
+        }
+        return false;
+    }
+
+    public Map<ItemType, List<InventoryItem>> getInventory() {
+        return inventory;
     }
 }

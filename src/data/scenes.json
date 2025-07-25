@@ -1,0 +1,18 @@
+[
+  {
+    "id": "start",
+    "prompt": "The street is quiet. Do you want to drive or walk?",
+    "choices": [
+      {
+        "label": "Drive",
+        "imagePath": "imgs/armoredCarImg.jpg",
+        "id": "drive_path"
+      },
+      {
+        "label": "Walk",
+        "imagePath": "imgs/walkingImg.jpg",
+        "id": "walk_path"
+      }
+    ]
+  }
+]

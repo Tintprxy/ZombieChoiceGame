@@ -6,8 +6,11 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
-import javafx.scene.Node;
+import model.GameChoice;
+import model.InventoryItem;
+import model.ItemType;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class ChoiceScreenView extends VBox {
@@ -15,34 +18,63 @@ public class ChoiceScreenView extends VBox {
     private Label healthLabel;
     private ProgressBar healthBar;
     private Label promptLabel;
-    public TopBarView topBar = new TopBarView();
+    private TopBarView topBar = new TopBarView();
+    private int health;
+    private String promptText;
+    private List<GameChoice> choices;
+    private boolean darkMode;
+    private Map<ItemType, List<InventoryItem>> inventory;
+    private Consumer<GameChoice> onChoiceSelected;
+    private Runnable onToggleTheme;
 
-    public ChoiceScreenView(int health, String promptText, List<Choice> choices, boolean darkMode, Consumer<Choice> onChoiceSelected, Runnable onToggleTheme) {
+    public ChoiceScreenView(int health,
+        String promptText,
+        List<GameChoice> choices,
+        boolean darkMode,
+        Map<ItemType, List<InventoryItem>> inventory,
+        Consumer<GameChoice> onChoiceSelected,
+        Runnable onToggleTheme) {
+
+        this.health = health;
+        this.promptText = promptText;
+        this.choices = choices;
+        this.darkMode = darkMode;
+        this.inventory = inventory;
+        this.onChoiceSelected = onChoiceSelected;
+        this.onToggleTheme = onToggleTheme;
+
         setSpacing(20);
-        setAlignment(Pos.CENTER);
         setPadding(new Insets(20));
+        setAlignment(Pos.TOP_CENTER);
 
-        // Health
+        // Top bar
+        topBar.toggleButton.setOnAction(e -> onToggleTheme.run());
+
+        // Inventory (left side)
+        VBox inventoryView = buildInventoryUI(inventory, darkMode);
+        inventoryView.setPrefWidth(150);
+        inventoryView.setMinWidth(80);
+
+        // Health and prompt
         healthLabel = new Label("Health: " + health);
         healthBar = new ProgressBar(health / 100.0);
         healthBar.setPrefWidth(300);
         healthBar.setStyle("-fx-accent: green;");
         healthBar.setTooltip(new Tooltip("Current Health: " + health));
 
-        // Prompt
         promptLabel = new Label(promptText);
         promptLabel.setWrapText(true);
 
         // Choices
-        HBox choiceRow = new HBox(40);
+        HBox choiceRow = new HBox(20);
         choiceRow.setAlignment(Pos.CENTER);
 
-        for (Choice choice : choices) {
-            ImageView imageView = new ImageView(new Image("file:" + choice.imagePath));
+        for (GameChoice choice : choices) {
+            ImageView imageView = new ImageView(new Image("file:" + choice.getImagePath()));
             imageView.setFitWidth(150);
             imageView.setPreserveRatio(true);
 
-            Button button = new Button(choice.label);
+            Button button = new Button(choice.getLabel());
             button.setOnAction(e -> onChoiceSelected.accept(choice));
             Theme.applyButtonStyle(button, darkMode);
 
@@ -51,11 +83,44 @@ public class ChoiceScreenView extends VBox {
             choiceRow.getChildren().add(column);
         }
 
-        topBar.toggleButton.setOnAction(e -> onToggleTheme.run());
+        // Right side content
+        VBox rightSide = new VBox(20, healthLabel, healthBar, promptLabel, choiceRow);
+        rightSide.setAlignment(Pos.TOP_CENTER);
 
+        // Combine both sides
+        HBox mainContent = new HBox(40, inventoryView, rightSide);
+        mainContent.setAlignment(Pos.TOP_CENTER);
+
+        getChildren().addAll(topBar, mainContent);
         applyTheme(darkMode);
+    }
 
-        getChildren().addAll(topBar, healthLabel, healthBar, promptLabel, choiceRow);
+    public int getHealth() {
+        return health;
+    }
+
+    public String getPromptText() {
+        return promptText;
+    }
+
+    public List<GameChoice> getChoices() {
+        return choices;
+    }
+
+    public boolean isDarkMode() {
+        return darkMode;
+    }
+
+    public Map<ItemType, List<InventoryItem>> getInventory() {
+        return inventory;
+    }
+
+    public Consumer<GameChoice> getOnChoiceSelected() {
+        return onChoiceSelected;
+    }
+
+    public Runnable getOnToggleTheme() {
+        return onToggleTheme;
     }
 
     public void applyTheme(boolean darkMode) {
@@ -65,5 +130,51 @@ public class ChoiceScreenView extends VBox {
         topBar.applyTheme(darkMode);
     }
 
-    public record Choice(String label, String imagePath, String id) {}
+    public TopBarView getTopBar() {
+        return topBar;
+    }
+
+    public VBox getLayout() {
+        return this;
+    }
+
+    private VBox buildInventoryUI(Map<ItemType, List<InventoryItem>> inventory, boolean darkMode) {
+        VBox inventoryBox = new VBox(10);
+        inventoryBox.setAlignment(Pos.CENTER_LEFT);
+        inventoryBox.setPadding(new Insets(10));
+        inventoryBox.setMaxWidth(250);
+        inventoryBox.setStyle(
+            "-fx-background-color: " + Theme.getInventoryBackground(darkMode) + ";" +
+            "-fx-border-color: " + Theme.getBorderColor(darkMode) + ";" +
+            "-fx-border-width: 1px;"
+        );
+
+        Label invTitle = new Label("Inventory");
+        invTitle.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: " + Theme.getTextColor(darkMode) + ";");
+        inventoryBox.getChildren().add(invTitle);
+
+        for (ItemType type : ItemType.values()) {
+            Label categoryLabel = new Label("• " + type.name() + ":");
+            categoryLabel.setStyle("-fx-text-fill: " + Theme.getTextColor(darkMode) + ";");
+
+            VBox itemList = new VBox(5);
+            List<InventoryItem> items = inventory.get(type);
+            if (items == null || items.isEmpty()) {
+                Label emptyLabel = new Label("- none");
+                emptyLabel.setStyle("-fx-text-fill: " + Theme.getTextColor(darkMode) + ";");
+                itemList.getChildren().add(emptyLabel);
+            } else {
+                for (InventoryItem item : items) {
+                    Label itemLabel = new Label("- " + item.getName());
+                    itemLabel.setStyle("-fx-text-fill: " + Theme.getTextColor(darkMode) + ";");
+                    itemList.getChildren().add(itemLabel);
+                }
+            }
+
+            VBox section = new VBox(3, categoryLabel, itemList);
+            inventoryBox.getChildren().add(section);
+        }
+
+        return inventoryBox;
+    }    
 }
