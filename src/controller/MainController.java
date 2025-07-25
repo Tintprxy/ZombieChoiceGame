@@ -1,67 +1,127 @@
 package controller;
 
+import java.util.List;
 import javafx.scene.Scene;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import model.GameModel;
-import view.TitleView;
-import view.GameView;
-import view.InstructionsView;
+import model.GameState;
+import view.*;
+import view.ChoiceScreenView;
 
 public class MainController {
+
     private final Stage stage;
     private final GameModel model;
+    private final BorderPane rootPane;
 
     public MainController(Stage stage) {
         this.stage = stage;
         this.model = new GameModel();
+        this.rootPane = new BorderPane();
     }
 
     public void startApp() {
-        showTitleView();
+        Scene scene = new Scene(rootPane, 800, 600);
+        stage.setScene(scene);
+        stage.setTitle("Zombie Choice Game");
+        updateView(); 
+        stage.show();
     }
 
-private void showTitleView() {
-    TitleView titleView = new TitleView();
-    titleView.applyTheme(model.isDarkMode());
+public void updateView() {
+    rootPane.setTop(null);
+    rootPane.setCenter(null);
 
-    titleView.startButton.setOnAction(e -> showGameIntro()); 
-    titleView.instructionsButton.setOnAction(e -> showInstructionsView()); 
-
-    titleView.topBar.toggleButton.setOnAction(e -> {
-        model.toggleDarkMode();
-        titleView.applyTheme(model.isDarkMode());
-    });
-
-    Scene scene = new Scene(titleView, 800, 600);
-    stage.setScene(scene);
-    stage.setTitle("Zombie Choice Game");
-    stage.show();
+    switch (model.getCurrentState()) {
+        case TITLE -> showTitleView();
+        case INSTRUCTIONS -> showInstructionsView();
+        case FIRST_CHOICE -> showFirstChoiceView();  
+        default -> System.out.println("Unknown state.");
+    }
 }
 
-// place holder
-    private void showGameIntro() {
-        GameView game = new GameView();
-        game.applyTheme(model.isDarkMode());
+    private void showTitleView() {
+        TitleView titleView = new TitleView();
+        titleView.applyTheme(model.isDarkMode());
 
-        game.continueButton.setOnAction(e -> {
-            game.updateText("A door creaks open... something is coming.", "Continue...");
+        titleView.startButton.setOnAction(e -> {
+            model.setCurrentState(GameState.FIRST_CHOICE);
+            updateView();
         });
 
-        Scene scene = new Scene(game, 500, 300);
-        stage.setScene(scene);
-    }
-    
-    private void showInstructionsView() {
-        InstructionsView instructionsView = new InstructionsView();
-        instructionsView.applyTheme(model.isDarkMode());
+        titleView.instructionsButton.setOnAction(e -> {
+            model.setCurrentState(GameState.INSTRUCTIONS);
+            updateView();
+        });
 
-        instructionsView.backButton.setOnAction(e -> showTitleView());
-        instructionsView.topBar.toggleButton.setOnAction(e -> {
+        titleView.topBar.toggleButton.setOnAction(e -> {
             model.toggleDarkMode();
-            instructionsView.applyTheme(model.isDarkMode());
+            titleView.applyTheme(model.isDarkMode());
+        });
+        rootPane.setCenter(titleView);
+    }
+
+    private void showInstructionsView() {
+        InstructionsView view = new InstructionsView();
+        view.applyTheme(model.isDarkMode());
+
+        view.backButton.setOnAction(e -> {
+            model.setCurrentState(GameState.TITLE);
+            updateView();
         });
 
-        Scene scene = new Scene(instructionsView, 600, 600);
-        stage.setScene(scene);
+        view.topBar.toggleButton.setOnAction(e -> {
+            model.toggleDarkMode();
+            view.applyTheme(model.isDarkMode());
+        });
+        rootPane.setCenter(view);
     }
+
+    private void showFirstChoiceView() {
+        var choices = List.of(
+            new ChoiceScreenView.Choice("Drive", "imgs/armoredCarImg.jpg", "drive"),
+            new ChoiceScreenView.Choice("Walk", "imgs/walkingImg.jpg", "walk")
+        );
+
+        ChoiceScreenView view = new ChoiceScreenView(
+            model.getHealth(),
+            "The street you're on is quiet ... but you hear zombies groaning in the distance.\n" +
+            "You need to make a choice. What will you do?\n\nDo you want to drive or walk?",
+            choices,
+            model.isDarkMode(),
+
+            selectedChoice -> {
+                if (selectedChoice.id().equals("walk")) {
+                    model.subtractHealth(30); 
+                }
+                model.setCurrentState(GameState.ENDING);
+                updateView();
+            },
+
+            // When dark mode is toggled:
+            () -> {
+                model.toggleDarkMode();
+                showFirstChoiceView(); 
+            }
+        );
+        rootPane.setTop(null); 
+        rootPane.setCenter(view);
+    }
+
+    // private void applyFirstChoiceTheme(VBox layout, TopBarView topBar) {
+    //     boolean dark = model.isDarkMode();
+
+    //     // Shared color logic
+    //     layout.setStyle("-fx-background-color: " + Theme.getBodyBackground(dark) + ";");
+
+    //     // Get label and style it
+    //     layout.getChildren().stream()
+    //         .filter(node -> node instanceof Label)
+    //         .map(node -> (Label) node)
+    //         .forEach(label -> label.setStyle("-fx-text-fill: " + Theme.getTextColor(dark) + ";"));
+
+    //     // Top bar handles itself
+    //     topBar.applyTheme(dark);
+    // }
 }
