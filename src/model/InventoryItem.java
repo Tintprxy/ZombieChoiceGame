@@ -4,13 +4,15 @@ public class InventoryItem {
     private String name;
     private ItemType type; // CONSUMABLE, WEAPON, KEY_ITEM, etc.
     private int healthRestore; // for consumables
-    private int durability;    // for weapons
+    private int durability;    // for weapons (scale 0-100)
+    private int power;         // for weapons (scale 1-10)
 
-    public InventoryItem(String name, ItemType type, int healthRestore, int durability) {
+    public InventoryItem(String name, ItemType type, int healthRestore, int durability, int power) {
         this.name = name;
         this.type = type;
         this.healthRestore = healthRestore;
         this.durability = durability;
+        this.power = power;
     }
 
     public String getName() {
@@ -27,6 +29,10 @@ public class InventoryItem {
 
     public int getDurability() {
         return durability;
+    }
+
+    public int getPower() {
+        return power;
     }
 
     public boolean isConsumable() {
@@ -60,13 +66,14 @@ public class InventoryItem {
         return !isBroken() && (type == ItemType.CONSUMABLE || type == ItemType.WEAPON);
     }
 
-     @Override
+    @Override
     public String toString() {
         return "InventoryItem{" +
                 "name='" + name + '\'' +
                 ", type=" + type +
                 ", healthRestore=" + healthRestore +
                 ", durability=" + durability +
+                ", power=" + power +
                 '}';
     }
 }

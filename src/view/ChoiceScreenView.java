@@ -7,7 +7,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import model.GameChoice;
-import model.GameScene;
 import model.InventoryItem;
 import model.ItemType;
 import java.util.List;
@@ -27,7 +26,6 @@ public class ChoiceScreenView extends VBox {
     private Consumer<GameChoice> onChoiceSelected;
     private Runnable onToggleTheme;
     private Consumer<InventoryItem> onConsumeItem;
-    private String lastHealthAppliedSceneId = null;
 
     public ChoiceScreenView(
         int health,
@@ -55,10 +53,12 @@ public class ChoiceScreenView extends VBox {
         // Top bar
         topBar.toggleButton.setOnAction(e -> onToggleTheme.run());
 
-        // Inventory (left side)
+        // After creating inventoryView in the constructor:
         VBox inventoryView = buildInventoryUI(inventory, darkMode);
-        inventoryView.setPrefWidth(150);
-        inventoryView.setMinWidth(80);
+        inventoryView.setPrefWidth(300); // Increase from 150 to 300 (or more if you want)
+        inventoryView.setMinWidth(300);
+        inventoryView.setMaxWidth(400); // Set a maximum width for the inventory view
+
 
         // Health and prompt
         healthLabel = new Label("Health: " + health);
@@ -179,11 +179,23 @@ public class ChoiceScreenView extends VBox {
             } else {
                 for (InventoryItem item : items) {
                     HBox itemRow = new HBox(5);
-                    Label itemLabel = new Label("- " + item.getName());
+                    StringBuilder itemDesc = new StringBuilder("- " + item.getName());
+
+                    // Show healthRestore for consumables
+                    if (item.isConsumable()) {
+                        itemDesc.append(" (Restores: ").append(item.getHealthRestore()).append(" HP)");
+                    }
+                    // Show durability and power for weapons
+                    if (item.isWeapon()) {
+                        itemDesc.append(" (Durability: ").append(item.getDurability())
+                                .append(", Power: ").append(item.getPower()).append(")");
+                    }
+
+                    Label itemLabel = new Label(itemDesc.toString());
                     itemLabel.setStyle("-fx-text-fill: " + Theme.getTextColor(darkMode) + ";");
                     itemRow.getChildren().add(itemLabel);
 
-                    // Consume button for consumables
+                    // Add a Consume button for consumables
                     if (item.isConsumable()) {
                         Button consumeBtn = new Button("Consume");
                         consumeBtn.setOnAction(e -> {
@@ -202,5 +214,5 @@ public class ChoiceScreenView extends VBox {
         }
 
         return inventoryBox;
-    } 
+    }
 }
