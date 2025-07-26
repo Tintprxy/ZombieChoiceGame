@@ -14,6 +14,7 @@ public class MainController {
     private final GameModel model;
     private final BorderPane rootPane;
     private final SceneLoader loader;
+    private String lastHealthAppliedSceneId = null;
     // private Map<ItemType, List<InventoryItem>> currentInventory;
 
     public MainController(Stage stage) {
@@ -94,27 +95,15 @@ public class MainController {
         }
     }
 
-    //     private void showDriveChoiceView() {
-    //     // Load the first scene using its ID
-    //     GameScene scene = loader.getSceneById("walk_path");
-
-    //     if (scene != null) {
-    //         showSceneView(scene);
-    //     } else {
-    //         // If scene can't be loaded, fallback to ending state
-    //         model.setCurrentState(GameState.ENDING);
-    //         updateView();
-    //     }
-    // }
-
     private void showSceneView(GameScene scene) {
-        // Apply the scene's healthChange when entering the scene
-        if (scene.getHealthChange() != 0) {
+        // Only apply healthChange if entering a new scene
+        if (!scene.getId().equals(lastHealthAppliedSceneId)) {
             int before = model.getHealth();
             model.subtractHealth(scene.getHealthChange());
             int after = model.getHealth();
             System.out.println("[DEBUG] Applied scene healthChange: " + scene.getHealthChange() +
                 " | Health before: " + before + ", after: " + after);
+            lastHealthAppliedSceneId = scene.getId();
         }
 
         ChoiceScreenView view = new ChoiceScreenView(
@@ -141,8 +130,21 @@ public class MainController {
             () -> {
                 model.toggleDarkMode();
                 updateView();
+            },
+            item -> {
+                System.out.println("[DEBUG] Attempting to consume item: " + item.getName() + ", type: " + item.getType());
+                boolean consumed = model.consumeItem(item);
+                if (consumed) {
+                    System.out.println("[DEBUG] Consumed item: " + item.getName() +
+                        " | Health restored: " + item.getHealthRestore() +
+                        " | Health after: " + model.getHealth());
+                    // Stay in the current scene: just refresh the current scene view
+                    showSceneView(scene);
+                } else {
+                    System.out.println("[DEBUG] Failed to consume item: " + item.getName());
+                }
             }
         );
         rootPane.setCenter(view);
-    } 
+    }
 }

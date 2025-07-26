@@ -59,11 +59,8 @@ public class GameModel {
     }
 
     public void addHealth(int amount) {
-        int before = health;
-        health -= amount; // negative amount increases health, positive decreases health
+        health += amount; // positive amount increases health, negative decreases health
         health = Math.max(0, Math.min(100, health)); // clamp between 0–100
-        int after = health;
-        System.out.println("[DEBUG] addHealth called: " + amount + " | Health before: " + before + ", after: " + after);
     }
     
     public boolean addItem(InventoryItem item) {
@@ -93,5 +90,22 @@ public class GameModel {
 
     public Map<ItemType, List<InventoryItem>> getInventory() {
         return inventory;
+    }
+
+    public boolean consumeItem(InventoryItem item) {
+        if (item != null && item.isConsumable()) {
+            addHealth(item.getHealthRestore());
+            for (List<InventoryItem> itemList : inventory.values()) {
+                if (itemList.remove(item)) {
+                    break;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public void removeFromInventory(InventoryItem item) {
+        inventory.get(item.getType()).remove(item);
     }
 }

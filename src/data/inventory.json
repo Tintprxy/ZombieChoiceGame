@@ -1,6 +1,26 @@
 [
-  { "name": "Handgun", "type": "WEAPON" },
-  { "name": "Granola Bars", "type": "CONSUMABLE" },
-  { "name": "Bottled Water", "type": "CONSUMABLE" },
-  { "name": "Map of the City", "type": "KEY_ITEM" }
+  {
+    "name": "Medkit",
+    "type": "CONSUMABLE",
+    "healthRestore": 25
+  },
+  {
+    "name": "Energy Drink",
+    "type": "CONSUMABLE",
+    "healthRestore": 10
+  },
+  {
+    "name": "Knife",
+    "type": "WEAPON",
+    "durability": 5
+  },
+  {
+    "name": "Baseball Bat",
+    "type": "WEAPON",
+    "durability": 10
+  },
+  {
+  "name": "Map",
+  "type": "KEY_ITEM"
+}
 ]

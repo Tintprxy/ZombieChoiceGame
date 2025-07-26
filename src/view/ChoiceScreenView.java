@@ -7,6 +7,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import model.GameChoice;
+import model.GameScene;
 import model.InventoryItem;
 import model.ItemType;
 import java.util.List;
@@ -25,15 +26,19 @@ public class ChoiceScreenView extends VBox {
     private Map<ItemType, List<InventoryItem>> inventory;
     private Consumer<GameChoice> onChoiceSelected;
     private Runnable onToggleTheme;
+    private Consumer<InventoryItem> onConsumeItem;
+    private String lastHealthAppliedSceneId = null;
 
-    public ChoiceScreenView(int health,
+    public ChoiceScreenView(
+        int health,
         String promptText,
         List<GameChoice> choices,
         boolean darkMode,
         Map<ItemType, List<InventoryItem>> inventory,
         Consumer<GameChoice> onChoiceSelected,
-        Runnable onToggleTheme) {
-
+        Runnable onToggleTheme,
+        Consumer<InventoryItem> onConsumeItem // <-- add this parameter
+    ) {
         this.health = health;
         this.promptText = promptText;
         this.choices = choices;
@@ -41,6 +46,7 @@ public class ChoiceScreenView extends VBox {
         this.inventory = inventory;
         this.onChoiceSelected = onChoiceSelected;
         this.onToggleTheme = onToggleTheme;
+        this.onConsumeItem = onConsumeItem; // <-- save the callback
 
         setSpacing(20);
         setPadding(new Insets(20));
@@ -172,9 +178,22 @@ public class ChoiceScreenView extends VBox {
                 itemList.getChildren().add(emptyLabel);
             } else {
                 for (InventoryItem item : items) {
+                    HBox itemRow = new HBox(5);
                     Label itemLabel = new Label("- " + item.getName());
                     itemLabel.setStyle("-fx-text-fill: " + Theme.getTextColor(darkMode) + ";");
-                    itemList.getChildren().add(itemLabel);
+                    itemRow.getChildren().add(itemLabel);
+
+                    // Consume button for consumables
+                    if (item.isConsumable()) {
+                        Button consumeBtn = new Button("Consume");
+                        consumeBtn.setOnAction(e -> {
+                            if (onConsumeItem != null) {
+                                onConsumeItem.accept(item);
+                            }
+                        });
+                        itemRow.getChildren().add(consumeBtn);
+                    }
+                    itemList.getChildren().add(itemRow);
                 }
             }
 
@@ -183,5 +202,5 @@ public class ChoiceScreenView extends VBox {
         }
 
         return inventoryBox;
-    }    
+    } 
 }
