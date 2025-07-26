@@ -54,11 +54,16 @@ public class GameModel {
     }
 
     public void subtractHealth(int amount) {
-        setHealth(health - amount);
+        health += amount; // negative amount decreases health, positive heals
+        health = Math.max(0, Math.min(100, health)); // clamp between 0–100
     }
 
     public void addHealth(int amount) {
-        setHealth(health + amount);
+        int before = health;
+        health -= amount; // negative amount increases health, positive decreases health
+        health = Math.max(0, Math.min(100, health)); // clamp between 0–100
+        int after = health;
+        System.out.println("[DEBUG] addHealth called: " + amount + " | Health before: " + before + ", after: " + after);
     }
     
     public boolean addItem(InventoryItem item) {

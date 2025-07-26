@@ -6,12 +6,30 @@
       {
         "label": "Drive",
         "imagePath": "imgs/armoredCarImg.jpg",
-        "id": "drive_path"
+        "id": "walk_path"
       },
       {
         "label": "Walk",
         "imagePath": "imgs/walkingImg.jpg",
         "id": "walk_path"
+      }
+    ]
+  },
+  
+  {
+    "id": "walk_path",
+    "prompt": "You walk down the street and find a hidden alley. Do you want to explore it or keep walking?",
+    "healthChange": -10,
+    "choices": [
+      {
+        "label": "Explore Alley",
+        "imagePath": "imgs/alleyImg.jpg",
+        "id": "explore_alley_path"
+      },
+      {
+        "label": "Keep Walking",
+        "imagePath": "imgs/streetImg.jpg",
+        "id": "keepWalking_path"
       }
     ]
   }

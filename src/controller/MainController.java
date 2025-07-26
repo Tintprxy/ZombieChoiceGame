@@ -1,18 +1,12 @@
 package controller;
 
-import java.util.List;
-import java.util.Map;
-
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import model.GameModel;
 import model.GameScene;
 import model.GameState;
-import model.InventoryItem;
-import model.ItemType;
 import model.SceneLoader;
-import java.io.File;
 import view.*;
 public class MainController {
 
@@ -38,17 +32,17 @@ public class MainController {
         stage.show();
     }
 
-public void updateView() {
-    rootPane.setTop(null);
-    rootPane.setCenter(null);
+    public void updateView() {
+        rootPane.setTop(null);
+        rootPane.setCenter(null);
 
-    switch (model.getCurrentState()) {
-        case TITLE -> showTitleView();
-        case INSTRUCTIONS -> showInstructionsView();
-        case FIRST_CHOICE -> showFirstChoiceView();  
-        default -> System.out.println("Unknown state.");
+        switch (model.getCurrentState()) {
+            case TITLE -> showTitleView();
+            case INSTRUCTIONS -> showInstructionsView();
+            case FIRST_CHOICE -> showFirstChoiceView();  
+            default -> System.out.println("Unknown state.");
+        }
     }
-}
 
     private void showTitleView() {
         TitleView titleView = new TitleView();
@@ -88,32 +82,67 @@ public void updateView() {
     }
 
     private void showFirstChoiceView() {
-        GameScene scene = loader.getSceneById("start"); // "start" is your first scene's ID in JSON
-        if (scene == null) {
-            System.err.println("Scene not found: start");
-            return;
+        // Load the first scene using its ID
+        GameScene scene = loader.getSceneById("start");
+
+        if (scene != null) {
+            showSceneView(scene);
+        } else {
+            // If scene can't be loaded, fallback to ending state
+            model.setCurrentState(GameState.ENDING);
+            updateView();
+        }
+    }
+
+    //     private void showDriveChoiceView() {
+    //     // Load the first scene using its ID
+    //     GameScene scene = loader.getSceneById("walk_path");
+
+    //     if (scene != null) {
+    //         showSceneView(scene);
+    //     } else {
+    //         // If scene can't be loaded, fallback to ending state
+    //         model.setCurrentState(GameState.ENDING);
+    //         updateView();
+    //     }
+    // }
+
+    private void showSceneView(GameScene scene) {
+        // Apply the scene's healthChange when entering the scene
+        if (scene.getHealthChange() != 0) {
+            int before = model.getHealth();
+            model.subtractHealth(scene.getHealthChange());
+            int after = model.getHealth();
+            System.out.println("[DEBUG] Applied scene healthChange: " + scene.getHealthChange() +
+                " | Health before: " + before + ", after: " + after);
         }
 
-        model.subtractHealth(scene.getHealthChange());
-
         ChoiceScreenView view = new ChoiceScreenView(
-           model.getHealth(),
+            model.getHealth(),
             scene.getPrompt(),
             scene.getChoices(),
             model.isDarkMode(),
             model.getInventory(),
             choice -> {
+                int before = model.getHealth();
                 model.subtractHealth(choice.getHealthEffect());
-                model.setCurrentState(GameState.ENDING); 
-                updateView();
+                int after = model.getHealth();
+                System.out.println("[DEBUG] Applied choice healthEffect: " + choice.getHealthEffect() +
+                    " | Health before: " + before + ", after: " + after);
+
+                GameScene next = loader.getSceneById(choice.getNextId());
+                if (next != null) {
+                    showSceneView(next);
+                } else {
+                    model.setCurrentState(GameState.ENDING);
+                    updateView();
+                }
             },
             () -> {
                 model.toggleDarkMode();
                 updateView();
             }
         );
-
-        rootPane.setTop(view.getTopBar());
-        rootPane.setCenter(view.getLayout());
-    }
+        rootPane.setCenter(view);
+    } 
 }

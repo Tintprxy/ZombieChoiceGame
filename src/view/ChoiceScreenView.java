@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class ChoiceScreenView extends VBox {
-
     private Label healthLabel;
     private ProgressBar healthBar;
     private Label promptLabel;
@@ -70,12 +69,20 @@ public class ChoiceScreenView extends VBox {
         choiceRow.setAlignment(Pos.CENTER);
 
         for (GameChoice choice : choices) {
-            ImageView imageView = new ImageView(new Image("file:" + choice.getImagePath()));
+            System.out.println("[DEBUG] Creating button for choice: " + choice.getLabel() + ", nextId: " + choice.getNextId() + ", imagePath: " + choice.getImagePath());
+            Image img = new Image("file:" + choice.getImagePath());
+            if (img.isError()) {
+                System.out.println("[DEBUG] Failed to load image: " + choice.getImagePath());
+            }
+            ImageView imageView = new ImageView(img);
             imageView.setFitWidth(150);
             imageView.setPreserveRatio(true);
 
             Button button = new Button(choice.getLabel());
-            button.setOnAction(e -> onChoiceSelected.accept(choice));
+            button.setOnAction(e -> {
+                System.out.println("[DEBUG] Button clicked: " + choice.getLabel() + ", nextId: " + choice.getNextId());
+                onChoiceSelected.accept(choice);
+            });
             Theme.applyButtonStyle(button, darkMode);
 
             VBox column = new VBox(10, imageView, button);
