@@ -12,7 +12,7 @@ public class GameChoice {
         this.imagePath = imagePath;
         this.nextId = nextId;
         this.healthEffect = healthEffect;
-        this.currentSceneId = null; // Initialize currentSceneId to null
+        this.currentSceneId = null; 
     }
 
     public String getLabel() {

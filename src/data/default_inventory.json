@@ -1,0 +1,28 @@
+[
+  {
+    "name": "Medkit",
+    "type": "CONSUMABLE",
+    "healthRestore": 25
+  },
+  {
+    "name": "Energy Drink",
+    "type": "CONSUMABLE",
+    "healthRestore": 10
+  },
+  {
+    "name": "Knife",
+    "type": "WEAPON",
+    "durability": 5,
+    "power": 4
+  },
+  {
+    "name": "Baseball Bat",
+    "type": "WEAPON",
+    "durability": 10,
+    "power": 7
+  },
+  {
+  "name": "Map",
+  "type": "KEY_ITEM"
+}
+]

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class GameModel {
     private boolean isDarkMode;
@@ -17,12 +18,10 @@ public class GameModel {
     public GameModel() {
         isDarkMode = false;
 
-        // Ensure all categories are initialized
         for (ItemType type : ItemType.values()) {
             inventory.put(type, new ArrayList<>());
         }
 
-        // Load from JSON only
         List<InventoryItem> initialItems = InventoryLoader.load("src/data/inventory.json");
         for (InventoryItem item : initialItems) {
             addItem(item);
@@ -64,9 +63,7 @@ public class GameModel {
     }
     
     public boolean addItem(InventoryItem item) {
-
         inventory.putIfAbsent(item.getType(), new ArrayList<>());
-
         List<InventoryItem> items = inventory.get(item.getType());
 
         int limit = switch (item.getType()) {
@@ -75,7 +72,10 @@ public class GameModel {
             case KEY_ITEM -> MAX_KEY_ITEMS;
         };
 
-        if (items.size() >= limit) return false;
+        // If adding a weapon >= max amount, return false to trigger a prompt
+        if (item.isWeapon() && items.size() >= limit) {
+            return false;
+        }
 
         items.add(item);
         return true;
@@ -107,5 +107,11 @@ public class GameModel {
 
     public void removeFromInventory(InventoryItem item) {
         inventory.get(item.getType()).remove(item);
+    }
+
+    public void reloadInventory() {
+        this.inventory = InventoryLoader.load("src/data/inventory.json")
+            .stream()
+            .collect(Collectors.groupingBy(InventoryItem::getType));
     }
 }

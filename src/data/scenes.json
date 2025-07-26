@@ -24,7 +24,7 @@
       {
         "label": "Explore Alley",
         "imagePath": "imgs/alleyImg.jpg",
-        "id": "explore_alley_path"
+        "id": "weapon_choice"
       },
       {
         "label": "Keep Walking",
@@ -32,5 +32,75 @@
         "id": "keepWalking_path"
       }
     ]
+  },
+
+  {
+  "id": "weapon_choice",
+  "prompt": "You discover a stash of weapons! Which one do you take?",
+  "choices": [
+    {
+      "label": "Take Sword",
+      "imagePath": "imgs/swordImg.jpg",
+      "id": "sword_taken"
+    },
+    {
+      "label": "Take Baseball Bat",
+      "imagePath": "imgs/baseballBatImg.jpg",
+      "id": "bat_taken"
+    },
+    {
+      "label": "Take Neither",
+      "imagePath": "imgs/emptyHandsImg.jpg",
+      "id": "neither_taken"
+    }
+  ]
+},
+
+{
+  "id": "sword_taken",
+  "prompt": "You take the sword and leave the bat behind.",
+  "choices": [
+    {
+      "label": "Continue",
+      "imagePath": "imgs/continue.jpg",
+      "id": "next_scene_id"
+    }
+  ],
+  "addItem": {
+    "name": "Sword",
+    "type": "WEAPON",
+    "durability": 12,
+    "power": 9
   }
+},
+{
+  "id": "bat_taken",
+  "prompt": "You take the baseball bat and leave the sword behind.",
+  "choices": [
+    {
+      "label": "Continue",
+      "imagePath": "imgs/continue.jpg",
+      "id": "next_scene_id"
+    }
+  ],
+  "addItem": {
+    "name": "Baseball Bat",
+    "type": "WEAPON",
+    "durability": 10,
+    "power": 7
+  }
+},
+
+{
+  "id": "neither_taken",
+  "prompt": "You decide to leave both weapons behind and continue unarmed. You feel vulnerable, but lighter on your feet.",
+  "choices": [
+    {
+      "label": "Continue",
+      "imagePath": "imgs/continue.jpg",
+      "id": "next_scene_id"
+    }
+  ]
+}
+
 ]

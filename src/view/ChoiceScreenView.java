@@ -35,7 +35,7 @@ public class ChoiceScreenView extends VBox {
         Map<ItemType, List<InventoryItem>> inventory,
         Consumer<GameChoice> onChoiceSelected,
         Runnable onToggleTheme,
-        Consumer<InventoryItem> onConsumeItem // <-- add this parameter
+        Consumer<InventoryItem> onConsumeItem 
     ) {
         this.health = health;
         this.promptText = promptText;
@@ -44,7 +44,7 @@ public class ChoiceScreenView extends VBox {
         this.inventory = inventory;
         this.onChoiceSelected = onChoiceSelected;
         this.onToggleTheme = onToggleTheme;
-        this.onConsumeItem = onConsumeItem; // <-- save the callback
+        this.onConsumeItem = onConsumeItem;
 
         setSpacing(20);
         setPadding(new Insets(20));
@@ -55,10 +55,15 @@ public class ChoiceScreenView extends VBox {
 
         // After creating inventoryView in the constructor:
         VBox inventoryView = buildInventoryUI(inventory, darkMode);
-        inventoryView.setPrefWidth(300); // Increase from 150 to 300 (or more if you want)
+        inventoryView.setPrefWidth(300); 
         inventoryView.setMinWidth(300);
-        inventoryView.setMaxWidth(400); // Set a maximum width for the inventory view
-
+        inventoryView.setMaxWidth(400);
+        //style the consume buttons with is dark mode
+        inventoryView.getChildren().forEach(node -> {
+            if (node instanceof Button button) {
+                Theme.applyButtonStyle(button, darkMode);
+            }
+        });
 
         // Health and prompt
         healthLabel = new Label("Health: " + health);
@@ -203,6 +208,7 @@ public class ChoiceScreenView extends VBox {
                                 onConsumeItem.accept(item);
                             }
                         });
+                        Theme.applyButtonStyle(consumeBtn, darkMode); // <-- Apply theme here
                         itemRow.getChildren().add(consumeBtn);
                     }
                     itemList.getChildren().add(itemRow);

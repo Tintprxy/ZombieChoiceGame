@@ -30,7 +30,23 @@ public class SceneLoader {
                     choice.setCurrentSceneId(sceneId);
                     choices.add(choice);
                 }
-                GameScene scene = new GameScene(sceneId, prompt, healthChange, choices);
+                InventoryItem addItem = null;
+                if (sceneObj.has("addItem")) {
+                    JsonObject addItemObj = sceneObj.getAsJsonObject("addItem");
+                    String name = addItemObj.get("name").getAsString();
+                    ItemType type = ItemType.valueOf(addItemObj.get("type").getAsString());
+                    int healthRestore = addItemObj.has("healthRestore") ? addItemObj.get("healthRestore").getAsInt() : 0;
+                    int durability = addItemObj.has("durability") ? addItemObj.get("durability").getAsInt() : 0;
+                    int power = addItemObj.has("power") ? addItemObj.get("power").getAsInt() : 0;
+                    addItem = new InventoryItem(name, type, healthRestore, durability, power);
+                }
+
+                GameScene scene;
+                if (addItem != null) {
+                    scene = new GameScene(sceneId, prompt, healthChange, choices, addItem);
+                } else {
+                    scene = new GameScene(sceneId, prompt, healthChange, choices);
+                }
                 sceneMap.put(sceneId, scene);
             }
             System.out.println("SceneLoader: Loaded " + sceneMap.size() + " scenes.");

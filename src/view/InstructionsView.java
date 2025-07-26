@@ -12,11 +12,13 @@ import javafx.scene.text.TextAlignment;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
+import javafx.scene.control.ScrollPane;
+
 public class InstructionsView extends BorderPane {
     public final TopBarView topBar = new TopBarView();
     public final Button backButton = new Button("Back to Menu");
 
-    private final VBox contentBox = new VBox(15);
+    private final VBox contentBox = new VBox(20);
 
     public InstructionsView() {
         setTop(topBar);
@@ -43,11 +45,17 @@ public class InstructionsView extends BorderPane {
               • 3 consumables(food, water, etc.)
               • 1 key item(map, keys, etc.)
 
-            Danger:
-            Every fight or injury will reduce your health.
-            Travel is measured in miles.
-            Some choices will completly drain your health bar.
 
+            IMPORTANT:
+            Weapons are used automatically to fight enemies.
+            Weapons have durability, which decreases with use.
+            Consumables restore health.
+            Key items are used to progress the story or unlock new areas not reachable without them.
+            Travel is measured in miles.
+            Every fight or injury will reduce your health.
+            Some choices will completely drain your health bar.
+            THIS GAME IS MADE TO BE AS LOGICAL AS POSSIBLE WHILE STILL BEING CHALLENGING.
+            If you find yourself stuck, try to think logically about your choices.
             Stay alert, make smart choices, and survive.
             """);
         instructions.setWrappingWidth(450);
@@ -56,9 +64,14 @@ public class InstructionsView extends BorderPane {
 
         contentBox.setPadding(new Insets(20));
         contentBox.setAlignment(Pos.TOP_LEFT);
-        contentBox.getChildren().addAll(heading, instructions, backButton);
+        contentBox.getChildren().addAll(heading, instructions);
 
-        setCenter(contentBox);
+        ScrollPane scrollPane = new ScrollPane(contentBox);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER); // Optional: hide horizontal bar
+        setCenter(scrollPane);
+        setBottom(backButton);
+        BorderPane.setMargin(backButton, new Insets(20, 0, 20, 0)); // Add vertical spacing
     }
 
     public void applyTheme(boolean isDarkMode) {
@@ -79,6 +92,6 @@ public class InstructionsView extends BorderPane {
     }
 
     public Scene buildScene() {
-        return new Scene(this, 600, 500);
+        return new Scene(this, 800, 900);
     }
 }
