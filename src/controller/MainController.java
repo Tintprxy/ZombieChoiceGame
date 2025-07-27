@@ -81,6 +81,12 @@ public class MainController {
         InstructionsView view = new InstructionsView();
         view.applyTheme(model.isDarkMode());
 
+        // Make the dark mode toggle work in instructions
+        view.topBar.toggleButton.setOnAction(e -> {
+            model.toggleDarkMode();
+            view.applyTheme(model.isDarkMode());
+        });
+
         view.backButton.setOnAction(e -> {
             model.setCurrentState(GameState.TITLE);
             updateView();

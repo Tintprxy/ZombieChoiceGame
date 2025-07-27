@@ -4,7 +4,6 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 import javafx.geometry.Pos;
 import static view.Theme.*;
-
 public class TopBarView extends HBox {
     public Button toggleButton;
 

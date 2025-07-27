@@ -19,6 +19,7 @@ public class InstructionsView extends BorderPane {
     public final Button backButton = new Button("Back to Menu");
 
     private final VBox contentBox = new VBox(20);
+    private final ScrollPane scrollPane;
 
     public InstructionsView() {
         setTop(topBar);
@@ -66,18 +67,27 @@ public class InstructionsView extends BorderPane {
         contentBox.setAlignment(Pos.TOP_LEFT);
         contentBox.getChildren().addAll(heading, instructions);
 
-        ScrollPane scrollPane = new ScrollPane(contentBox);
+        scrollPane = new ScrollPane(contentBox);
         scrollPane.setFitToWidth(true);
-        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER); // Optional: hide horizontal bar
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+
         setCenter(scrollPane);
         setBottom(backButton);
-        BorderPane.setMargin(backButton, new Insets(20, 0, 20, 0)); // Add vertical spacing
+        BorderPane.setMargin(backButton, new Insets(20, 0, 20, 0));
     }
 
     public void applyTheme(boolean isDarkMode) {
+        // Set background for the BorderPane
         setBackground(new Background(new BackgroundFill(
                 isDarkMode ? Color.web("#2e2e2e") : Color.WHITE,
                 CornerRadii.EMPTY, Insets.EMPTY)));
+
+        // Set background for the ScrollPane's viewport
+        scrollPane.setStyle(isDarkMode
+                ? "-fx-background: #2e2e2e; -fx-background-color: #2e2e2e;"
+                : "-fx-background: white; -fx-background-color: white;");
 
         topBar.applyTheme(isDarkMode);
         backButton.setStyle(isDarkMode
@@ -86,7 +96,7 @@ public class InstructionsView extends BorderPane {
 
         contentBox.getChildren().forEach(node -> {
             if (node instanceof Text text) {
-                text.setFill(isDarkMode ? Color.LIGHTGRAY : Color.BLACK);
+                text.setFill(isDarkMode ? Color.web("#f5f5f5") : Color.BLACK);
             }
         });
     }
