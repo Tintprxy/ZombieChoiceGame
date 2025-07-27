@@ -40,6 +40,7 @@ public class SceneLoader {
                     int power = addItemObj.has("power") ? addItemObj.get("power").getAsInt() : 0;
                     addItem = new InventoryItem(name, type, healthRestore, durability, power);
                 }
+                int threatLevel = sceneObj.has("threatLevel") ? sceneObj.get("threatLevel").getAsInt() : -1;
 
                 GameScene scene;
                 if (addItem != null) {
@@ -47,6 +48,10 @@ public class SceneLoader {
                 } else {
                     scene = new GameScene(sceneId, prompt, healthChange, choices);
                 }
+
+                // Set threatLevel if present
+                scene.setThreatLevel(threatLevel);
+
                 sceneMap.put(sceneId, scene);
             }
             System.out.println("SceneLoader: Loaded " + sceneMap.size() + " scenes.");

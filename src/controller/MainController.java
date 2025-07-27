@@ -81,7 +81,6 @@ public class MainController {
         InstructionsView view = new InstructionsView();
         view.applyTheme(model.isDarkMode());
 
-        // Make the dark mode toggle work in instructions
         view.topBar.toggleButton.setOnAction(e -> {
             model.toggleDarkMode();
             view.applyTheme(model.isDarkMode());
@@ -110,13 +109,18 @@ public class MainController {
 
     private void showSceneView(GameScene scene) {
         this.currentScene = scene;
+
         // Only apply healthChange if entering a new scene
         if (!scene.getId().equals(lastHealthAppliedSceneId)) {
             int before = model.getHealth();
-            model.subtractHealth(scene.getHealthChange());
-            int after = model.getHealth();
-            System.out.println("[DEBUG] Applied scene healthChange: " + scene.getHealthChange() +
-                " | Health before: " + before + ", after: " + after);
+            // Skip applying the JSON healthChange if this is a fight result scene.
+            if (!scene.getId().startsWith("fight_result")) {
+                 model.subtractHealth(scene.getHealthChange());
+                 System.out.println("[DEBUG] Applied scene healthChange: " + scene.getHealthChange() +
+                     " | Health before: " + before + ", after: " + model.getHealth());
+            } else {
+                 System.out.println("[DEBUG] Skipped JSON healthChange for fight result scene: " + scene.getId());
+            }
             lastHealthAppliedSceneId = scene.getId();
         }
 
@@ -147,14 +151,17 @@ public class MainController {
             model.isDarkMode(),
             model.getInventory(),
             choice -> {
-                int before = model.getHealth();
-                model.subtractHealth(choice.getHealthEffect());
-                int after = model.getHealth();
-                System.out.println("[DEBUG] Applied choice healthEffect: " + choice.getHealthEffect() +
-                    " | Health before: " + before + ", after: " + after);
-
                 GameScene next = loader.getSceneById(choice.getNextId());
-                if (next != null) {
+
+                // Delegate fight handling to a single helper if the player chose “Fight”
+                if (scene.getThreatLevel() > -1 && "Fight".equalsIgnoreCase(choice.getLabel())) {
+                    int threat = scene.getThreatLevel();
+                    int ded = computeDurabilityDecrease(threat);
+                    int winPenalty = computeWinHealthPenalty(threat);
+                    int losePenalty = computeLoseHealthPenalty(threat);
+                    handleFight(scene, ded, winPenalty, losePenalty);
+                    return;
+                } else if (next != null) {
                     showSceneView(next);
                 } else {
                     model.setCurrentState(GameState.ENDING);
@@ -291,5 +298,57 @@ public class MainController {
                 }
             });
         });
+    }
+
+    private void handleFight(GameScene scene, int decreaseDurAmount, int subHealthWin, int subHealthLose) {
+        int threatLevel = scene.getThreatLevel();
+        List<InventoryItem> weapons = model.getInventory().getOrDefault(ItemType.WEAPON, new ArrayList<>());
+        // Allow winning when weapon power is equal to threat level.
+        List<InventoryItem> winningWeapons = weapons.stream()
+            .filter(w -> w.getPower() >= threatLevel && w.getDurability() > 0)
+            .sorted(Comparator.comparingInt(InventoryItem::getPower))
+            .toList();
+        InventoryItem chosenWeapon = winningWeapons.isEmpty() ? null : winningWeapons.get(0);
+
+        if (chosenWeapon != null) {
+            int oldDurability = chosenWeapon.getDurability();
+            chosenWeapon.decreaseDurability(decreaseDurAmount);
+            int newDurability = chosenWeapon.getDurability();
+            // Subtract health using negative value to apply penalty
+            model.subtractHealth(-subHealthWin);
+            System.out.printf("[DEBUG] WIN | used %s, durability decreased from %d to %d | new health: %d%n",
+                chosenWeapon.getName(), oldDurability, newDurability, model.getHealth());
+            showSceneView(loader.getSceneById("fight_result_win_1"));
+        } else {
+            // Use fists with default power of 2.
+            int fistsPower = 2;
+            // If fists power is greater than or equal to threat, the user wins.
+            if (fistsPower >= threatLevel) {
+                model.subtractHealth(-subHealthWin);
+                System.out.printf("[DEBUG] WIN (unarmed) | fists power(%d) >= threat(%d) | new health: %d%n",
+                    fistsPower, threatLevel, model.getHealth());
+                showSceneView(loader.getSceneById("fight_result_win_1"));
+            } else {
+                model.subtractHealth(-subHealthLose);
+                System.out.printf("[DEBUG] LOSE (unarmed) | fists power(%d) < threat(%d) | new health: %d%n",
+                    fistsPower, threatLevel, model.getHealth());
+                showSceneView(loader.getSceneById("fight_result_lose_1"));
+            }
+        }
+    }
+
+    private int computeDurabilityDecrease(int threatLevel) {
+        // Example: Use 1 for lower threat levels, 2 for higher ones.
+        return (threatLevel >= 5) ? 2 : 1;
+    }
+
+    private int computeWinHealthPenalty(int threatLevel) {
+        // Example: Base penalty of 10 plus additional damage based on threat.
+        return 10 + threatLevel;
+    }
+
+    private int computeLoseHealthPenalty(int threatLevel) {
+        // Example: Base penalty of 25 plus double the threat level.
+        return 25 + (2 * threatLevel);
     }
 }

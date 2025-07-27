@@ -80,7 +80,15 @@ public class ChoiceScreenView extends VBox {
         choiceRow.setAlignment(Pos.CENTER);
 
         for (GameChoice choice : choices) {
-            System.out.println("[DEBUG] Creating button for choice: " + choice.getLabel() + ", nextId: " + choice.getNextId() + ", imagePath: " + choice.getImagePath());
+            if ("Fight".equalsIgnoreCase(choice.getLabel())) {
+                System.out.println("[DEBUG] Creating button for choice: " + choice.getLabel() +
+                    ", possible nextIds: fight_result_win_1 / fight_result_lose_1" +
+                    ", imagePath: " + choice.getImagePath());
+            } else {
+                System.out.println("[DEBUG] Creating button for choice: " + choice.getLabel() +
+                    ", nextId: " + choice.getNextId() +
+                    ", imagePath: " + choice.getImagePath());
+            }
             Image img = new Image("file:" + choice.getImagePath());
             if (img.isError()) {
                 System.out.println("[DEBUG] Failed to load image: " + choice.getImagePath());
@@ -91,7 +99,13 @@ public class ChoiceScreenView extends VBox {
 
             Button button = new Button(choice.getLabel());
             button.setOnAction(e -> {
-                System.out.println("[DEBUG] Button clicked: " + choice.getLabel() + ", nextId: " + choice.getNextId());
+                if ("Fight".equalsIgnoreCase(choice.getLabel())) {
+                    System.out.println("[DEBUG] Button clicked: " + choice.getLabel() +
+                        " (combat resolution will determine next scene)");
+                } else {
+                    System.out.println("[DEBUG] Button clicked: " + choice.getLabel() +
+                        ", nextId: " + choice.getNextId());
+                }
                 onChoiceSelected.accept(choice);
             });
             Theme.applyButtonStyle(button, darkMode);
@@ -214,11 +228,9 @@ public class ChoiceScreenView extends VBox {
                     itemList.getChildren().add(itemRow);
                 }
             }
-
             VBox section = new VBox(3, categoryLabel, itemList);
             inventoryBox.getChildren().add(section);
         }
-
         return inventoryBox;
     }
 }

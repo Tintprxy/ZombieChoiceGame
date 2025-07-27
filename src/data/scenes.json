@@ -6,12 +6,71 @@
       {
         "label": "Drive",
         "imagePath": "imgs/armoredCarImg.jpg",
-        "id": "walk_path"
+        "id": "drive_path"
       },
       {
         "label": "Walk",
         "imagePath": "imgs/walkingImg.jpg",
         "id": "walk_path"
+      }
+    ]
+  },
+
+  {
+    "id": "drive_path",
+    "prompt": "You start the car and drive down the deserted street. Soon, you reach a barricade blocking the road. Do you want to get out and investigate or try to drive around?",
+    "choices": [
+      {
+        "label": "Get Out and Investigate",
+        "imagePath": "imgs/investigateImg.jpg",
+        "id": "zombie_encounter_1"
+      },
+      {
+        "label": "Drive Around",
+        "imagePath": "imgs/armoredCarImg.jpg",
+        "id": "drive_around"
+      }
+    ]
+  },
+
+  {
+    "id": "zombie_encounter_1",
+    "prompt": "A zombie blocks your path!",
+    "threatLevel": 2,
+    "choices": [
+      {
+        "label": "Fight",
+        "imagePath": "imgs/fightImg.jpg",
+        "id": "fight_result_win_1"
+      },
+      {
+        "label": "Run",
+        "imagePath": "imgs/runImg.jpg",
+        "id": "run_away"
+      }
+    ]
+  },
+
+  {
+    "id": "fight_result_win_1",
+    "prompt": "You fight the zombie. Your weapon takes some damage, but you survive.",
+    "choices": [
+      {
+        "label": "Keep Moving",
+        "imagePath": "imgs/continue.jpg",
+        "id": "find_shelter"
+      }
+    ]
+  },
+
+    {
+    "id": "fight_result_lose_1",
+    "prompt": "You tried to fight, but your weapon was too weak. You are badly hurt.",
+    "choices": [
+      {
+        "label": "Try to Escape",
+        "imagePath": "imgs/continue.jpg",
+        "id": "find_shelter"
       }
     ]
   },
@@ -35,72 +94,72 @@
   },
 
   {
-  "id": "weapon_choice",
-  "prompt": "You discover a stash of weapons! Which one do you take?",
-  "choices": [
-    {
-      "label": "Take Sword",
-      "imagePath": "imgs/swordImg.jpg",
-      "id": "sword_taken"
-    },
-    {
-      "label": "Take Baseball Bat",
-      "imagePath": "imgs/baseballBatImg.jpg",
-      "id": "bat_taken"
-    },
-    {
-      "label": "Take Neither",
-      "imagePath": "imgs/emptyHandsImg.jpg",
-      "id": "neither_taken"
-    }
-  ]
-},
+    "id": "weapon_choice",
+    "prompt": "You discover a stash of weapons! Which one do you take?",
+    "choices": [
+      {
+        "label": "Take Sword",
+        "imagePath": "imgs/swordImg.jpg",
+        "id": "sword_taken"
+      },
+      {
+        "label": "Take Baseball Bat",
+        "imagePath": "imgs/baseballBatImg.jpg",
+        "id": "bat_taken"
+      },
+      {
+        "label": "Take Neither",
+        "imagePath": "imgs/emptyHandsImg.jpg",
+        "id": "neither_taken"
+      }
+    ]
+  },
 
-{
-  "id": "sword_taken",
-  "prompt": "You take the sword and leave the bat behind.",
-  "choices": [
-    {
-      "label": "Continue",
-      "imagePath": "imgs/continue.jpg",
-      "id": "next_scene_id"
+  {
+    "id": "sword_taken",
+    "prompt": "You take the sword and leave the bat behind.",
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/titleImg.jpg",
+        "id": "next_scene_id"
+      }
+    ],
+    "addItem": {
+      "name": "Sword",
+      "type": "WEAPON",
+      "durability": 12,
+      "power": 9
     }
-  ],
-  "addItem": {
-    "name": "Sword",
-    "type": "WEAPON",
-    "durability": 12,
-    "power": 9
+  },
+
+  {
+    "id": "bat_taken",
+    "prompt": "You take the baseball bat and leave the sword behind.",
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/titleImg.jpg",
+        "id": "next_scene_id"
+      }
+    ],
+    "addItem": {
+      "name": "Baseball Bat",
+      "type": "WEAPON",
+      "durability": 10,
+      "power": 7
+    }
+  },
+
+  {
+    "id": "neither_taken",
+    "prompt": "You decide to leave both weapons behind and continue unarmed. You feel vulnerable, but lighter on your feet.",
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/titleImg.jpg",
+        "id": "next_scene_id"
+      }
+    ]
   }
-},
-{
-  "id": "bat_taken",
-  "prompt": "You take the baseball bat and leave the sword behind.",
-  "choices": [
-    {
-      "label": "Continue",
-      "imagePath": "imgs/continue.jpg",
-      "id": "next_scene_id"
-    }
-  ],
-  "addItem": {
-    "name": "Baseball Bat",
-    "type": "WEAPON",
-    "durability": 10,
-    "power": 7
-  }
-},
-
-{
-  "id": "neither_taken",
-  "prompt": "You decide to leave both weapons behind and continue unarmed. You feel vulnerable, but lighter on your feet.",
-  "choices": [
-    {
-      "label": "Continue",
-      "imagePath": "imgs/continue.jpg",
-      "id": "next_scene_id"
-    }
-  ]
-}
-
 ]

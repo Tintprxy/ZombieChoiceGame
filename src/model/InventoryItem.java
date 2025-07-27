@@ -50,7 +50,7 @@ public class InventoryItem {
     public void setDurability(int durability) {
         this.durability = durability;
     }
-    public void reduceDurability(int amount) {
+    public void decreaseDurability(int amount) {
         this.durability = Math.max(0, this.durability - amount);
     }
     public boolean isBroken() {
