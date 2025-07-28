@@ -1,7 +1,7 @@
 [
   {
     "id": "start",
-    "prompt": "The street is quiet. Do you want to drive or walk?",
+    "prompt": "The street is quiet but you hear a distant moan. Zombies? Enemies? only one way to find out. Do you want to drive your armored car or Ditch it and go on foot?",
     "choices": [
       {
         "label": "Drive",
@@ -18,7 +18,7 @@
 
   {
     "id": "drive_path",
-    "prompt": "You start the car and drive down the deserted street. Soon, you reach a barricade blocking the road. Do you want to get out and investigate or try to drive around?",
+    "prompt": "You start the car and drive down the deserted street. Most stores have been abandoned and looted. Soon, you reach a barricade blocking the road. Do you want to get out and investigate or try to drive around?",
     "choices": [
       {
         "label": "Get Out and Investigate",
@@ -28,14 +28,14 @@
       {
         "label": "Drive Around",
         "imagePath": "imgs/armoredCarImg.jpg",
-        "id": "drive_around"
+        "id": "find_shelter"
       }
     ]
   },
 
   {
     "id": "zombie_encounter_1",
-    "prompt": "A zombie blocks your path!",
+    "prompt": "You get out and look around the barricade. Only to find food wrappers, dirty clothes, and signs of a struggle. Suddenly, a zombie appears around the corner! The zombie is weak and separated from the main horde. Do you want to fight it or run away?",
     "threatLevel": 2,
     "choices": [
       {
@@ -46,18 +46,18 @@
       {
         "label": "Run",
         "imagePath": "imgs/runImg.jpg",
-        "id": "run_away"
+        "id": "find_shelter"
       }
     ]
   },
 
   {
     "id": "fight_result_win_1",
-    "prompt": "You fight the zombie. Your weapon takes some damage, but you survive.",
+    "prompt": "You fight the zombie and defeat it. Your weapon takes some damage, but you survive the encounter.",
     "choices": [
       {
         "label": "Keep Moving",
-        "imagePath": "imgs/continue.jpg",
+        "imagePath": "imgs/continueImg.jpg",
         "id": "find_shelter"
       }
     ]
@@ -65,11 +65,11 @@
 
     {
     "id": "fight_result_lose_1",
-    "prompt": "You tried to fight, but your weapon was too weak. You are badly hurt.",
+    "prompt": "You tried to fight the zombie, but your weapon was too weak and You are hurt.",
     "choices": [
       {
         "label": "Try to Escape",
-        "imagePath": "imgs/continue.jpg",
+        "imagePath": "imgs/continueImg.jpg",
         "id": "find_shelter"
       }
     ]
@@ -77,7 +77,7 @@
   
   {
     "id": "walk_path",
-    "prompt": "You walk down the street and find a hidden alley. Do you want to explore it or keep walking?",
+    "prompt": "You walk down the street and find a hidden alley. There could be supplies or danger but you can't tell from here. Do you want to explore it or keep walking?",
     "healthChange": -10,
     "choices": [
       {
@@ -88,7 +88,7 @@
       {
         "label": "Keep Walking",
         "imagePath": "imgs/streetImg.jpg",
-        "id": "keepWalking_path"
+        "id": "startRunning"
       }
     ]
   },
@@ -121,8 +121,8 @@
     "choices": [
       {
         "label": "Continue",
-        "imagePath": "imgs/titleImg.jpg",
-        "id": "next_scene_id"
+        "imagePath": "imgs/swordTakenImg.jpg",
+        "id": "startRunning"
       }
     ],
     "addItem": {
@@ -139,8 +139,8 @@
     "choices": [
       {
         "label": "Continue",
-        "imagePath": "imgs/titleImg.jpg",
-        "id": "next_scene_id"
+        "imagePath": "imgs/batTakenImg.jpg",
+        "id": "startRunning"
       }
     ],
     "addItem": {
@@ -158,8 +158,41 @@
       {
         "label": "Continue",
         "imagePath": "imgs/titleImg.jpg",
-        "id": "next_scene_id"
+        "id": "startRunning"
       }
-    ]
-  }
+  ]
+},
+
+{
+  "id": "find_shelter",
+  "prompt": "You find a nearby building that looks like it could provide shelter. Do you want to enter it or continue your journey towards the Military Base?",
+  "choices": [
+    {
+      "label": "Enter Building",
+      "imagePath": "imgs/enterBuildingImg.jpg",
+      "id": "next_id"
+    },
+    {
+      "label": "Keep Moving",
+      "imagePath": "imgs/keepMovingImg.jpg",
+      "id": "next_id"
+    }
+  ]
+},
+{
+  "id": "startRunning",
+  "prompt": "You keep walking down the alley till you make it to a street, staying alert for any signs of danger. The city is eerily quiet, but you can hear distant moans and shuffling feet. Then suddenly, you hear a loud crash and a scream behind you. Do you want to start running or find a place to hide?",
+  "choices": [
+    {
+      "label": "Start Running",
+      "imagePath": "imgs/startRunningImg.jpg",
+      "id": "next_id"
+    },
+    {
+      "label": "Find a Place to Hide",
+      "imagePath": "imgs/hideImg.jpg",
+      "id": "next_id"
+    }
+  ]
+}
 ]
