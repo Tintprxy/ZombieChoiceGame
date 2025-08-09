@@ -9,14 +9,18 @@ import java.util.stream.Collectors;
 public class GameModel {
     private boolean isDarkMode;
     private GameState currentState = GameState.TITLE;
-    private int health = 100;
+    private int health;
     private Map<ItemType, List<InventoryItem>> inventory = new HashMap<>();
     private static final int MAX_CONSUMABLES = 3;
     private static final int MAX_KEY_ITEMS = 1;
     private static final int MAX_WEAPONS = 2;
+    private static final int INITIAL_HEALTH = 100; // NEW
 
     public GameModel() {
         isDarkMode = false;
+
+        // Initialize starting health
+        this.health = INITIAL_HEALTH; // NEW
 
         for (ItemType type : ItemType.values()) {
             inventory.put(type, new ArrayList<>());
@@ -113,5 +117,16 @@ public class GameModel {
         this.inventory = InventoryLoader.load("src/data/inventory.json")
             .stream()
             .collect(Collectors.groupingBy(InventoryItem::getType));
+    }
+
+    public void clearInventory() {
+        if (inventory != null) {
+            inventory.clear();
+        }
+    }
+
+    public void resetHealth() {
+        // Set health to initial value
+        this.health = INITIAL_HEALTH; // UPDATED
     }
 }

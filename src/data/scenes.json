@@ -1,4 +1,25 @@
 [
+    {
+    "id": "inventory_choice",
+    "prompt": "Select your starting inventory:\n\nHealth Heavy, Attack Heavy, or Balanced?",
+    "choices": [
+      {
+        "label": "Health Heavy",
+        "imagePath": "imgs/healthHeavyImg.jpg",
+        "id": "Start"
+      },
+      {
+        "label": "Attack Heavy",
+        "imagePath": "imgs/attackHeavyImg.jpg",
+        "id": "start"
+      },
+      {
+        "label": "Balanced",
+        "imagePath": "imgs/balancedImg.jpg",
+        "id": "start"
+      }
+    ]
+  },
   {
     "id": "start",
     "prompt": "The street is quiet but you hear a distant moan. Zombies? Enemies? only one way to find out. Do you want to drive your armored car or Ditch it and go on foot?",
@@ -74,6 +95,23 @@
       }
     ]
   },
+
+  {
+  "id": "find_shelter",
+  "prompt": "You find a nearby building that looks like it could provide shelter. Do you want to enter it or continue your journey towards the Military Base?",
+  "choices": [
+    {
+      "label": "Enter Building",
+      "imagePath": "imgs/enterBuildingImg.jpg",
+      "id": "next_id"
+    },
+    {
+      "label": "Keep Moving",
+      "imagePath": "imgs/keepMovingImg.jpg",
+      "id": "next_id"
+    }
+  ]
+},
   
   {
     "id": "walk_path",
@@ -163,22 +201,7 @@
   ]
 },
 
-{
-  "id": "find_shelter",
-  "prompt": "You find a nearby building that looks like it could provide shelter. Do you want to enter it or continue your journey towards the Military Base?",
-  "choices": [
-    {
-      "label": "Enter Building",
-      "imagePath": "imgs/enterBuildingImg.jpg",
-      "id": "next_id"
-    },
-    {
-      "label": "Keep Moving",
-      "imagePath": "imgs/keepMovingImg.jpg",
-      "id": "next_id"
-    }
-  ]
-},
+
 {
   "id": "startRunning",
   "prompt": "You keep walking down the alley till you make it to a street, staying alert for any signs of danger. The city is eerily quiet, but you can hear distant moans and shuffling feet. Then suddenly, you hear a loud crash and a scream behind you. Do you want to start running or find a place to hide?",

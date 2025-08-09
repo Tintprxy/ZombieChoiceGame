@@ -61,8 +61,9 @@ public class MainController {
         titleView.applyTheme(model.isDarkMode());
 
         titleView.startButton.setOnAction(e -> {
-            model.setCurrentState(GameState.FIRST_CHOICE);
-            updateView();
+                model.clearInventory();
+                resetInventoryToDefault();
+                showInventoryChoice();
         });
 
         titleView.instructionsButton.setOnAction(e -> {
@@ -151,7 +152,14 @@ public class MainController {
             model.isDarkMode(),
             model.getInventory(),
             choice -> {
-                GameScene next = loader.getSceneById(choice.getNextId());
+                // Check if the current scene is the inventory choice screen.
+                if ("inventory_choice".equals(currentScene.getId())) {
+                    // Set up inventory based on the choice label.
+                    applyInventoryChoice(choice.getLabel());
+                    // Load next scene; here we assume "start" is the first gameplay scene.
+                    showSceneView(loader.getSceneById("start"));
+                    return;
+                }
 
                 // Delegate fight handling to a single helper if the player chose “Fight”
                 if (scene.getThreatLevel() > -1 && "Fight".equalsIgnoreCase(choice.getLabel())) {
@@ -161,16 +169,37 @@ public class MainController {
                     int losePenalty = computeLoseHealthPenalty(threat);
                     handleFight(scene, ded, winPenalty, losePenalty);
                     return;
-                } else if (next != null) {
-                    showSceneView(next);
                 } else {
-                    model.setCurrentState(GameState.ENDING);
-                    updateView();
+                    GameScene next = loader.getSceneById(choice.getNextId());
+                    if (next != null) {
+                        showSceneView(next);
+                    } else {
+                        model.setCurrentState(GameState.ENDING);
+                        updateView();
+                    }
                 }
             },
             () -> {
                 model.toggleDarkMode();
                 showSceneView(currentScene);
+            },
+            () -> { // NEW: onReset
+                javafx.scene.control.Alert confirm =
+                    new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
+                confirm.setTitle("Reset Game");
+                confirm.setHeaderText("Are you sure you want to return to the title screen?");
+                confirm.setContentText("Any current progress will be lost.");
+                Optional<javafx.scene.control.ButtonType> res = confirm.showAndWait();
+                if (res.isPresent() && res.get() == javafx.scene.control.ButtonType.OK) {
+                    // Clear transient state
+                    lastHealthAppliedSceneId = null;
+                    addItemProcessedScenes.clear();
+                    resetInventoryToDefault(); // optional, if you reset items on title
+                    model.resetHealth();       // optional, if you have such a helper
+                    // Go back to title
+                    model.setCurrentState(GameState.TITLE);
+                    updateView(); // shows TitleView
+                }
             },
             item -> {
                 System.out.println("[DEBUG] Attempting to consume item: " + item.getName() + ", type: " + item.getType());
@@ -186,6 +215,13 @@ public class MainController {
             }
         );
         rootPane.setCenter(view);
+
+        // Keep your existing window resize
+        Platform.runLater(() -> {
+            javafx.stage.Stage stage = (javafx.stage.Stage) rootPane.getScene().getWindow();
+            stage.setWidth(1100);
+            stage.setHeight(700);
+        });
     }
 
     // Helper to write new weapon to a temp JSON file
@@ -350,5 +386,59 @@ public class MainController {
     private int computeLoseHealthPenalty(int threatLevel) {
         // Example: Base penalty of 25 plus double the threat level.
         return 25 + (2 * threatLevel);
+    }
+
+    private void applyInventoryChoice(String choiceLabel) {
+        // Clear any existing inventory.
+        model.clearInventory();
+        
+        switch (choiceLabel.toLowerCase()) {
+            case "health heavy":
+                // Load a health heavy inventory from its JSON file.
+                List<InventoryItem> healthItems = loadInventoryFromJson("c:\\Users\\tthom\\Desktop\\ZombieChoiceGame\\src\\data\\health_inventory.json");
+                for (InventoryItem item : healthItems) {
+                    model.addItem(item);
+                }
+                break;
+            case "attack heavy":
+                // Load an attack heavy inventory from its JSON file.
+                List<InventoryItem> attackItems = loadInventoryFromJson("c:\\Users\\tthom\\Desktop\\ZombieChoiceGame\\src\\data\\attack_inventory.json");
+                for (InventoryItem item : attackItems) {
+                    model.addItem(item);
+                }
+                break;
+            case "balanced":
+                // Load the default balanced inventory.
+                List<InventoryItem> balancedItems = loadInventoryFromJson("c:\\Users\\tthom\\Desktop\\ZombieChoiceGame\\src\\data\\balanced_inventory.json");
+                for (InventoryItem item : balancedItems) {
+                    model.addItem(item);
+                }
+                break;
+            default:
+                break;
+        }
+        System.out.println("[DEBUG] Applied " + choiceLabel + " inventory");
+    }
+
+    private List<InventoryItem> loadInventoryFromJson(String filePath) {
+        try (Reader reader = new FileReader(filePath)) {
+            // Parse the JSON array into an InventoryItem[]
+            InventoryItem[] items = new Gson().fromJson(reader, InventoryItem[].class);
+            return Arrays.asList(items);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
+    }
+
+    // In showFirstChoiceView (or a new method) in MainController:
+    private void showInventoryChoice() {
+        GameScene scene = loader.getSceneById("inventory_choice");
+        if (scene != null) {
+            showSceneView(scene);
+        } else {
+            // Fallback to the normal start scene if inventory_choice is missing
+            showSceneView(loader.getSceneById("start"));
+        }
     }
 }

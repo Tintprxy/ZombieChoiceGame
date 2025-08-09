@@ -25,6 +25,7 @@ public class ChoiceScreenView extends VBox {
     private Map<ItemType, List<InventoryItem>> inventory;
     private Consumer<GameChoice> onChoiceSelected;
     private Runnable onToggleTheme;
+    private Runnable onReset;          // NEW
     private Consumer<InventoryItem> onConsumeItem;
 
     public ChoiceScreenView(
@@ -35,6 +36,7 @@ public class ChoiceScreenView extends VBox {
         Map<ItemType, List<InventoryItem>> inventory,
         Consumer<GameChoice> onChoiceSelected,
         Runnable onToggleTheme,
+        Runnable onReset,              // NEW
         Consumer<InventoryItem> onConsumeItem 
     ) {
         this.health = health;
@@ -44,6 +46,7 @@ public class ChoiceScreenView extends VBox {
         this.inventory = inventory;
         this.onChoiceSelected = onChoiceSelected;
         this.onToggleTheme = onToggleTheme;
+        this.onReset = onReset;        // NEW
         this.onConsumeItem = onConsumeItem;
 
         setSpacing(20);
@@ -52,6 +55,7 @@ public class ChoiceScreenView extends VBox {
 
         // Top bar
         topBar.toggleButton.setOnAction(e -> onToggleTheme.run());
+        topBar.resetButton.setOnAction(e -> onReset.run()); // NEW
 
         // After creating inventoryView in the constructor:
         VBox inventoryView = buildInventoryUI(inventory, darkMode);

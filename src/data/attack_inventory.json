@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Energy Drink",
+    "type": "CONSUMABLE",
+    "healthRestore": 10
+  },
+
+  {
+    "name": "Pistol",
+    "type": "WEAPON",
+    "durability": 8,
+    "power": 10
+  },
+  {
+    "name": "Knife",
+    "type": "WEAPON",
+    "durability": 6,
+    "power": 5
+  },
+    
+  {
+    "name": "Shotgun",
+    "type": "WEAPON",
+    "durability": 9,
+    "power": 12
+  },
+
+  {
+  "name": "Map",
+  "type": "KEY_ITEM"
+}
+]

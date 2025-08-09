@@ -1,0 +1,5 @@
+comfy_zombie_1.png
+
+positive=A Zombie running in a city, realistic, Dark aesthetic, 8k, masterpiece, ultra-detailed
+
+negative=painting, cartoon, anime, drawing, copyright, watermarks

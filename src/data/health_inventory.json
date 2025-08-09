@@ -1,0 +1,29 @@
+[
+  {
+    "name": "Medkit",
+    "type": "CONSUMABLE",
+    "healthRestore": 25
+  },
+  {
+    "name": "Energy Drink",
+    "type": "CONSUMABLE",
+    "healthRestore": 10
+  },
+
+  {
+    "name": "epinephrine",
+    "type": "CONSUMABLE",
+    "healthRestore": 30
+  },
+
+  {
+    "name": "Spiked Baseball Bat",
+    "type": "WEAPON",
+    "durability": 5,
+    "power": 9
+  },
+  {
+  "name": "Map",
+  "type": "KEY_ITEM"
+}
+]
