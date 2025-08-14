@@ -3,3 +3,9 @@ comfy_zombie_1.png
 positive=A Zombie running in a city, realistic, Dark aesthetic, 8k, masterpiece, ultra-detailed
 
 negative=painting, cartoon, anime, drawing, copyright, watermarks
+
+comfy_zombie_2.png
+
+positive=zombie jumping really high off a building far away, 8k, masterpiece, use dark blues, dark aesthetic, ultra-detailed, realistic
+
+negative=painting, cartoon, anime, drawing, copyright, watermarks

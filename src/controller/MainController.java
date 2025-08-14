@@ -1,5 +1,4 @@
 package controller;
-
 import com.google.gson.*;
 import java.io.*;
 import java.util.*;
@@ -111,10 +110,8 @@ public class MainController {
     private void showSceneView(GameScene scene) {
         this.currentScene = scene;
 
-        // Only apply healthChange if entering a new scene
         if (!scene.getId().equals(lastHealthAppliedSceneId)) {
             int before = model.getHealth();
-            // Skip applying the JSON healthChange if this is a fight result scene.
             if (!scene.getId().startsWith("fight_result")) {
                  model.subtractHealth(scene.getHealthChange());
                  System.out.println("[DEBUG] Applied scene healthChange: " + scene.getHealthChange() +
@@ -152,24 +149,24 @@ public class MainController {
             model.isDarkMode(),
             model.getInventory(),
             choice -> {
-                // Check if the current scene is the inventory choice screen.
                 if ("inventory_choice".equals(currentScene.getId())) {
-                    // Set up inventory based on the choice label.
                     applyInventoryChoice(choice.getLabel());
-                    // Load next scene; here we assume "start" is the first gameplay scene.
                     showSceneView(loader.getSceneById("start"));
                     return;
                 }
 
                 // Delegate fight handling to a single helper if the player chose “Fight”
-                if (scene.getThreatLevel() > -1 && "Fight".equalsIgnoreCase(choice.getLabel())) {
+                if (scene.getThreatLevel() > -1 && choice.getLabel().toLowerCase().contains("fight")) {
                     int threat = scene.getThreatLevel();
+                    int fightNumber = scene.getFightNumber(); 
                     int ded = computeDurabilityDecrease(threat);
                     int winPenalty = computeWinHealthPenalty(threat);
                     int losePenalty = computeLoseHealthPenalty(threat);
-                    handleFight(scene, ded, winPenalty, losePenalty);
+                    handleFight(scene, fightNumber, ded, winPenalty, losePenalty, choice.getNextId());
                     return;
                 } else {
+                    System.out.printf("[DEBUG] No fight calculation for choice \"%s\"; loading scene: %s%n", 
+                          choice.getLabel(), choice.getNextId());
                     GameScene next = loader.getSceneById(choice.getNextId());
                     if (next != null) {
                         showSceneView(next);
@@ -183,7 +180,8 @@ public class MainController {
                 model.toggleDarkMode();
                 showSceneView(currentScene);
             },
-            () -> { // NEW: onReset
+            //reset button
+            () -> { 
                 javafx.scene.control.Alert confirm =
                     new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
                 confirm.setTitle("Reset Game");
@@ -191,14 +189,13 @@ public class MainController {
                 confirm.setContentText("Any current progress will be lost.");
                 Optional<javafx.scene.control.ButtonType> res = confirm.showAndWait();
                 if (res.isPresent() && res.get() == javafx.scene.control.ButtonType.OK) {
-                    // Clear transient state
+                    
                     lastHealthAppliedSceneId = null;
                     addItemProcessedScenes.clear();
-                    resetInventoryToDefault(); // optional, if you reset items on title
-                    model.resetHealth();       // optional, if you have such a helper
-                    // Go back to title
+                    resetInventoryToDefault(); 
+                    model.resetHealth();                         
                     model.setCurrentState(GameState.TITLE);
-                    updateView(); // shows TitleView
+                    updateView(); 
                 }
             },
             item -> {
@@ -216,7 +213,6 @@ public class MainController {
         );
         rootPane.setCenter(view);
 
-        // Keep your existing window resize
         Platform.runLater(() -> {
             javafx.stage.Stage stage = (javafx.stage.Stage) rootPane.getScene().getWindow();
             stage.setWidth(1100);
@@ -224,7 +220,6 @@ public class MainController {
         });
     }
 
-    // Helper to write new weapon to a temp JSON file
     private void writeTempWeaponJson(InventoryItem item) {
         try (FileWriter writer = new FileWriter("src/data/new_weapon.json")) {
             JsonObject obj = new JsonObject();
@@ -238,7 +233,6 @@ public class MainController {
         }
     }
 
-    // Helper to remove a weapon from inventory.json
     private void removeWeaponFromJson(String weaponName) {
         try {
             File file = new File("src/data/inventory.json");
@@ -258,7 +252,6 @@ public class MainController {
         }
     }
 
-    // Helper to add a weapon to inventory.json
     private void addWeaponToJson(InventoryItem item) {
         try {
             File file = new File("src/data/inventory.json");
@@ -305,7 +298,6 @@ public class MainController {
 
             Optional<String> result = dialog.showAndWait();
             result.ifPresent(selectedName -> {
-                // Show confirmation dialog
                 javafx.scene.control.Alert confirm = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
                 confirm.setTitle("Confirm Removal");
                 confirm.setHeaderText("Are you sure you want to remove " + selectedName + "?");
@@ -322,7 +314,6 @@ public class MainController {
                         " | Added new item: " + item.getName());                   
                     addItemProcessedScenes.add(nextSceneId);
 
-                    // Go to the intended next scene
                     GameScene nextScene = loader.getSceneById(nextSceneId);
                     if (nextScene != null) {
                         showSceneView(nextScene);
@@ -336,39 +327,42 @@ public class MainController {
         });
     }
 
-    private void handleFight(GameScene scene, int decreaseDurAmount, int subHealthWin, int subHealthLose) {
+    private void handleFight(GameScene scene, int fightNumber, int decreaseDurAmount, int subHealthWin, int subHealthLose, String defaultWinSceneId) {
         int threatLevel = scene.getThreatLevel();
+        
         List<InventoryItem> weapons = model.getInventory().getOrDefault(ItemType.WEAPON, new ArrayList<>());
-        // Allow winning when weapon power is equal to threat level.
         List<InventoryItem> winningWeapons = weapons.stream()
             .filter(w -> w.getPower() >= threatLevel && w.getDurability() > 0)
             .sorted(Comparator.comparingInt(InventoryItem::getPower))
             .toList();
+        
         InventoryItem chosenWeapon = winningWeapons.isEmpty() ? null : winningWeapons.get(0);
-
+        
+        // Compute win scene id based on fightNumber:
+        String winSceneId = (fightNumber > 0) ? "fight_result_win_" + fightNumber : defaultWinSceneId;
+        // Compute lose scene id based on fightNumber (default to 1 if no fight number)
+        String loseSceneId = (fightNumber > 0) ? "fight_result_lose_" + fightNumber : "fight_result_lose_1";
         if (chosenWeapon != null) {
             int oldDurability = chosenWeapon.getDurability();
             chosenWeapon.decreaseDurability(decreaseDurAmount);
             int newDurability = chosenWeapon.getDurability();
-            // Subtract health using negative value to apply penalty
             model.subtractHealth(-subHealthWin);
-            System.out.printf("[DEBUG] WIN | used %s, durability decreased from %d to %d | new health: %d%n",
-                chosenWeapon.getName(), oldDurability, newDurability, model.getHealth());
-            showSceneView(loader.getSceneById("fight_result_win_1"));
+            System.out.printf("[DEBUG] WIN | used %s (power %d >= threat %d), durability decreased from %d to %d | new health: %d%n",
+                chosenWeapon.getName(), chosenWeapon.getPower(), threatLevel, oldDurability, newDurability, model.getHealth());
+            showSceneView(loader.getSceneById(winSceneId));
         } else {
-            // Use fists with default power of 2.
+            // Use unarmed fists (power 2)
             int fistsPower = 2;
-            // If fists power is greater than or equal to threat, the user wins.
             if (fistsPower >= threatLevel) {
                 model.subtractHealth(-subHealthWin);
                 System.out.printf("[DEBUG] WIN (unarmed) | fists power(%d) >= threat(%d) | new health: %d%n",
                     fistsPower, threatLevel, model.getHealth());
-                showSceneView(loader.getSceneById("fight_result_win_1"));
+                showSceneView(loader.getSceneById(winSceneId));
             } else {
                 model.subtractHealth(-subHealthLose);
                 System.out.printf("[DEBUG] LOSE (unarmed) | fists power(%d) < threat(%d) | new health: %d%n",
                     fistsPower, threatLevel, model.getHealth());
-                showSceneView(loader.getSceneById("fight_result_lose_1"));
+                showSceneView(loader.getSceneById(loseSceneId));
             }
         }
     }

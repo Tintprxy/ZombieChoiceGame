@@ -25,7 +25,7 @@ public class ChoiceScreenView extends VBox {
     private Map<ItemType, List<InventoryItem>> inventory;
     private Consumer<GameChoice> onChoiceSelected;
     private Runnable onToggleTheme;
-    private Runnable onReset;          // NEW
+    private Runnable onReset;         
     private Consumer<InventoryItem> onConsumeItem;
 
     public ChoiceScreenView(
@@ -36,7 +36,7 @@ public class ChoiceScreenView extends VBox {
         Map<ItemType, List<InventoryItem>> inventory,
         Consumer<GameChoice> onChoiceSelected,
         Runnable onToggleTheme,
-        Runnable onReset,              // NEW
+        Runnable onReset,              
         Consumer<InventoryItem> onConsumeItem 
     ) {
         this.health = health;
@@ -46,23 +46,21 @@ public class ChoiceScreenView extends VBox {
         this.inventory = inventory;
         this.onChoiceSelected = onChoiceSelected;
         this.onToggleTheme = onToggleTheme;
-        this.onReset = onReset;        // NEW
+        this.onReset = onReset;        
         this.onConsumeItem = onConsumeItem;
 
         setSpacing(20);
         setPadding(new Insets(20));
         setAlignment(Pos.TOP_CENTER);
 
-        // Top bar
         topBar.toggleButton.setOnAction(e -> onToggleTheme.run());
-        topBar.resetButton.setOnAction(e -> onReset.run()); // NEW
+        topBar.resetButton.setOnAction(e -> onReset.run()); 
 
-        // After creating inventoryView in the constructor:
         VBox inventoryView = buildInventoryUI(inventory, darkMode);
         inventoryView.setPrefWidth(300); 
         inventoryView.setMinWidth(300);
         inventoryView.setMaxWidth(400);
-        //style the consume buttons with is dark mode
+
         inventoryView.getChildren().forEach(node -> {
             if (node instanceof Button button) {
                 Theme.applyButtonStyle(button, darkMode);

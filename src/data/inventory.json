@@ -9,7 +9,6 @@
     "type": "CONSUMABLE",
     "healthRestore": 10
   },
-
   {
     "name": "Baseball Bat",
     "type": "WEAPON",
@@ -23,7 +22,13 @@
     "power": 5
   },
   {
-  "name": "Map",
-  "type": "KEY_ITEM"
-}
+    "name": "Map",
+    "type": "KEY_ITEM"
+  },
+  {
+    "name": "Sword",
+    "type": "WEAPON",
+    "durability": 12,
+    "power": 9
+  }
 ]

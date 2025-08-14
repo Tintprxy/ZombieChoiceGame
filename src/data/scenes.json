@@ -17,9 +17,15 @@
         "label": "Balanced",
         "imagePath": "imgs/balancedImg.jpg",
         "id": "start"
+      },
+      {
+        "label": "empty",
+        "imagePath": "imgs/emptyImg.jpg",
+        "id": "start"
       }
     ]
   },
+
   {
     "id": "start",
     "prompt": "The street is quiet but you hear a distant moan. Zombies? Enemies? only one way to find out. Do you want to drive your armored car or Ditch it and go on foot?",
@@ -48,7 +54,7 @@
       },
       {
         "label": "Drive Around",
-        "imagePath": "imgs/armoredCarImg.jpg",
+        "imagePath": "imgs/barricadeImg.jpg",
         "id": "find_shelter"
       }
     ]
@@ -57,7 +63,8 @@
   {
     "id": "zombie_encounter_1",
     "prompt": "You get out and look around the barricade. Only to find food wrappers, dirty clothes, and signs of a struggle. Suddenly, a zombie appears around the corner! The zombie is weak and separated from the main horde. Do you want to fight it or run away?",
-    "threatLevel": 2,
+    "threatLevel": 10,
+    "fightNumber": 1,
     "choices": [
       {
         "label": "Fight",
@@ -103,7 +110,7 @@
     {
       "label": "Enter Building",
       "imagePath": "imgs/enterBuildingImg.jpg",
-      "id": "next_id"
+      "id": "up_or_down"
     },
     {
       "label": "Keep Moving",
@@ -112,10 +119,88 @@
     }
   ]
 },
-  
-  {
-    "id": "walk_path",
-    "prompt": "You walk down the street and find a hidden alley. There could be supplies or danger but you can't tell from here. Do you want to explore it or keep walking?",
+
+{
+  "id": "up_or_down",
+  "prompt": "Inside the building, the air is stale and the floor creaks under your feet. Do you want to go upstairs or stay on the ground floor?",
+  "choices": [
+    {
+      "label": "Go Upstairs",
+      "imagePath": "imgs/IMG.jpg",
+      "id": "upstairs_scene"
+    },
+    {
+      "label": "Stay Downstairs",
+      "imagePath": "imgs/IMG.jpg",
+      "id": "downstairs_scene"
+    }
+  ]
+},
+
+{
+  "id": "upstairs_scene",
+  "prompt": "The floor is rotted and giving way. As you try to go upstairs, the weakened floor collapses and you fall back down to the first floor, taking damage in the process.",
+  "healthChange": -20,
+  "choices": [
+    {
+      "label": "Get Up and Continue",
+      "imagePath": "imgs/IMG.jpg",
+      "id": "downstairs_scene"
+    }
+  ]
+},
+
+{
+  "id": "downstairs_scene",
+  "prompt": "As you slowly approach one of the rooms on the ground floor, you see a zombie standing right in front of a medical bag. The sight sends a shiver down your spine. Do you want to run and quickly grab the medical bag or fight the zombie?",
+  "threatLevel": 5,
+  "fightNumber": 2,
+  "choices": [
+    {
+      "label": "Grab Medical Bag",
+      "imagePath": "imgs/IMG.jpg",
+      "id": "grab_medical_bag_failed"
+    },
+    {
+      "label": "Fight Zombie",
+      "imagePath": "imgs/IMG.jpg",
+      "id": "fight_result_win_2"
+    }
+  ]
+},
+
+{
+  "id": "fight_result_win_2",
+  "prompt": "After defeating the zombie, you open the bag and notice a small vial labeled 'Antidote' lying inside. This key item can cure the infection caused by a zombie bite, but you can only use it once. Do you want to pick up the Antidote? (The map is a place holder key item with no effect)",
+  "choices": [
+    {
+      "label": "Pick Up Antidote",
+      "imagePath": "imgs/antidoteImg.jpg",
+      "id": "add_antidote"
+    },
+    {
+      "label": "Leave it Behind",
+      "imagePath": "imgs/ignoreImg.jpg",
+      "id": "keep_map"
+    }
+  ]
+},
+
+{
+  "id": "fight_result_lose_2",
+  "prompt": "You tried to fight the zombie, but your efforts weren't enough. The zombie overpowers you and sinks its teeth into your arm. The bite quickly shows signs of infection, and without a chance to use an antidote, your fate seems sealed. Your vision fades as the infection takes hold.",
+  "choices": [
+    {
+      "label": "Accept your fate",
+      "imagePath": "imgs/gameOverImg.jpg",
+      "id": "game_over_infection"
+    }
+  ]
+},
+
+{
+  "id": "walk_path",
+  "prompt": "You walk down the street and find a hidden alley. There could be supplies or danger but you can't tell from here. Do you want to explore it or keep walking?",
     "healthChange": -10,
     "choices": [
       {
@@ -200,7 +285,6 @@
       }
   ]
 },
-
 
 {
   "id": "startRunning",

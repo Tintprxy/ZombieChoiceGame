@@ -4,13 +4,16 @@ import java.util.List;
 
 public class GameScene {
 
+    // new field for fight number; default to 1 if not set
+    private int fightNumber = 1;
+
     public GameScene(String id, String prompt, List<GameChoice> choices) {
         this.id = id;
         this.prompt = prompt;
         this.choices = choices;
     }
 
-    public GameScene(String id, String prompt, int healthChange, java.util.List<GameChoice> choices) {
+    public GameScene(String id, String prompt, int healthChange, List<GameChoice> choices) {
         this.id = id;
         this.prompt = prompt;
         this.healthChange = healthChange;
@@ -46,6 +49,16 @@ public class GameScene {
     public int getHealthChange() { return healthChange; }
     public List<GameChoice> getChoices() { return choices; }
     public int getThreatLevel() { return threatLevel; }
+
+    // New getter for fightNumber
+    public int getFightNumber() { 
+        return fightNumber; 
+    }
+    
+    // Optional setter for fightNumber
+    public void setFightNumber(int fightNumber) {
+        this.fightNumber = fightNumber;
+    }
 
     public boolean hasAddItem() {
         return addItem != null;
