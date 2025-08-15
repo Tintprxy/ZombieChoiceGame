@@ -14,13 +14,11 @@ public class GameModel {
     private static final int MAX_CONSUMABLES = 3;
     private static final int MAX_KEY_ITEMS = 1;
     private static final int MAX_WEAPONS = 2;
-    private static final int INITIAL_HEALTH = 100; // NEW
+    private static final int INITIAL_HEALTH = 100;
 
     public GameModel() {
         isDarkMode = false;
-
-        // Initialize starting health
-        this.health = INITIAL_HEALTH; // NEW
+        this.health = INITIAL_HEALTH;
 
         for (ItemType type : ItemType.values()) {
             inventory.put(type, new ArrayList<>());
@@ -49,7 +47,7 @@ public class GameModel {
     }
 
     public void setHealth(int value) {
-        health = Math.max(0, Math.min(100, value)); // clamp between 0–100
+        health = Math.max(0, Math.min(100, value));
     }
 
     public int getHealth() {
@@ -57,13 +55,13 @@ public class GameModel {
     }
 
     public void subtractHealth(int amount) {
-        health += amount; // negative amount decreases health, positive heals
-        health = Math.max(0, Math.min(100, health)); // clamp between 0–100
+        health += amount;
+        health = Math.max(0, Math.min(100, health));
     }
 
     public void addHealth(int amount) {
-        health += amount; // positive amount increases health, negative decreases health
-        health = Math.max(0, Math.min(100, health)); // clamp between 0–100
+        health += amount;
+        health = Math.max(0, Math.min(100, health));
     }
     
     public boolean addItem(InventoryItem item) {
@@ -76,7 +74,6 @@ public class GameModel {
             case KEY_ITEM -> MAX_KEY_ITEMS;
         };
 
-        // If adding a weapon >= max amount, return false to trigger a prompt
         if (item.isWeapon() && items.size() >= limit) {
             return false;
         }
@@ -126,7 +123,6 @@ public class GameModel {
     }
 
     public void resetHealth() {
-        // Set health to initial value
-        this.health = INITIAL_HEALTH; // UPDATED
+        this.health = INITIAL_HEALTH;
     }
 }

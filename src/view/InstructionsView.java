@@ -28,7 +28,6 @@ public class InstructionsView extends BorderPane {
         heading.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
 
         Text instructions = new Text("""
-
             Welcome to the Zombie Choice Game!
             This game is a text-based adventure where you make choices to survive in a zombie-infested world.
         
@@ -38,14 +37,13 @@ public class InstructionsView extends BorderPane {
             Health Bar:
             Your health will decrease when injured or attacked. Watch the bar at the top of the screen.
 
-             Inventory:
+            Inventory:
             You can collect items like food, weapons, and tools.
             These items will give you advantages/disadvantages throughout the game.
             You can carry up to:
               • 2 weapons
               • 3 consumables(food, water, etc.)
               • 1 key item(map, keys, etc.)
-
 
             IMPORTANT:
             Weapons are used automatically to fight enemies.
@@ -79,12 +77,10 @@ public class InstructionsView extends BorderPane {
     }
 
     public void applyTheme(boolean isDarkMode) {
-        // Set background for the BorderPane
         setBackground(new Background(new BackgroundFill(
                 isDarkMode ? Color.web("#2e2e2e") : Color.WHITE,
                 CornerRadii.EMPTY, Insets.EMPTY)));
 
-        // Set background for the ScrollPane's viewport
         scrollPane.setStyle(isDarkMode
                 ? "-fx-background: #2e2e2e; -fx-background-color: #2e2e2e;"
                 : "-fx-background: white; -fx-background-color: white;");

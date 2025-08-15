@@ -63,7 +63,7 @@
   {
     "id": "zombie_encounter_1",
     "prompt": "You get out and look around the barricade. Only to find food wrappers, dirty clothes, and signs of a struggle. Suddenly, a zombie appears around the corner! The zombie is weak and separated from the main horde. Do you want to fight it or run away?",
-    "threatLevel": 10,
+    "threatLevel": 2,
     "fightNumber": 1,
     "choices": [
       {
@@ -153,7 +153,7 @@
 {
   "id": "downstairs_scene",
   "prompt": "As you slowly approach one of the rooms on the ground floor, you see a zombie standing right in front of a medical bag. The sight sends a shiver down your spine. Do you want to run and quickly grab the medical bag or fight the zombie?",
-  "threatLevel": 5,
+  "threatLevel": 9,
   "fightNumber": 2,
   "choices": [
     {

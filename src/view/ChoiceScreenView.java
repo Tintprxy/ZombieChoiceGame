@@ -67,7 +67,6 @@ public class ChoiceScreenView extends VBox {
             }
         });
 
-        // Health and prompt
         healthLabel = new Label("Health: " + health);
         healthBar = new ProgressBar(health / 100.0);
         healthBar.setPrefWidth(300);
@@ -77,7 +76,6 @@ public class ChoiceScreenView extends VBox {
         promptLabel = new Label(promptText);
         promptLabel.setWrapText(true);
 
-        // Choices
         HBox choiceRow = new HBox(20);
         choiceRow.setAlignment(Pos.CENTER);
 
@@ -117,11 +115,9 @@ public class ChoiceScreenView extends VBox {
             choiceRow.getChildren().add(column);
         }
 
-        // Right side content
         VBox rightSide = new VBox(20, healthLabel, healthBar, promptLabel, choiceRow);
         rightSide.setAlignment(Pos.TOP_CENTER);
 
-        // Combine both sides
         HBox mainContent = new HBox(40, inventoryView, rightSide);
         mainContent.setAlignment(Pos.TOP_CENTER);
 
@@ -202,11 +198,9 @@ public class ChoiceScreenView extends VBox {
                     HBox itemRow = new HBox(5);
                     StringBuilder itemDesc = new StringBuilder("- " + item.getName());
 
-                    // Show healthRestore for consumables
                     if (item.isConsumable()) {
                         itemDesc.append(" (Restores: ").append(item.getHealthRestore()).append(" HP)");
                     }
-                    // Show durability and power for weapons
                     if (item.isWeapon()) {
                         itemDesc.append(" (Durability: ").append(item.getDurability())
                                 .append(", Power: ").append(item.getPower()).append(")");
@@ -216,7 +210,6 @@ public class ChoiceScreenView extends VBox {
                     itemLabel.setStyle("-fx-text-fill: " + Theme.getTextColor(darkMode) + ";");
                     itemRow.getChildren().add(itemLabel);
 
-                    // Add a Consume button for consumables
                     if (item.isConsumable()) {
                         Button consumeBtn = new Button("Consume");
                         consumeBtn.setOnAction(e -> {
@@ -224,7 +217,7 @@ public class ChoiceScreenView extends VBox {
                                 onConsumeItem.accept(item);
                             }
                         });
-                        Theme.applyButtonStyle(consumeBtn, darkMode); // <-- Apply theme here
+                        Theme.applyButtonStyle(consumeBtn, darkMode);
                         itemRow.getChildren().add(consumeBtn);
                     }
                     itemList.getChildren().add(itemRow);

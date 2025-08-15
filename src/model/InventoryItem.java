@@ -2,10 +2,10 @@ package model;
 
 public class InventoryItem {
     private String name;
-    private ItemType type; // CONSUMABLE, WEAPON, KEY_ITEM, etc.
-    private int healthRestore; // for consumables
-    private int durability;    // for weapons (scale 0-100)
-    private int power;         // for weapons (scale 1-10)
+    private ItemType type;
+    private int healthRestore;
+    private int durability;
+    private int power;
 
     public InventoryItem(String name, ItemType type, int healthRestore, int durability, int power) {
         this.name = name;
@@ -50,18 +50,23 @@ public class InventoryItem {
     public void setDurability(int durability) {
         this.durability = durability;
     }
+
     public void decreaseDurability(int amount) {
         this.durability = Math.max(0, this.durability - amount);
     }
+
     public boolean isBroken() {
         return durability <= 0;
     }
+
     public void repair(int amount) {
         this.durability += amount;
     }
+
     public boolean isRepairable() {
-        return type == ItemType.WEAPON && durability < 100; // max durability is 100
+        return type == ItemType.WEAPON && durability < 100;
     }
+
     public boolean isUsable() {
         return !isBroken() && (type == ItemType.CONSUMABLE || type == ItemType.WEAPON);
     }

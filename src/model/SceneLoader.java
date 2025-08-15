@@ -49,8 +49,10 @@ public class SceneLoader {
                     scene = new GameScene(sceneId, prompt, healthChange, choices);
                 }
 
-                // Set threatLevel if present
                 scene.setThreatLevel(threatLevel);
+
+                int fightNumber = sceneObj.has("fightNumber") ? sceneObj.get("fightNumber").getAsInt() : 1;
+                scene.setFightNumber(fightNumber);
 
                 sceneMap.put(sceneId, scene);
             }

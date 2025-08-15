@@ -95,13 +95,11 @@ public class MainController {
     }
 
     private void showFirstChoiceView() {
-        // Load the first scene using its ID
         GameScene scene = loader.getSceneById("start");
 
         if (scene != null) {
             showSceneView(scene);
         } else {
-            // If scene can't be loaded, fallback to ending state
             model.setCurrentState(GameState.ENDING);
             updateView();
         }
@@ -122,7 +120,6 @@ public class MainController {
             lastHealthAppliedSceneId = scene.getId();
         }
 
-        // Only process addItem if not already processed for this scene
         if (scene.hasAddItem() && !addItemProcessedScenes.contains(scene.getId())) {
             InventoryItem item = scene.getAddItem();
             boolean added = model.addItem(item);
@@ -155,7 +152,6 @@ public class MainController {
                     return;
                 }
 
-                // Delegate fight handling to a single helper if the player chose “Fight”
                 if (scene.getThreatLevel() > -1 && choice.getLabel().toLowerCase().contains("fight")) {
                     int threat = scene.getThreatLevel();
                     int fightNumber = scene.getFightNumber(); 
@@ -180,7 +176,6 @@ public class MainController {
                 model.toggleDarkMode();
                 showSceneView(currentScene);
             },
-            //reset button
             () -> { 
                 javafx.scene.control.Alert confirm =
                     new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
@@ -272,7 +267,7 @@ public class MainController {
 
     private void resetInventoryToDefault() {
         try {
-            File defaultFile = new File("src/data/default_inventory.json");
+            File defaultFile = new File("src/data/empty_inventory.json");
             File inventoryFile = new File("src/data/inventory.json");
             try (
                 FileReader reader = new FileReader(defaultFile);
@@ -330,6 +325,9 @@ public class MainController {
     private void handleFight(GameScene scene, int fightNumber, int decreaseDurAmount, int subHealthWin, int subHealthLose, String defaultWinSceneId) {
         int threatLevel = scene.getThreatLevel();
         
+        System.out.printf("[DEBUG] In handleFight: Scene \"%s\" with fightNumber: %d, threatLevel: %d%n",
+            scene.getId(), fightNumber, threatLevel);
+        
         List<InventoryItem> weapons = model.getInventory().getOrDefault(ItemType.WEAPON, new ArrayList<>());
         List<InventoryItem> winningWeapons = weapons.stream()
             .filter(w -> w.getPower() >= threatLevel && w.getDurability() > 0)
@@ -338,10 +336,10 @@ public class MainController {
         
         InventoryItem chosenWeapon = winningWeapons.isEmpty() ? null : winningWeapons.get(0);
         
-        // Compute win scene id based on fightNumber:
         String winSceneId = (fightNumber > 0) ? "fight_result_win_" + fightNumber : defaultWinSceneId;
-        // Compute lose scene id based on fightNumber (default to 1 if no fight number)
         String loseSceneId = (fightNumber > 0) ? "fight_result_lose_" + fightNumber : "fight_result_lose_1";
+        System.out.printf("[DEBUG] Computed winSceneId: %s, loseSceneId: %s%n", winSceneId, loseSceneId);
+        
         if (chosenWeapon != null) {
             int oldDurability = chosenWeapon.getDurability();
             chosenWeapon.decreaseDurability(decreaseDurAmount);
@@ -351,7 +349,6 @@ public class MainController {
                 chosenWeapon.getName(), chosenWeapon.getPower(), threatLevel, oldDurability, newDurability, model.getHealth());
             showSceneView(loader.getSceneById(winSceneId));
         } else {
-            // Use unarmed fists (power 2)
             int fistsPower = 2;
             if (fistsPower >= threatLevel) {
                 model.subtractHealth(-subHealthWin);
@@ -368,41 +365,34 @@ public class MainController {
     }
 
     private int computeDurabilityDecrease(int threatLevel) {
-        // Example: Use 1 for lower threat levels, 2 for higher ones.
         return (threatLevel >= 5) ? 2 : 1;
     }
 
     private int computeWinHealthPenalty(int threatLevel) {
-        // Example: Base penalty of 10 plus additional damage based on threat.
         return 10 + threatLevel;
     }
 
     private int computeLoseHealthPenalty(int threatLevel) {
-        // Example: Base penalty of 25 plus double the threat level.
         return 25 + (2 * threatLevel);
     }
 
     private void applyInventoryChoice(String choiceLabel) {
-        // Clear any existing inventory.
         model.clearInventory();
         
         switch (choiceLabel.toLowerCase()) {
             case "health heavy":
-                // Load a health heavy inventory from its JSON file.
                 List<InventoryItem> healthItems = loadInventoryFromJson("c:\\Users\\tthom\\Desktop\\ZombieChoiceGame\\src\\data\\health_inventory.json");
                 for (InventoryItem item : healthItems) {
                     model.addItem(item);
                 }
                 break;
             case "attack heavy":
-                // Load an attack heavy inventory from its JSON file.
                 List<InventoryItem> attackItems = loadInventoryFromJson("c:\\Users\\tthom\\Desktop\\ZombieChoiceGame\\src\\data\\attack_inventory.json");
                 for (InventoryItem item : attackItems) {
                     model.addItem(item);
                 }
                 break;
             case "balanced":
-                // Load the default balanced inventory.
                 List<InventoryItem> balancedItems = loadInventoryFromJson("c:\\Users\\tthom\\Desktop\\ZombieChoiceGame\\src\\data\\balanced_inventory.json");
                 for (InventoryItem item : balancedItems) {
                     model.addItem(item);
@@ -416,7 +406,6 @@ public class MainController {
 
     private List<InventoryItem> loadInventoryFromJson(String filePath) {
         try (Reader reader = new FileReader(filePath)) {
-            // Parse the JSON array into an InventoryItem[]
             InventoryItem[] items = new Gson().fromJson(reader, InventoryItem[].class);
             return Arrays.asList(items);
         } catch (IOException e) {
@@ -425,13 +414,11 @@ public class MainController {
         }
     }
 
-    // In showFirstChoiceView (or a new method) in MainController:
     private void showInventoryChoice() {
         GameScene scene = loader.getSceneById("inventory_choice");
         if (scene != null) {
             showSceneView(scene);
         } else {
-            // Fallback to the normal start scene if inventory_choice is missing
             showSceneView(loader.getSceneById("start"));
         }
     }
