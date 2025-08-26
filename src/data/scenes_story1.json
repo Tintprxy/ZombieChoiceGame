@@ -44,23 +44,6 @@
   },
 
   {
-    "id": "next",
-    "prompt": "The street is quiet but you hear a distant moan. Zombies? Enemies? only one way to find out. Do you want to drive your armored car or Ditch it and go on foot?",
-    "choices": [
-      {
-        "label": "Drive",
-        "imagePath": "imgs/armoredCarImg.jpg",
-        "id": "drive_path"
-      },
-      {
-        "label": "Walk",
-        "imagePath": "imgs/walkingImg.jpg",
-        "id": "walk_path"
-      }
-    ]
-  },
-
-  {
     "id": "drive_path",
     "prompt": "You start the car and drive down the deserted street. Most stores have been abandoned and looted. Soon, you reach a barricade blocking the road. Do you want to get out and investigate or try to drive around?",
     "choices": [

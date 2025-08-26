@@ -13,11 +13,13 @@ import model.GameState;
 import model.InventoryItem;
 import model.ItemType;
 import model.SceneLoader;
-import view.ChooseStoryView;
+//import view.ChooseStoryView;
 import view.ChoiceScreenView;
 import view.InstructionsView;
 import view.TitleView;
 import view.InventoryChoiceView;
+import view.StoryTurnstileView;
+import javafx.scene.control.Button;
 
 public class MainController {
     private final Stage stage;
@@ -81,13 +83,18 @@ public class MainController {
     }
 
     private void showChooseStoryView() {
-        ChooseStoryView chooseStoryView = new ChooseStoryView(model.isDarkMode());
+        // Instantiate the new StoryTurnstileView (which uses VBoxes for each story option)
+        StoryTurnstileView turnstileView = new StoryTurnstileView(model.isDarkMode());
         
-        chooseStoryView.getTopBar().toggleButton.setOnAction(e -> {
+        // Wire the top bar toggle and reset buttons
+        turnstileView.getTopBar().toggleButton.setOnAction(e -> {
             model.toggleDarkMode();
-            chooseStoryView.applyTheme(model.isDarkMode()); 
+            System.out.println("[DEBUG] Dark mode toggled: " + model.isDarkMode());
+            turnstileView.getTopBar().applyTheme(model.isDarkMode());
         });
-        chooseStoryView.getTopBar().resetButton.setOnAction(e -> {
+
+        turnstileView.getTopBar().resetButton.setOnAction(e -> {
+            System.out.println("[DEBUG] Reset button clicked.");
             lastHealthAppliedSceneId = null;
             addItemProcessedScenes.clear();
             model.clearInventory();
@@ -96,17 +103,24 @@ public class MainController {
             updateView();
         });
         
-        chooseStoryView.getStory1Button().setOnAction(e -> {
+        // Assuming each VBox has 3 children (ImageView, Label, Button),
+        // we extract the button from each story box.
+        Button story1Button = (Button) turnstileView.getStory1Box().getChildren().get(2);
+        story1Button.setOnAction(e -> {
             SceneLoader sceneLoader = new SceneLoader("src/data/scenes_story1.json");
-            showInventoryChoiceView(sceneLoader, "start");
-        });
-
-        chooseStoryView.getStory2Button().setOnAction(e -> {
-            SceneLoader sceneLoader = new SceneLoader("src/data/scenes_story2.json");
-            showInventoryChoiceView(sceneLoader, "start");
+            showInventoryChoiceView(sceneLoader, "start"); // Pass the correct scene id.
         });
         
-        rootPane.setCenter(chooseStoryView);
+        Button story2Button = (Button) turnstileView.getStory2Box().getChildren().get(2);
+        story2Button.setOnAction(e -> {
+            SceneLoader sceneLoader = new SceneLoader("src/data/scenes_story2.json");
+            showInventoryChoiceView(sceneLoader, "start"); // Pass the correct scene id.
+        });
+        
+        // Set the turnstile view as the center of the root pane.
+        rootPane.setCenter(turnstileView);
+        System.out.println("Story1Box children: " + turnstileView.getStory1Box().getChildren().size());
+        System.out.println("Story2Box children: " + turnstileView.getStory2Box().getChildren().size());
     }
 
     private void showInstructionsView() {
@@ -133,82 +147,60 @@ public class MainController {
         }
     }
 
-    private void showSceneView(GameScene scene, SceneLoader sceneLoader) {
-        this.currentScene = scene;
-
-        if (!scene.getId().equals(lastHealthAppliedSceneId)) {
+    private void showSceneView(GameScene currentScene, SceneLoader sceneLoader) {
+        this.currentScene = currentScene;
+        
+        // Apply any health changes or other effects.
+        if (!currentScene.getId().equals(lastHealthAppliedSceneId)) {
             int before = model.getHealth();
-            if (!scene.getId().startsWith("fight_result")) {
-                model.subtractHealth(scene.getHealthChange());
-                System.out.println("[DEBUG] Applied scene healthChange: " + scene.getHealthChange() +
-                    " | Health before: " + before + ", after: " + model.getHealth());
+            if (!currentScene.getId().startsWith("fight_result")) {
+                model.subtractHealth(currentScene.getHealthChange());
+                System.out.println("[DEBUG] Applied scene healthChange: " + currentScene.getHealthChange()
+                    + " | Health before: " + before + ", after: " + model.getHealth());
             } else {
-                System.out.println("[DEBUG] Skipped JSON healthChange for fight result scene: " + scene.getId());
+                System.out.println("[DEBUG] Skipped JSON healthChange for fight result scene: " + currentScene.getId());
             }
-            lastHealthAppliedSceneId = scene.getId();
+            lastHealthAppliedSceneId = currentScene.getId();
         }
-
+        
+        // If the current scene is the inventory_choice scene, load the inventory view.
         if ("inventory_choice".equals(currentScene.getId())) {
             showInventoryChoiceView();
             return;
         }
-
-        if (scene.hasAddItem() && !addItemProcessedScenes.contains(scene.getId())) {
-            InventoryItem item = scene.getAddItem();
-            boolean added = model.addItem(item);
-            if (!added && item.isWeapon()) {
-                writeTempWeaponJson(item);
-                List<InventoryItem> weapons = model.getInventory().get(ItemType.WEAPON);
-                List<String> weaponNames = new ArrayList<>();
-                for (InventoryItem w : weapons) weaponNames.add(w.getName());
-                showWeaponRemovalDialog(weaponNames, item, scene.getId());
-                return; 
-            } else {
-                System.out.println("[DEBUG] Added item to inventory: " + item.getName() + " | Success: " + added);
-                if (added && item.isWeapon()) {
-                    addWeaponToJson(item);
-                }
-            }
-            addItemProcessedScenes.add(scene.getId());
-        }
-
+        
+        // Build the choice screen view.
         ChoiceScreenView view = new ChoiceScreenView(
             model.getHealth(),
-            scene.getPrompt(),
-            scene.getChoices(),
+            currentScene.getPrompt(),
+            currentScene.getChoices(),
             model.isDarkMode(),
             model.getInventory(),
             choice -> {
-                if (scene.getThreatLevel() > -1 && choice.getLabel().toLowerCase().contains("fight")) {
-                    int threat = scene.getThreatLevel();
-                    int fightNumber = scene.getFightNumber();
-                    int ded = computeDurabilityDecrease(threat);
-                    int winPenalty = computeWinHealthPenalty(threat);
-                    int losePenalty = computeLoseHealthPenalty(threat);
-                    handleFight(scene, fightNumber, ded, winPenalty, losePenalty, choice.getNextId());
-                    return;
+                // When a choice is selected, use the current scene's choice.nextId to load the next scene.
+                System.out.printf("[DEBUG] Button clicked: %s, nextId: %s%n", choice.getLabel(), choice.getNextId());
+                GameScene nextScene = sceneLoader.getSceneById(choice.getNextId());
+                if (nextScene != null) {
+                    showSceneView(nextScene, sceneLoader);
                 } else {
-                    System.out.printf("[DEBUG] No fight calculation for choice \"%s\"; loading scene: %s%n", 
-                          choice.getLabel(), choice.getNextId());
-                    GameScene next = loader.getSceneById(choice.getNextId());
-                    if (next != null) {
-                        showSceneView(next, loader);
-                    } else {
-                        model.setCurrentState(GameState.ENDING);
-                        updateView();
-                    }
+                    System.out.println("[DEBUG] No scene found with id " + choice.getNextId());
+                    // Optionally, set the game state to ENDING or update the view.
+                    model.setCurrentState(GameState.ENDING);
+                    updateView();
                 }
             },
             () -> {
+                // Dark mode toggle callback; preserve current scene.
                 model.toggleDarkMode();
-                showSceneView(currentScene, loader);
+                showSceneView(currentScene, sceneLoader);
             },
             () -> { 
+                // Reset callback: confirm revert to title screen.
                 javafx.scene.control.Alert confirm =
                     new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
                 confirm.setTitle("Reset Game");
                 confirm.setHeaderText("Are you sure you want to return to the title screen?");
-                confirm.setContentText("Any current progress will be lost.");
+                confirm.setContentText("Any progress will be lost.");
                 Optional<javafx.scene.control.ButtonType> res = confirm.showAndWait();
                 if (res.isPresent() && res.get() == javafx.scene.control.ButtonType.OK) {
                     lastHealthAppliedSceneId = null;
@@ -220,20 +212,23 @@ public class MainController {
                 }
             },
             item -> {
+                // Item consumption callback.
                 System.out.println("[DEBUG] Attempting to consume item: " + item.getName() + ", type: " + item.getType());
                 boolean consumed = model.consumeItem(item);
                 if (consumed) {
                     System.out.println("[DEBUG] Consumed item: " + item.getName() +
-                        " | Health restored: " + item.getHealthRestore() +
                         " | Health after: " + model.getHealth());
-                    showSceneView(scene, loader);
+                    showSceneView(currentScene, sceneLoader);
                 } else {
                     System.out.println("[DEBUG] Failed to consume item: " + item.getName());
                 }
             }
         );
+        
+        // Set the scene view in the center of the root pane.
         rootPane.setCenter(view);
         
+        // Optionally update stage dimensions, etc.
         Platform.runLater(() -> {
             Stage stage = (Stage) rootPane.getScene().getWindow();
             stage.setWidth(1100);
@@ -431,66 +426,113 @@ public class MainController {
     }
 
     private void showInventoryChoiceView() {
-        System.out.println("[DEBUG] Dark Mode: " + model.isDarkMode());
-        System.out.println("[DEBUG] Health: " + model.getHealth());
-        System.out.println("[DEBUG] Inventory: " + model.getInventory());
-        Map<ItemType, List<InventoryItem>> inventory = model.getInventory() != null ? model.getInventory() : new HashMap<>();
-        InventoryChoiceView invView = new InventoryChoiceView(model.isDarkMode(), model.getHealth(), inventory);
-        rootPane.setCenter(invView);
-
+        // Instantiate InventoryChoiceView with current dark mode, health, and inventory.
+        InventoryChoiceView invView = new InventoryChoiceView(model.isDarkMode(), model.getHealth(), model.getInventory());
+        
+        // Wire the local top bar in InventoryChoiceView
+        invView.getTopBar().toggleButton.setOnAction(e -> {
+            model.toggleDarkMode();
+            invView.applyTheme(model.isDarkMode());
+        });
+        
+        invView.getTopBar().resetButton.setOnAction(e -> {
+            System.out.println("[DEBUG] Inventory Reset clicked.");
+            lastHealthAppliedSceneId = null;
+            addItemProcessedScenes.clear();
+            model.clearInventory();
+            model.resetHealth();
+            model.setCurrentState(GameState.TITLE);
+            updateView();
+        });
+        
+        // Wire inventory choice buttons to load the story.
+        // (Assuming you want to load scenes from your Story1 JSON file)
         invView.getHealthHeavyButton().setOnAction(e -> {
+            System.out.println("[DEBUG] Health Heavy button clicked.");
             applyInventoryChoice("Health Heavy");
+            SceneLoader loader = new SceneLoader("src/data/scenes_story1.json");
             GameScene next = loader.getSceneById("start");
             if (next != null) {
                 showSceneView(next, loader);
             } else {
+                System.out.println("[DEBUG] Failed to load starting scene.");
                 updateView();
             }
         });
+        
         invView.getAttackHeavyButton().setOnAction(e -> {
+            System.out.println("[DEBUG] Attack Heavy button clicked.");
             applyInventoryChoice("Attack Heavy");
+            SceneLoader loader = new SceneLoader("src/data/scenes_story1.json");
             GameScene next = loader.getSceneById("start");
             if (next != null) {
                 showSceneView(next, loader);
             } else {
+                System.out.println("[DEBUG] Failed to load starting scene.");
                 updateView();
             }
         });
+        
         invView.getBalancedButton().setOnAction(e -> {
+            System.out.println("[DEBUG] Balanced button clicked.");
             applyInventoryChoice("Balanced");
+            SceneLoader loader = new SceneLoader("src/data/scenes_story1.json");
             GameScene next = loader.getSceneById("start");
             if (next != null) {
                 showSceneView(next, loader);
             } else {
+                System.out.println("[DEBUG] Failed to load starting scene.");
                 updateView();
             }
         });
+        
+        // Set the InventoryChoiceView (with its local top bar) as center.
+        rootPane.setCenter(invView);
     }
 
     private void showInventoryChoiceView(SceneLoader sceneLoader, String startSceneId) {
-        InventoryChoiceView invView = new InventoryChoiceView(model.isDarkMode(), model.getHealth(), model.getInventory());
-        rootPane.setCenter(invView);
+        InventoryChoiceView invView = new InventoryChoiceView(
+            model.isDarkMode(),
+            model.getHealth(),
+            model.getInventory()
+        );
 
         invView.getHealthHeavyButton().setOnAction(e -> {
+            System.out.println("[DEBUG] Health Heavy button clicked.");
             applyInventoryChoice("Health Heavy");
-            GameScene next = sceneLoader.getSceneById(startSceneId);
+            GameScene next = sceneLoader.getSceneById(startSceneId); // Use passed parameter here.
             if (next != null) {
+                System.out.println("[DEBUG] Starting scene: " + next.getId());
                 showSceneView(next, sceneLoader);
+            } else {
+                System.out.println("[DEBUG] Failed to load starting scene.");
             }
         });
+
         invView.getAttackHeavyButton().setOnAction(e -> {
+            System.out.println("[DEBUG] Attack Heavy button clicked.");
             applyInventoryChoice("Attack Heavy");
             GameScene next = sceneLoader.getSceneById(startSceneId);
             if (next != null) {
+                System.out.println("[DEBUG] Starting scene: " + next.getId());
                 showSceneView(next, sceneLoader);
+            } else {
+                System.out.println("[DEBUG] Failed to load starting scene.");
             }
         });
+
         invView.getBalancedButton().setOnAction(e -> {
+            System.out.println("[DEBUG] Balanced button clicked.");
             applyInventoryChoice("Balanced");
             GameScene next = sceneLoader.getSceneById(startSceneId);
             if (next != null) {
+                System.out.println("[DEBUG] Starting scene: " + next.getId());
                 showSceneView(next, sceneLoader);
+            } else {
+                System.out.println("[DEBUG] Failed to load starting scene.");
             }
         });
+
+        rootPane.setCenter(invView);
     }
 }

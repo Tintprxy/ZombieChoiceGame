@@ -6,7 +6,7 @@
       {
         "label": "Health Heavy",
         "imagePath": "imgs/healthHeavyImg.jpg",
-        "id": "Start"
+        "id": "start"
       },
       {
         "label": "Attack Heavy",

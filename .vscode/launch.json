@@ -3,6 +3,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "SceneLoader",
+      "request": "launch",
+      "mainClass": "model.SceneLoader",
+      "projectName": "ZombieChoiceGame_13169db4"
+    },
+    {
+      "type": "java",
       "name": "Launch JavaFX App (with DLLs)",
       "request": "launch",
       "mainClass": "Main",
