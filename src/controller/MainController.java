@@ -2,18 +2,22 @@ package controller;
 import com.google.gson.*;
 import java.io.*;
 import java.util.*;
-import javafx.scene.control.ChoiceDialog;
 import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import model.GameModel;
 import model.GameScene;
 import model.GameState;
 import model.InventoryItem;
-import model.SceneLoader;
 import model.ItemType;
-import view.*;
+import model.SceneLoader;
+import view.ChooseStoryView;
+import view.ChoiceScreenView;
+import view.InstructionsView;
+import view.TitleView;
+import view.InventoryChoiceView;
 
 public class MainController {
     private final Stage stage;
@@ -60,16 +64,15 @@ public class MainController {
         titleView.applyTheme(model.isDarkMode());
 
         titleView.startButton.setOnAction(e -> {
-                model.clearInventory();
-                resetInventoryToDefault();
-                showInventoryChoice();
+            model.clearInventory();
+            showChooseStoryView();
         });
 
         titleView.instructionsButton.setOnAction(e -> {
             model.setCurrentState(GameState.INSTRUCTIONS);
             updateView();
         });
-
+        
         titleView.topBar.toggleButton.setOnAction(e -> {
             model.toggleDarkMode();
             titleView.applyTheme(model.isDarkMode());
@@ -77,47 +80,77 @@ public class MainController {
         rootPane.setCenter(titleView);
     }
 
+    private void showChooseStoryView() {
+        ChooseStoryView chooseStoryView = new ChooseStoryView(model.isDarkMode());
+        
+        chooseStoryView.getTopBar().toggleButton.setOnAction(e -> {
+            model.toggleDarkMode();
+            chooseStoryView.applyTheme(model.isDarkMode()); 
+        });
+        chooseStoryView.getTopBar().resetButton.setOnAction(e -> {
+            lastHealthAppliedSceneId = null;
+            addItemProcessedScenes.clear();
+            model.clearInventory();
+            model.resetHealth();
+            model.setCurrentState(GameState.TITLE);
+            updateView();
+        });
+        
+        chooseStoryView.getStory1Button().setOnAction(e -> {
+            SceneLoader sceneLoader = new SceneLoader("src/data/scenes_story1.json");
+            showInventoryChoiceView(sceneLoader, "start");
+        });
+
+        chooseStoryView.getStory2Button().setOnAction(e -> {
+            SceneLoader sceneLoader = new SceneLoader("src/data/scenes_story2.json");
+            showInventoryChoiceView(sceneLoader, "start");
+        });
+        
+        rootPane.setCenter(chooseStoryView);
+    }
+
     private void showInstructionsView() {
         InstructionsView view = new InstructionsView();
         view.applyTheme(model.isDarkMode());
-
         view.topBar.toggleButton.setOnAction(e -> {
             model.toggleDarkMode();
             view.applyTheme(model.isDarkMode());
         });
-
         view.backButton.setOnAction(e -> {
             model.setCurrentState(GameState.TITLE);
             updateView();
         });
-
         rootPane.setCenter(view);
     }
 
     private void showFirstChoiceView() {
-        GameScene scene = loader.getSceneById("start");
-
+        GameScene scene = loader.getSceneById("next");
         if (scene != null) {
-            showSceneView(scene);
+            showSceneView(scene, loader);
         } else {
             model.setCurrentState(GameState.ENDING);
             updateView();
         }
     }
 
-    private void showSceneView(GameScene scene) {
+    private void showSceneView(GameScene scene, SceneLoader sceneLoader) {
         this.currentScene = scene;
 
         if (!scene.getId().equals(lastHealthAppliedSceneId)) {
             int before = model.getHealth();
             if (!scene.getId().startsWith("fight_result")) {
-                 model.subtractHealth(scene.getHealthChange());
-                 System.out.println("[DEBUG] Applied scene healthChange: " + scene.getHealthChange() +
-                     " | Health before: " + before + ", after: " + model.getHealth());
+                model.subtractHealth(scene.getHealthChange());
+                System.out.println("[DEBUG] Applied scene healthChange: " + scene.getHealthChange() +
+                    " | Health before: " + before + ", after: " + model.getHealth());
             } else {
-                 System.out.println("[DEBUG] Skipped JSON healthChange for fight result scene: " + scene.getId());
+                System.out.println("[DEBUG] Skipped JSON healthChange for fight result scene: " + scene.getId());
             }
             lastHealthAppliedSceneId = scene.getId();
+        }
+
+        if ("inventory_choice".equals(currentScene.getId())) {
+            showInventoryChoiceView();
+            return;
         }
 
         if (scene.hasAddItem() && !addItemProcessedScenes.contains(scene.getId())) {
@@ -146,15 +179,9 @@ public class MainController {
             model.isDarkMode(),
             model.getInventory(),
             choice -> {
-                if ("inventory_choice".equals(currentScene.getId())) {
-                    applyInventoryChoice(choice.getLabel());
-                    showSceneView(loader.getSceneById("start"));
-                    return;
-                }
-
                 if (scene.getThreatLevel() > -1 && choice.getLabel().toLowerCase().contains("fight")) {
                     int threat = scene.getThreatLevel();
-                    int fightNumber = scene.getFightNumber(); 
+                    int fightNumber = scene.getFightNumber();
                     int ded = computeDurabilityDecrease(threat);
                     int winPenalty = computeWinHealthPenalty(threat);
                     int losePenalty = computeLoseHealthPenalty(threat);
@@ -165,7 +192,7 @@ public class MainController {
                           choice.getLabel(), choice.getNextId());
                     GameScene next = loader.getSceneById(choice.getNextId());
                     if (next != null) {
-                        showSceneView(next);
+                        showSceneView(next, loader);
                     } else {
                         model.setCurrentState(GameState.ENDING);
                         updateView();
@@ -174,7 +201,7 @@ public class MainController {
             },
             () -> {
                 model.toggleDarkMode();
-                showSceneView(currentScene);
+                showSceneView(currentScene, loader);
             },
             () -> { 
                 javafx.scene.control.Alert confirm =
@@ -184,13 +211,12 @@ public class MainController {
                 confirm.setContentText("Any current progress will be lost.");
                 Optional<javafx.scene.control.ButtonType> res = confirm.showAndWait();
                 if (res.isPresent() && res.get() == javafx.scene.control.ButtonType.OK) {
-                    
                     lastHealthAppliedSceneId = null;
                     addItemProcessedScenes.clear();
-                    resetInventoryToDefault(); 
-                    model.resetHealth();                         
+                    resetInventoryToDefault();
+                    model.resetHealth();
                     model.setCurrentState(GameState.TITLE);
-                    updateView(); 
+                    updateView();
                 }
             },
             item -> {
@@ -200,16 +226,16 @@ public class MainController {
                     System.out.println("[DEBUG] Consumed item: " + item.getName() +
                         " | Health restored: " + item.getHealthRestore() +
                         " | Health after: " + model.getHealth());
-                    showSceneView(scene);
+                    showSceneView(scene, loader);
                 } else {
                     System.out.println("[DEBUG] Failed to consume item: " + item.getName());
                 }
             }
         );
         rootPane.setCenter(view);
-
+        
         Platform.runLater(() -> {
-            javafx.stage.Stage stage = (javafx.stage.Stage) rootPane.getScene().getWindow();
+            Stage stage = (Stage) rootPane.getScene().getWindow();
             stage.setWidth(1100);
             stage.setHeight(700);
         });
@@ -290,28 +316,24 @@ public class MainController {
             dialog.setTitle("Weapon Inventory Full");
             dialog.setHeaderText("Choose a weapon to remove to make space for: " + item.getName());
             dialog.setContentText("Remove:");
-
             Optional<String> result = dialog.showAndWait();
             result.ifPresent(selectedName -> {
                 javafx.scene.control.Alert confirm = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
                 confirm.setTitle("Confirm Removal");
                 confirm.setHeaderText("Are you sure you want to remove " + selectedName + "?");
                 confirm.setContentText("This cannot be undone.");
-
                 Optional<javafx.scene.control.ButtonType> confirmation = confirm.showAndWait();
                 if (confirmation.isPresent() && confirmation.get() == javafx.scene.control.ButtonType.OK) {
                     model.removeItem(selectedName);
                     removeWeaponFromJson(selectedName);
-
                     model.addItem(item);
                     addWeaponToJson(item);
                     System.out.println("[DEBUG] Removed weapon: " + selectedName +
-                        " | Added new item: " + item.getName());                   
+                        " | Added new item: " + item.getName());
                     addItemProcessedScenes.add(nextSceneId);
-
                     GameScene nextScene = loader.getSceneById(nextSceneId);
                     if (nextScene != null) {
-                        showSceneView(nextScene);
+                        showSceneView(nextScene, loader);
                     } else {
                         updateView();
                     }
@@ -324,22 +346,17 @@ public class MainController {
 
     private void handleFight(GameScene scene, int fightNumber, int decreaseDurAmount, int subHealthWin, int subHealthLose, String defaultWinSceneId) {
         int threatLevel = scene.getThreatLevel();
-        
         System.out.printf("[DEBUG] In handleFight: Scene \"%s\" with fightNumber: %d, threatLevel: %d%n",
             scene.getId(), fightNumber, threatLevel);
-        
         List<InventoryItem> weapons = model.getInventory().getOrDefault(ItemType.WEAPON, new ArrayList<>());
         List<InventoryItem> winningWeapons = weapons.stream()
             .filter(w -> w.getPower() >= threatLevel && w.getDurability() > 0)
             .sorted(Comparator.comparingInt(InventoryItem::getPower))
             .toList();
-        
         InventoryItem chosenWeapon = winningWeapons.isEmpty() ? null : winningWeapons.get(0);
-        
         String winSceneId = (fightNumber > 0) ? "fight_result_win_" + fightNumber : defaultWinSceneId;
         String loseSceneId = (fightNumber > 0) ? "fight_result_lose_" + fightNumber : "fight_result_lose_1";
         System.out.printf("[DEBUG] Computed winSceneId: %s, loseSceneId: %s%n", winSceneId, loseSceneId);
-        
         if (chosenWeapon != null) {
             int oldDurability = chosenWeapon.getDurability();
             chosenWeapon.decreaseDurability(decreaseDurAmount);
@@ -347,19 +364,19 @@ public class MainController {
             model.subtractHealth(-subHealthWin);
             System.out.printf("[DEBUG] WIN | used %s (power %d >= threat %d), durability decreased from %d to %d | new health: %d%n",
                 chosenWeapon.getName(), chosenWeapon.getPower(), threatLevel, oldDurability, newDurability, model.getHealth());
-            showSceneView(loader.getSceneById(winSceneId));
+            showSceneView(loader.getSceneById(winSceneId), loader);
         } else {
             int fistsPower = 2;
             if (fistsPower >= threatLevel) {
                 model.subtractHealth(-subHealthWin);
                 System.out.printf("[DEBUG] WIN (unarmed) | fists power(%d) >= threat(%d) | new health: %d%n",
                     fistsPower, threatLevel, model.getHealth());
-                showSceneView(loader.getSceneById(winSceneId));
+                showSceneView(loader.getSceneById(winSceneId), loader);
             } else {
                 model.subtractHealth(-subHealthLose);
                 System.out.printf("[DEBUG] LOSE (unarmed) | fists power(%d) < threat(%d) | new health: %d%n",
                     fistsPower, threatLevel, model.getHealth());
-                showSceneView(loader.getSceneById(loseSceneId));
+                showSceneView(loader.getSceneById(loseSceneId), loader);
             }
         }
     }
@@ -378,7 +395,6 @@ public class MainController {
 
     private void applyInventoryChoice(String choiceLabel) {
         model.clearInventory();
-        
         switch (choiceLabel.toLowerCase()) {
             case "health heavy":
                 List<InventoryItem> healthItems = loadInventoryFromJson("c:\\Users\\tthom\\Desktop\\ZombieChoiceGame\\src\\data\\health_inventory.json");
@@ -414,12 +430,67 @@ public class MainController {
         }
     }
 
-    private void showInventoryChoice() {
-        GameScene scene = loader.getSceneById("inventory_choice");
-        if (scene != null) {
-            showSceneView(scene);
-        } else {
-            showSceneView(loader.getSceneById("start"));
-        }
+    private void showInventoryChoiceView() {
+        System.out.println("[DEBUG] Dark Mode: " + model.isDarkMode());
+        System.out.println("[DEBUG] Health: " + model.getHealth());
+        System.out.println("[DEBUG] Inventory: " + model.getInventory());
+        Map<ItemType, List<InventoryItem>> inventory = model.getInventory() != null ? model.getInventory() : new HashMap<>();
+        InventoryChoiceView invView = new InventoryChoiceView(model.isDarkMode(), model.getHealth(), inventory);
+        rootPane.setCenter(invView);
+
+        invView.getHealthHeavyButton().setOnAction(e -> {
+            applyInventoryChoice("Health Heavy");
+            GameScene next = loader.getSceneById("start");
+            if (next != null) {
+                showSceneView(next, loader);
+            } else {
+                updateView();
+            }
+        });
+        invView.getAttackHeavyButton().setOnAction(e -> {
+            applyInventoryChoice("Attack Heavy");
+            GameScene next = loader.getSceneById("start");
+            if (next != null) {
+                showSceneView(next, loader);
+            } else {
+                updateView();
+            }
+        });
+        invView.getBalancedButton().setOnAction(e -> {
+            applyInventoryChoice("Balanced");
+            GameScene next = loader.getSceneById("start");
+            if (next != null) {
+                showSceneView(next, loader);
+            } else {
+                updateView();
+            }
+        });
+    }
+
+    private void showInventoryChoiceView(SceneLoader sceneLoader, String startSceneId) {
+        InventoryChoiceView invView = new InventoryChoiceView(model.isDarkMode(), model.getHealth(), model.getInventory());
+        rootPane.setCenter(invView);
+
+        invView.getHealthHeavyButton().setOnAction(e -> {
+            applyInventoryChoice("Health Heavy");
+            GameScene next = sceneLoader.getSceneById(startSceneId);
+            if (next != null) {
+                showSceneView(next, sceneLoader);
+            }
+        });
+        invView.getAttackHeavyButton().setOnAction(e -> {
+            applyInventoryChoice("Attack Heavy");
+            GameScene next = sceneLoader.getSceneById(startSceneId);
+            if (next != null) {
+                showSceneView(next, sceneLoader);
+            }
+        });
+        invView.getBalancedButton().setOnAction(e -> {
+            applyInventoryChoice("Balanced");
+            GameScene next = sceneLoader.getSceneById(startSceneId);
+            if (next != null) {
+                showSceneView(next, sceneLoader);
+            }
+        });
     }
 }

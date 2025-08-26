@@ -1,10 +1,10 @@
 package view;
 
-import javafx.scene.layout.BorderPane;
 import javafx.scene.control.Button;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.geometry.Pos;
 import javafx.geometry.Insets;

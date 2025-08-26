@@ -90,7 +90,7 @@ public class GameModel {
     }
 
     public Map<ItemType, List<InventoryItem>> getInventory() {
-        return inventory;
+        return inventory; // Ensure this matches the expected type
     }
 
     public boolean consumeItem(InventoryItem item) {

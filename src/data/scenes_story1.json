@@ -1,12 +1,12 @@
 [
-    {
+  {
     "id": "inventory_choice",
     "prompt": "Select your starting inventory:\n\nHealth Heavy, Attack Heavy, or Balanced?",
     "choices": [
       {
         "label": "Health Heavy",
         "imagePath": "imgs/healthHeavyImg.jpg",
-        "id": "Start"
+        "id": "start"
       },
       {
         "label": "Attack Heavy",
@@ -28,6 +28,23 @@
 
   {
     "id": "start",
+    "prompt": "The street is quiet but you hear a distant moan. Zombies? Enemies? only one way to find out. Do you want to drive your armored car or Ditch it and go on foot?",
+    "choices": [
+      {
+        "label": "Drive",
+        "imagePath": "imgs/armoredCarImg.jpg",
+        "id": "drive_path"
+      },
+      {
+        "label": "Walk",
+        "imagePath": "imgs/walkingImg.jpg",
+        "id": "walk_path"
+      }
+    ]
+  },
+
+  {
+    "id": "next",
     "prompt": "The street is quiet but you hear a distant moan. Zombies? Enemies? only one way to find out. Do you want to drive your armored car or Ditch it and go on foot?",
     "choices": [
       {
@@ -126,12 +143,12 @@
   "choices": [
     {
       "label": "Go Upstairs",
-      "imagePath": "imgs/IMG.jpg",
+      "imagePath": "imgs/upstairsImg.jpg",
       "id": "upstairs_scene"
     },
     {
       "label": "Stay Downstairs",
-      "imagePath": "imgs/IMG.jpg",
+      "imagePath": "imgs/downstairsImg.jpg",
       "id": "downstairs_scene"
     }
   ]
@@ -144,7 +161,7 @@
   "choices": [
     {
       "label": "Get Up and Continue",
-      "imagePath": "imgs/IMG.jpg",
+      "imagePath": "imgs/fallThroughImg.jpg",
       "id": "downstairs_scene"
     }
   ]
@@ -158,13 +175,44 @@
   "choices": [
     {
       "label": "Grab Medical Bag",
-      "imagePath": "imgs/IMG.jpg",
+      "imagePath": "imgs/drzombiemedbagImg.jpg",
       "id": "grab_medical_bag_failed"
     },
     {
       "label": "Fight Zombie",
-      "imagePath": "imgs/IMG.jpg",
+      "imagePath": "imgs/drzombiefightImg.jpg",
       "id": "fight_result_win_2"
+    }
+  ]
+},
+
+{
+  "id": "grab_medical_bag_failed",
+  "prompt": "You dash forward to grab the medical bag, but the doctor zombie lunges and slashes across your arm. Pain shoots through your body as you lose 20 health. Stumbling back, you realize the bag is out of reach — and the supplies are lost to you.",
+  "healthChange": -20,
+  "choices": [
+    {
+      "label": "fight zombie",
+      "imagePath": "imgs/doctorZombieSlash.jpg",
+      "id": "fight_result_win_2"
+    },
+    {
+      "label": "Retreat",
+      "imagePath": "imgs/retreatImg.jpg",
+      "id": "retreat_scene"
+    }
+  ]
+},
+
+{
+  "id": "retreat_scene",
+  "prompt": "You stumble back, clutching your wounded arm. The doctor zombie snarls and stands guard over the medical bag. You retreat deeper into the building, leaving the supplies behind.",
+  "healthChange": -10,
+  "choices": [
+    {
+      "label": "Continue On",
+      "imagePath": "imgs/retreatImg.jpg",
+      "id": "next_path"
     }
   ]
 },
@@ -180,7 +228,7 @@
     },
     {
       "label": "Leave it Behind",
-      "imagePath": "imgs/ignoreImg.jpg",
+      "imagePath": "imgs/emptyHandsImg.jpg",
       "id": "keep_map"
     }
   ]
@@ -192,8 +240,20 @@
   "choices": [
     {
       "label": "Accept your fate",
-      "imagePath": "imgs/gameOverImg.jpg",
+      "imagePath": "imgs/doctorZombieBite.jpg",
       "id": "game_over_infection"
+    }
+  ]
+},
+
+{
+  "id": "return_to_car",
+  "prompt": "You make your way back to the car, your heart racing with every step. The streets are eerily quiet, but you can still feel the presence of danger lurking around every corner.",
+  "choices": [
+    {
+      "label": "Get in the Car",
+      "imagePath": "imgs/carImg.jpg",
+      "id": "car_scene"
     }
   ]
 },
@@ -301,5 +361,12 @@
       "id": "next_id"
     }
   ]
+}, 
+
+{
+  "id": "game_over_infection",
+  "prompt": "The infection spreads rapidly through your body. Your strength fades as your vision blurs, the world darkening with every heartbeat.Everything goes black. Game Over. (Every choice can have dangerous consequences, press reset to play again)",
+  "choices": []
 }
+
 ]
