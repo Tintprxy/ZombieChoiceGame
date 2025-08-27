@@ -15,6 +15,8 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.Node;
 import java.io.File;
 
+import static view.Theme.*;
+
 public class TitleView extends BorderPane {
     public final Button startButton = new Button("Start Game");
     public final Button instructionsButton = new Button("Instructions");
@@ -50,24 +52,31 @@ public class TitleView extends BorderPane {
         if (imageView != null) contentBox.getChildren().add(imageView);
         contentBox.getChildren().addAll(titleText, creditText, instructionText, startButton, instructionsButton);
 
-        setTop(topBar);
+        // Add padding to the top bar for consistency
+        VBox topBarContainer = new VBox(topBar);
+        topBarContainer.setPadding(new Insets(20, 30, 0, 0)); // top, right, bottom, left
+        topBarContainer.setAlignment(Pos.TOP_RIGHT);
+
+        setTop(topBarContainer);
         setCenter(contentBox);
     }
 
     public void applyTheme(boolean isDarkMode) {
         setBackground(new Background(new BackgroundFill(
-                isDarkMode ? Color.web("#2e2e2e") : Color.WHITE,
+                Color.web(isDarkMode ? DARK_BG : LIGHT_BG),
                 CornerRadii.EMPTY, Insets.EMPTY)));
 
         topBar.applyTheme(isDarkMode);
 
         for (Node node : contentBox.getChildren()) {
             if (node instanceof Text text) {
-                text.setFill(isDarkMode ? Color.LIGHTGRAY : Color.BLACK);
+                text.setFill(Color.web(isDarkMode ? DARK_TEXT : LIGHT_TEXT));
             } else if (node instanceof Button button) {
-                button.setStyle(isDarkMode
-                        ? "-fx-background-color: #444444; -fx-text-fill: white;"
-                        : "-fx-background-color: #eeeeee; -fx-text-fill: black;");
+                button.setStyle(String.format(
+                    "-fx-background-color: %s; -fx-text-fill: %s;",
+                    isDarkMode ? DARK_BUTTON_BG : LIGHT_BUTTON_BG,
+                    isDarkMode ? DARK_BUTTON_TEXT : LIGHT_BUTTON_TEXT
+                ));
             }
         }
     }

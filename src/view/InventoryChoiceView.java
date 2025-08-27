@@ -14,10 +14,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static view.Theme.*;
+import controller.MainController;
+
 public class InventoryChoiceView extends BorderPane {
     private final TopBarView topBar = new TopBarView();
     private boolean darkMode;
-    
+
     private final Label promptLabel;
     private final Button healthHeavyButton;
     private final Button attackHeavyButton;
@@ -28,12 +31,18 @@ public class InventoryChoiceView extends BorderPane {
 
     public InventoryChoiceView(boolean darkMode, int health, Map<ItemType, List<InventoryItem>> inventory) {
         this.darkMode = darkMode;
-        
-        // Set up and wire the local top bar just like in ChoiceScreenView
+
         topBar.applyTheme(darkMode);
         setTop(topBar);
-        wireTopBar();
+
+
+        // Add padding to the top bar for consistency (same as TitleView)
+        VBox topBarContainer = new VBox(topBar);
+        topBarContainer.setPadding(new Insets(20, 30, 0, 0)); // top, right, bottom, left
+        topBarContainer.setAlignment(Pos.TOP_RIGHT);
         
+      
+
         inventorySidebar = buildInventoryUI(inventory, darkMode);
         setLeft(inventorySidebar);
 
@@ -42,24 +51,52 @@ public class InventoryChoiceView extends BorderPane {
         centerBox.setPadding(new Insets(20));
 
         promptLabel = new Label("Choose your inventory setup:");
-        promptLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: " + (darkMode ? "white" : "black") + ";");
+        // Style will be set in applyTheme
 
-        healthHeavyButton = new Button("Health Heavy", createImageView("file:imgs/healthHeavyImg.jpg"));
-        attackHeavyButton = new Button("Attack Heavy", createImageView("file:imgs/healthHeavyImg.jpg"));
-        balancedButton = new Button("Balanced", createImageView("file:imgs/balancedImg.jpg"));
+        // Create images
+        ImageView healthHeavyImg = createImageView("file:imgs/healthHeavyImg.jpg");
+        ImageView attackHeavyImg = createImageView("file:imgs/attackHeavyImg.jpg");
+        ImageView balancedImg = createImageView("file:imgs/balancedImg.jpg");
 
-        String btnStyle = darkMode
-                ? "-fx-background-color: #444444; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10 20;"
-                : "-fx-background-color: #eeeeee; -fx-text-fill: black; -fx-font-size: 14px; -fx-padding: 10 20;";
-        healthHeavyButton.setStyle(btnStyle);
-        attackHeavyButton.setStyle(btnStyle);
-        balancedButton.setStyle(btnStyle);
+        // Make the images bigger
+        if (healthHeavyImg != null) {
+            healthHeavyImg.setFitHeight(300); // or your preferred size
+            healthHeavyImg.setPreserveRatio(true);
+        }
+        if (attackHeavyImg != null) {
+            attackHeavyImg.setFitHeight(300);
+            attackHeavyImg.setPreserveRatio(true);
+        }
+        if (balancedImg != null) {
+            balancedImg.setFitHeight(300);
+            balancedImg.setPreserveRatio(true);
+        }
 
-        HBox buttonBox = new HBox(20, healthHeavyButton, attackHeavyButton, balancedButton);
+        // Create buttons without images
+        healthHeavyButton = new Button("Health Heavy");
+        attackHeavyButton = new Button("Attack Heavy");
+        balancedButton = new Button("Balanced");
+
+        // VBox for each option: image above button
+        VBox healthHeavyBox = new VBox(8, healthHeavyImg, healthHeavyButton);
+        VBox attackHeavyBox = new VBox(8, attackHeavyImg, attackHeavyButton);
+        VBox balancedBox = new VBox(8, balancedImg, balancedButton);
+
+        healthHeavyBox.setAlignment(Pos.CENTER);
+        attackHeavyBox.setAlignment(Pos.CENTER);
+        balancedBox.setAlignment(Pos.CENTER);
+
+        // Optionally, add padding or min width for uniformity
+        healthHeavyBox.setPadding(new Insets(10, 10, 10, 10));
+        attackHeavyBox.setPadding(new Insets(10, 10, 10, 10));
+        balancedBox.setPadding(new Insets(10, 10, 10, 10));
+
+        HBox buttonBox = new HBox(30, healthHeavyBox, attackHeavyBox, balancedBox);
         buttonBox.setAlignment(Pos.CENTER);
 
         healthLabel = new Label("Health: " + health);
-        healthLabel.setStyle("-fx-text-fill: " + (darkMode ? "white" : "black") + "; -fx-font-size: 14px;");
+        // Style will be set in applyTheme
+
         healthBar = new ProgressBar(health / 100.0);
         healthBar.setPrefWidth(300);
         healthBar.setStyle("-fx-accent: green;");
@@ -69,34 +106,14 @@ public class InventoryChoiceView extends BorderPane {
         centerBox.getChildren().addAll(promptLabel, buttonBox, healthBox);
         setCenter(centerBox);
 
+        // Set background using theme
         setBackground(new Background(new BackgroundFill(
-                darkMode ? Color.web("#2e2e2e") : Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+                Color.web(darkMode ? DARK_BG : LIGHT_BG), CornerRadii.EMPTY, Insets.EMPTY)));
+
+        // Apply theme to all components
+        applyTheme(darkMode);
     }
-    
-    // Wire the local top bar's dark mode toggle and reset buttons exactly as in ChoiceScreenView
-    private void wireTopBar() {
-        // Dark mode toggle: flip the local state and reapply the theme.
-        topBar.toggleButton.setOnAction(e -> {
-            darkMode = !darkMode;
-            System.out.println("[DEBUG] Inventory topBar dark mode toggled: " + darkMode);
-            applyTheme(darkMode);
-        });
-        // Reset button: show a confirmation dialog then call reset logic.
-        topBar.resetButton.setOnAction(e -> {
-            System.out.println("[DEBUG] Inventory topBar reset triggered.");
-            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-            confirm.setTitle("Reset Game");
-            confirm.setHeaderText("Return to the title screen?");
-            confirm.setContentText("Any progress will be lost.");
-            Optional<ButtonType> res = confirm.showAndWait();
-            if (res.isPresent() && res.get() == ButtonType.OK) {
-                System.out.println("[DEBUG] Inventory reset confirmed.");
-                // Insert reset logic, e.g., fire a callback to the controller.
-                // For example: resetInventory(); or notify MainController to update view.
-            }
-        });
-    }
-    
+
     private ImageView createImageView(String imagePath) {
         ImageView imageView = null;
         try {
@@ -109,35 +126,35 @@ public class InventoryChoiceView extends BorderPane {
         }
         return imageView;
     }
-    
+
     private VBox buildInventoryUI(Map<ItemType, List<InventoryItem>> inventory, boolean darkMode) {
         VBox inventoryBox = new VBox(10);
         inventoryBox.setAlignment(Pos.CENTER_LEFT);
         inventoryBox.setPadding(new Insets(10));
         inventoryBox.setMaxWidth(250);
         inventoryBox.setStyle(
-                "-fx-background-color: " + (darkMode ? "#333333" : "#f2f2f2") + ";" +
-                "-fx-border-color: " + (darkMode ? "#777777" : "#cccccc") + ";" +
+                "-fx-background-color: " + (darkMode ? DARK_BOX : LIGHT_BOX) + ";" +
+                "-fx-border-color: " + (darkMode ? DARK_BORDER : LIGHT_BORDER) + ";" +
                 "-fx-border-width: 1px;"
         );
         Label invTitle = new Label("Inventory");
         invTitle.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: "
-                + (darkMode ? "white" : "black") + ";");
+                + (darkMode ? DARK_TEXT : LIGHT_TEXT) + ";");
         inventoryBox.getChildren().add(invTitle);
-        
+
         for (ItemType type : inventory.keySet()) {
             Label catLabel = new Label("• " + type.name() + ":");
-            catLabel.setStyle("-fx-text-fill: " + (darkMode ? "white" : "black") + ";");
+            catLabel.setStyle("-fx-text-fill: " + (darkMode ? DARK_TEXT : LIGHT_TEXT) + ";");
             VBox itemList = new VBox(5);
             List<InventoryItem> items = inventory.get(type);
             if (items == null || items.isEmpty()) {
                 Label emptyLabel = new Label("- none");
-                emptyLabel.setStyle("-fx-text-fill: " + (darkMode ? "white" : "black") + ";");
+                emptyLabel.setStyle("-fx-text-fill: " + (darkMode ? DARK_TEXT : LIGHT_TEXT) + ";");
                 itemList.getChildren().add(emptyLabel);
             } else {
                 for (InventoryItem item : items) {
                     Label itemLabel = new Label("- " + item.getName());
-                    itemLabel.setStyle("-fx-text-fill: " + (darkMode ? "white" : "black") + ";");
+                    itemLabel.setStyle("-fx-text-fill: " + (darkMode ? DARK_TEXT : LIGHT_TEXT) + ";");
                     itemList.getChildren().add(itemLabel);
                 }
             }
@@ -146,44 +163,69 @@ public class InventoryChoiceView extends BorderPane {
         }
         return inventoryBox;
     }
-    
+
     public Button getHealthHeavyButton() {
         return healthHeavyButton;
     }
-    
+
     public Button getAttackHeavyButton() {
         return attackHeavyButton;
     }
-    
+
     public Button getBalancedButton() {
         return balancedButton;
     }
-    
+
     public TopBarView getTopBar() {
         return topBar;
     }
-    
+
     public void applyTheme(boolean darkMode) {
-        // Update the top bar, prompt, and buttons.
+        this.darkMode = darkMode;
+
+        // Top bar
         topBar.applyTheme(darkMode);
-        promptLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: " + (darkMode ? "white" : "black") + ";");
-        
-        String btnStyle = darkMode
-                ? "-fx-background-color: #444444; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10 20;"
-                : "-fx-background-color: #eeeeee; -fx-text-fill: black; -fx-font-size: 14px; -fx-padding: 10 20;";
+
+        // Prompt label
+        promptLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: " +
+                (darkMode ? DARK_TEXT : LIGHT_TEXT) + ";");
+
+        // Button style with consistent padding and rounded corners
+        String btnStyle = String.format(
+                "-fx-background-color: %s; -fx-text-fill: %s; -fx-background-radius: 20; -fx-padding: 10 20;",
+                darkMode ? DARK_BUTTON_BG : LIGHT_BUTTON_BG,
+                darkMode ? DARK_BUTTON_TEXT : LIGHT_BUTTON_TEXT
+        );
         healthHeavyButton.setStyle(btnStyle);
         attackHeavyButton.setStyle(btnStyle);
         balancedButton.setStyle(btnStyle);
-        
-        // Update the inventory sidebar style.
+
+        // Health label
+        healthLabel.setStyle("-fx-text-fill: " + (darkMode ? DARK_TEXT : LIGHT_TEXT) + "; -fx-font-size: 14px;");
+
+        // Inventory sidebar
         inventorySidebar.setStyle(
-                "-fx-background-color: " + (darkMode ? "#333333" : "#f2f2f2") + ";" +
-                "-fx-border-color: " + (darkMode ? "#777777" : "#cccccc") + ";" +
+                "-fx-background-color: " + (darkMode ? DARK_BOX : LIGHT_BOX) + ";" +
+                "-fx-border-color: " + (darkMode ? DARK_BORDER : LIGHT_BORDER) + ";" +
                 "-fx-border-width: 1px;"
         );
-        
-        // Update overall view background.
+        // Update inventory sidebar text colors
+        for (javafx.scene.Node node : inventorySidebar.getChildren()) {
+            if (node instanceof Label label) {
+                label.setStyle(label.getStyle().replaceAll("-fx-text-fill: #[A-Fa-f0-9]{6};?", "")
+                        + "-fx-text-fill: " + (darkMode ? DARK_TEXT : LIGHT_TEXT) + ";");
+            } else if (node instanceof VBox vbox) {
+                for (javafx.scene.Node sub : vbox.getChildren()) {
+                    if (sub instanceof Label label) {
+                        label.setStyle(label.getStyle().replaceAll("-fx-text-fill: #[A-Fa-f0-9]{6};?", "")
+                                + "-fx-text-fill: " + (darkMode ? DARK_TEXT : LIGHT_TEXT) + ";");
+                    }
+                }
+            }
+        }
+
+        // Background
         setBackground(new Background(new BackgroundFill(
-                darkMode ? Color.web("#2e2e2e") : Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+                Color.web(darkMode ? DARK_BG : LIGHT_BG), CornerRadii.EMPTY, Insets.EMPTY)));
     }
 }

@@ -20,6 +20,8 @@ import view.TitleView;
 import view.InventoryChoiceView;
 import view.StoryTurnstileView;
 import javafx.scene.control.Button;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 
 public class MainController {
     private final Stage stage;
@@ -57,11 +59,7 @@ public class MainController {
         }
     }
 
-    private void showTitleView() {
-        resetInventoryToDefault();
-        model.reloadInventory();
-        addItemProcessedScenes.clear();
-
+    protected void showTitleView() {
         TitleView titleView = new TitleView();
         titleView.applyTheme(model.isDarkMode());
 
@@ -87,7 +85,7 @@ public class MainController {
         turnstileView.getTopBar().toggleButton.setOnAction(e -> {
             model.toggleDarkMode();
             System.out.println("[DEBUG] Dark mode toggled: " + model.isDarkMode());
-            turnstileView.getTopBar().applyTheme(model.isDarkMode());
+            turnstileView.applyTheme(model.isDarkMode()); // <-- Update theme for the whole view
         });
 
         turnstileView.getTopBar().resetButton.setOnAction(e -> {
@@ -475,13 +473,36 @@ public class MainController {
     }
 
     private void showInventoryChoiceView(SceneLoader SceneLoader, String startSceneId) {
-        InventoryChoiceView invView = new InventoryChoiceView(
+        InventoryChoiceView inventoryView = new InventoryChoiceView(
             model.isDarkMode(),
             model.getHealth(),
             model.getInventory()
         );
 
-        invView.getHealthHeavyButton().setOnAction(e -> {
+        inventoryView.getTopBar().toggleButton.setOnAction(e -> {
+            model.toggleDarkMode();
+            System.out.println("[DEBUG] Dark mode toggled: " + model.isDarkMode());
+            inventoryView.applyTheme(model.isDarkMode()); // <-- Update theme for the whole view
+        });
+
+        inventoryView.getTopBar().resetButton.setOnAction(e -> {
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+            confirm.setTitle("Reset Game");
+            confirm.setHeaderText("Return to the title screen?");
+            confirm.setContentText("Any progress will be lost.");
+            Optional<ButtonType> res = confirm.showAndWait();
+            if (res.isPresent() && res.get() == ButtonType.OK) {
+                lastHealthAppliedSceneId = null;
+                addItemProcessedScenes.clear();
+                model.clearInventory();
+                model.resetHealth();
+                model.setCurrentState(GameState.TITLE);
+                updateView();
+            }
+        });
+
+
+        inventoryView.getHealthHeavyButton().setOnAction(e -> {
             System.out.println("[DEBUG] Health Heavy button clicked.");
             applyInventoryChoice("Health Heavy");
             GameScene next = SceneLoader.getSceneById(startSceneId); // Use passed parameter here.
@@ -493,7 +514,7 @@ public class MainController {
             }
         });
 
-        invView.getAttackHeavyButton().setOnAction(e -> {
+        inventoryView.getAttackHeavyButton().setOnAction(e -> {
             System.out.println("[DEBUG] Attack Heavy button clicked.");
             applyInventoryChoice("Attack Heavy");
             GameScene next = SceneLoader.getSceneById(startSceneId);
@@ -505,7 +526,7 @@ public class MainController {
             }
         });
 
-        invView.getBalancedButton().setOnAction(e -> {
+        inventoryView.getBalancedButton().setOnAction(e -> {
             System.out.println("[DEBUG] Balanced button clicked.");
             applyInventoryChoice("Balanced");
             GameScene next = SceneLoader.getSceneById(startSceneId);
@@ -517,7 +538,7 @@ public class MainController {
             }
         });
 
-        rootPane.setCenter(invView);
+        rootPane.setCenter(inventoryView);
     }
 
     // Adds a weapon to the inventory, using existing addWeaponToJson and showWeaponRemovalDialog methods.
