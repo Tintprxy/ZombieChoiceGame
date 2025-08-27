@@ -1,6 +1,7 @@
 package model;
 
 import java.util.List;
+import com.google.gson.JsonObject;
 
 public class GameScene {
 
@@ -37,6 +38,9 @@ public class GameScene {
         this.threatLevel = threatLevel;
     }
 
+    // Add a field to store the raw JSON object
+    private JsonObject rawJson;
+
     private String id;
     private String prompt;
     private int healthChange;
@@ -70,5 +74,15 @@ public class GameScene {
 
     public void setThreatLevel(int threatLevel) {
         this.threatLevel = threatLevel;
+    }
+
+    // Getter for rawJson
+    public JsonObject getRawJson() {
+        return rawJson;
+    }
+
+    // Optionally, a setter if you need to set it after construction
+    public void setRawJson(JsonObject rawJson) {
+        this.rawJson = rawJson;
     }
 }

@@ -55,6 +55,8 @@ public class SceneLoader {
                     int fightNumber = sceneObj.has("fightNumber") ? sceneObj.get("fightNumber").getAsInt() : 1;
                     scene.setFightNumber(fightNumber);
 
+                    System.out.println("[DEBUG] Loaded scene: " + scene.getId() + ", addItem: " + scene.getAddItem());
+
                     sceneMap.put(sceneId, scene);
                 } catch (Exception ex) {
                     System.err.println("[ERROR] Failed to parse scene: " + sceneElem);

@@ -75,10 +75,12 @@ public class GameModel {
         };
 
         if (item.isWeapon() && items.size() >= limit) {
+            System.out.println("[DEBUG] Weapon limit reached, not adding: " + item.getName());
             return false;
         }
 
         items.add(item);
+        System.out.println("[DEBUG] Added item: " + item.getName() + ", inventory now: " + inventory);
         return true;
     }
 
