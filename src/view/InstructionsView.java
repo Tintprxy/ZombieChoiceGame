@@ -49,12 +49,11 @@ public class InstructionsView extends BorderPane {
             Weapons are used automatically to fight enemies.
             Weapons have durability, which decreases with use.
             Consumables restore health.
-            Key items are used to progress the story or unlock new areas not reachable without them.
-            Travel is measured in miles.
-            Every fight or injury will reduce your health.
+            Key items are used to progress the story or unlock new areas not reachable without them..
             Some choices will completely drain your health bar.
             THIS GAME IS MADE TO BE AS LOGICAL AS POSSIBLE WHILE STILL BEING CHALLENGING.
-            If you find yourself stuck, try to think logically about your choices.
+            If you find yourself stuck, try to think about your choices.
+            Some choices mean nothing while others could be life or death.
             Stay alert, make smart choices, and survive.
             """);
         instructions.setWrappingWidth(450);
@@ -78,21 +77,22 @@ public class InstructionsView extends BorderPane {
 
     public void applyTheme(boolean isDarkMode) {
         setBackground(new Background(new BackgroundFill(
-                isDarkMode ? Color.web("#2e2e2e") : Color.WHITE,
+                Color.web(isDarkMode ? Theme.DARK_BG : Theme.LIGHT_BG),
                 CornerRadii.EMPTY, Insets.EMPTY)));
 
-        scrollPane.setStyle(isDarkMode
-                ? "-fx-background: #2e2e2e; -fx-background-color: #2e2e2e;"
-                : "-fx-background: white; -fx-background-color: white;");
+        scrollPane.setStyle(
+                "-fx-background: " + (isDarkMode ? Theme.DARK_BG : Theme.LIGHT_BG) + ";" +
+                        "-fx-background-color: " + (isDarkMode ? Theme.DARK_BG : Theme.LIGHT_BG) + ";"
+        );
 
         topBar.applyTheme(isDarkMode);
         backButton.setStyle(isDarkMode
-                ? "-fx-background-color: #444444; -fx-text-fill: white;"
-                : "-fx-background-color: #eeeeee; -fx-text-fill: black;");
+                ? "-fx-background-color: " + Theme.DARK_BUTTON_BG + "; -fx-text-fill: " + Theme.DARK_BUTTON_TEXT + ";"
+                : "-fx-background-color: " + Theme.LIGHT_BUTTON_BG + "; -fx-text-fill: " + Theme.LIGHT_BUTTON_TEXT + ";");
 
         contentBox.getChildren().forEach(node -> {
             if (node instanceof Text text) {
-                text.setFill(isDarkMode ? Color.web("#f5f5f5") : Color.BLACK);
+                text.setFill(isDarkMode ? Color.web(Theme.DARK_TEXT) : Color.web(Theme.LIGHT_TEXT));
             }
         });
     }
