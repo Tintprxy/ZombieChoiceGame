@@ -73,6 +73,12 @@ public class InstructionsView extends BorderPane {
         setCenter(scrollPane);
         setBottom(backButton);
         BorderPane.setMargin(backButton, new Insets(20, 0, 20, 0));
+
+        topBar.resetButton.setOnAction(e -> backButton.fire());
+        backButton.setOnAction(e -> {
+            // Your logic to go back to the menu, e.g.:
+            // mainController.showTitleView();
+        });
     }
 
     public void applyTheme(boolean isDarkMode) {

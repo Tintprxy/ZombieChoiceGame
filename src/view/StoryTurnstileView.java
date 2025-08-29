@@ -10,7 +10,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-
 import static view.Theme.*;
 
 public class StoryTurnstileView extends BorderPane {
@@ -29,8 +28,8 @@ public class StoryTurnstileView extends BorderPane {
         setPadding(new Insets(20));
 
         // Create story boxes
-        story1Box = createStoryBox("file:imgs/story1.png", "Story 1", "Play Story 1");
-        story2Box = createStoryBox("file:imgs/story2.png", "Story 2", "Play Story 2");
+        story1Box = createStoryBox("file:imgs/healthHeavyImg.jpg", "Story 1", "Play Story 1");
+        story2Box = createStoryBox("file:imgs/attackHeavyImg.jpg", "Story 2", "Play Story 2");
 
         container = new HBox(50, story1Box, story2Box);
         container.setAlignment(Pos.CENTER);

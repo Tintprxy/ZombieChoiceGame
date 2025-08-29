@@ -43,6 +43,8 @@ public class MainController {
         Scene scene = new Scene(rootPane, 800, 600);
         stage.setScene(scene);
         stage.setTitle("Zombie Choice Game");
+        stage.setMinWidth(900);
+        stage.setMinHeight(600);
         updateView(); 
         stage.show();
     }
@@ -247,13 +249,6 @@ public class MainController {
             }
         );
         rootPane.setCenter(view);
-
-        // Keep your existing window resize
-        Platform.runLater(() -> {
-            Stage stage = (Stage) rootPane.getScene().getWindow();
-            stage.setWidth(1100);
-            stage.setHeight(700);
-        });
     }
 
     private void writeTempWeaponJson(InventoryItem item) {
