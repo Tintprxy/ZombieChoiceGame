@@ -23,5 +23,15 @@ public class InventoryLoader {
             System.err.println("Inventory load error: " + e.getMessage());
             return Collections.emptyList();
         }
+    }   
+    
+    public static InventoryItem loadKeyItemFromJson(String path) {
+        try (FileReader reader = new FileReader(path)) {
+            Gson gson = new Gson();
+            return gson.fromJson(reader, InventoryItem.class);
+        } catch (Exception e) {
+            System.err.println("Key item not found: " + e.getMessage());
+            return null;
+        }
     }
 }

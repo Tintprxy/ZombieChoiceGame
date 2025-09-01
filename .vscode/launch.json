@@ -3,17 +3,10 @@
   "configurations": [
     {
       "type": "java",
-      "name": "SceneLoader",
-      "request": "launch",
-      "mainClass": "model.SceneLoader",
-      "projectName": "ZombieChoiceGame_13169db4"
-    },
-    {
-      "type": "java",
-      "name": "Launch JavaFX App (with DLLs)",
+      "name": "Run JavaFX",
       "request": "launch",
       "mainClass": "Main",
-      "vmArgs": "--module-path \"C:/Users/tthom/Desktop/ZombieChoiceGame/lib\" --add-modules javafx.controls,javafx.fxml -Djava.library.path=\"C:/Users/tthom/Desktop/ZombieChoiceGame/lib\""
+      "vmArgs": "--module-path \"C:/Users/tthom/Documents/--Main/ZombieChoiceGame/lib\" --add-modules javafx.controls,javafx.fxml -Djava.library.path=\"C:/Users/tthom/Documents/--Main/ZombieChoiceGame/lib\""
     }
   ]
 }

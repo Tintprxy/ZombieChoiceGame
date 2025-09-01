@@ -15,6 +15,7 @@ public class GameModel {
     private static final int MAX_KEY_ITEMS = 1;
     private static final int MAX_WEAPONS = 2;
     private static final int INITIAL_HEALTH = 100;
+    private InventoryItem keyItem;
 
     public GameModel() {
         isDarkMode = false;
@@ -110,6 +111,14 @@ public class GameModel {
 
     public void removeFromInventory(InventoryItem item) {
         inventory.get(item.getType()).remove(item);
+    }
+
+    public InventoryItem getKeyItem() {
+        return keyItem;
+    }
+
+    public void setKeyItem(InventoryItem keyItem) {
+        this.keyItem = keyItem;
     }
 
     public void reloadInventory() {

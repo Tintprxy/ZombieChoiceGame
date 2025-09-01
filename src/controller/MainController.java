@@ -11,6 +11,7 @@ import model.GameModel;
 import model.GameScene;
 import model.GameState;
 import model.InventoryItem;
+import model.InventoryLoader;
 import model.ItemType;
 import model.SceneLoader;
 //import view.ChooseStoryView;
@@ -82,6 +83,20 @@ public class MainController {
         rootPane.setCenter(titleView);
     }
 
+        private void showInstructionsView() {
+        InstructionsView view = new InstructionsView();
+        view.applyTheme(model.isDarkMode());
+        view.topBar.toggleButton.setOnAction(e -> {
+            model.toggleDarkMode();
+            view.applyTheme(model.isDarkMode());
+        });
+        view.backButton.setOnAction(e -> {
+            model.setCurrentState(GameState.TITLE);
+            updateView();
+        });
+        rootPane.setCenter(view);
+    }
+
     private void showChooseStoryView() {
         StoryTurnstileView turnstileView = new StoryTurnstileView(model.isDarkMode());
         turnstileView.getTopBar().toggleButton.setOnAction(e -> {
@@ -118,356 +133,7 @@ public class MainController {
         System.out.println("Story2Box children: " + turnstileView.getStory2Box().getChildren().size());
     }
 
-    private void showInstructionsView() {
-        InstructionsView view = new InstructionsView();
-        view.applyTheme(model.isDarkMode());
-        view.topBar.toggleButton.setOnAction(e -> {
-            model.toggleDarkMode();
-            view.applyTheme(model.isDarkMode());
-        });
-        view.backButton.setOnAction(e -> {
-            model.setCurrentState(GameState.TITLE);
-            updateView();
-        });
-        rootPane.setCenter(view);
-    }
-
-    // private void showFirstChoiceView() {
-    //     GameScene scene = SceneLoader.getSceneById("next");
-    //     if (scene != null) {
-    //         showSceneView(scene, SceneLoader);
-    //     } else {
-    //         model.setCurrentState(GameState.ENDING);
-    //         updateView();
-    //     }
-    // }
-
-    private void showSceneView(GameScene scene, SceneLoader sceneLoader) {
-        this.currentScene = scene;
-
-        // Only apply healthChange if entering a new scene
-        if (!scene.getId().equals(lastHealthAppliedSceneId)) {
-            int before = model.getHealth();
-            // Skip applying the JSON healthChange if this is a fight result scene.
-            if (!scene.getId().startsWith("fight_result")) {
-                model.subtractHealth(scene.getHealthChange());
-                System.out.println("[DEBUG] Applied scene healthChange: " + scene.getHealthChange() +
-                    " | Health before: " + before + ", after: " + model.getHealth());
-            } else {
-                System.out.println("[DEBUG] Skipped JSON healthChange for fight result scene: " + scene.getId());
-            }
-            lastHealthAppliedSceneId = scene.getId();
-        }
-
-        // Inventory choice screen logic
-        if ("inventory_choice".equals(scene.getId())) {
-            showInventoryChoiceView(sceneLoader, "start");
-            return;
-        }
-
-        if (scene.getAddItem() != null && !addItemProcessedScenes.contains(scene.getId())) {
-            InventoryItem item = scene.getAddItem();
-            addItemProcessedScenes.add(scene.getId()); // mark current scene as processed
-            if (item.getType() == ItemType.WEAPON) {
-                // You must pass a next scene id that is not the same as the current scene!
-                // For example, if the scene’s choices lead to a new scene, pass that id.
-                // Here we assume the scene has a proper next id stored (you might need to adjust this):
-                String nextSceneId = scene.getChoices().get(0).getNextId(); 
-                addWeaponToInventory(item, nextSceneId, sceneLoader);
-            } else {
-                model.addItem(item);
-                System.out.println("[DEBUG] Added item from scene: " + item.getName());
-            }
-        }
-
-        // Build the choice screen view
-        ChoiceScreenView view = new ChoiceScreenView(
-            model.getHealth(),
-            scene.getPrompt(),
-            scene.getChoices(),
-            model.isDarkMode(),
-            model.getInventory(),
-            choice -> {
-                // Inventory choice logic
-                if ("inventory_choice".equals(scene.getId())) {
-                    applyInventoryChoice(choice.getLabel());
-                    showSceneView(sceneLoader.getSceneById("start"), sceneLoader);
-                    return;
-                }
-                // Fight logic: if the choice label is "Fight" or contains "fight"
-                if (scene.getThreatLevel() > -1 && choice.getLabel().toLowerCase().contains("fight")) {
-                    int threat = scene.getThreatLevel();
-                    int fightNumber = scene.getFightNumber();
-                    int ded = computeDurabilityDecrease(threat);
-                    int winPenalty = computeWinHealthPenalty(threat);
-                    int losePenalty = computeLoseHealthPenalty(threat);
-                    handleFight(scene, fightNumber, ded, winPenalty, losePenalty, choice.getNextId(), sceneLoader);
-                    return;
-                }
-                // Normal scene transition
-                System.out.printf("[DEBUG] No fight calculation for choice \"%s\"; loading scene: %s%n", 
-                    choice.getLabel(), choice.getNextId());
-                GameScene next = sceneLoader.getSceneById(choice.getNextId());
-                if (next != null) {
-                    showSceneView(next, sceneLoader);
-                } else {
-                    System.out.println("[DEBUG] No scene found with id " + choice.getNextId());
-                    model.setCurrentState(GameState.ENDING);
-                    updateView();
-                }
-            },
-            () -> {
-                model.toggleDarkMode();
-                showSceneView(scene, sceneLoader);
-            },
-            () -> {
-                javafx.scene.control.Alert confirm =
-                    new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
-                confirm.setTitle("Reset Game");
-                confirm.setHeaderText("Are you sure you want to return to the title screen?");
-                confirm.setContentText("Any current progress will be lost.");
-                Optional<javafx.scene.control.ButtonType> res = confirm.showAndWait();
-                if (res.isPresent() && res.get() == javafx.scene.control.ButtonType.OK) {
-                    lastHealthAppliedSceneId = null;
-                    addItemProcessedScenes.clear();
-                    resetInventoryToDefault();
-                    model.resetHealth();
-                    model.setCurrentState(GameState.TITLE);
-                    updateView();
-                }
-            },
-            item -> {
-                System.out.println("[DEBUG] Attempting to consume item: " + item.getName() + ", type: " + item.getType());
-                boolean consumed = model.consumeItem(item);
-                if (consumed) {
-                    System.out.println("[DEBUG] Consumed item: " + item.getName() +
-                        " | Health after: " + model.getHealth());
-                    showSceneView(scene, sceneLoader);
-                } else {
-                    System.out.println("[DEBUG] Failed to consume item: " + item.getName());
-                }
-            }
-        );
-        rootPane.setCenter(view);
-    }
-
-    private void writeTempWeaponJson(InventoryItem item) {
-        try (FileWriter writer = new FileWriter("src/data/new_weapon.json")) {
-            JsonObject obj = new JsonObject();
-            obj.addProperty("name", item.getName());
-            obj.addProperty("type", item.getType().toString());
-            obj.addProperty("durability", item.getDurability());
-            obj.addProperty("power", item.getPower());
-            new Gson().toJson(obj, writer);
-        } catch (IOException e) {
-            System.err.println("Failed to write temp weapon JSON: " + e.getMessage());
-        }
-    }
-
-    private void removeWeaponFromJson(String weaponName) {
-        try {
-            File file = new File("src/data/inventory.json");
-            JsonArray arr = JsonParser.parseReader(new FileReader(file)).getAsJsonArray();
-            JsonArray newArr = new JsonArray();
-            for (JsonElement el : arr) {
-                JsonObject obj = el.getAsJsonObject();
-                if (!obj.has("name") || !weaponName.equals(obj.get("name").getAsString())) {
-                    newArr.add(obj);
-                }
-            }
-            try (FileWriter writer = new FileWriter(file)) {
-                new GsonBuilder().setPrettyPrinting().create().toJson(newArr, writer);
-            }
-        } catch (IOException e) {
-            System.err.println("Failed to remove weapon from JSON: " + e.getMessage());
-        }
-    }
-
-    private void addWeaponToJson(InventoryItem item) {
-        try (FileReader reader = new FileReader("src/data/inventory.json")) {
-            JsonElement element = JsonParser.parseReader(reader);
-            JsonArray arr;
-            if (element == null || !element.isJsonArray()) {
-                arr = new JsonArray();
-            } else {
-                arr = element.getAsJsonArray();
-            }
-            JsonObject obj = new JsonObject();
-            obj.addProperty("name", item.getName());
-            obj.addProperty("type", item.getType().toString());
-            obj.addProperty("durability", item.getDurability());
-            obj.addProperty("power", item.getPower());
-            arr.add(obj);
-            try (FileWriter writer = new FileWriter("src/data/inventory.json")) {
-                new GsonBuilder().setPrettyPrinting().create().toJson(arr, writer);
-            }
-        } catch (IOException e) {
-            System.err.println("Failed to add weapon to JSON: " + e.getMessage());
-        }
-    }
-
-    private void resetInventoryToDefault() {
-        try {
-            File defaultFile = new File("src/data/empty_inventory.json");
-            File inventoryFile = new File("src/data/inventory.json");
-            try (
-                FileReader reader = new FileReader(defaultFile);
-                FileWriter writer = new FileWriter(inventoryFile)
-            ) {
-                int c;
-                while ((c = reader.read()) != -1) {
-                    writer.write(c);
-                }
-            }
-            System.out.println("[DEBUG] Inventory reset to default.");
-        } catch (IOException e) {
-            System.err.println("Failed to reset inventory: " + e.getMessage());
-        }
-    }
-
-    private void showWeaponRemovalDialog(List<String> weaponNames, InventoryItem item, String nextSceneId, SceneLoader SceneLoader) {
-        Platform.runLater(() -> {
-            ChoiceDialog<String> dialog = new ChoiceDialog<>(weaponNames.get(0), weaponNames);
-            dialog.setTitle("Weapon Inventory Full");
-            dialog.setHeaderText("Choose a weapon to remove to make space for: " + item.getName());
-            dialog.setContentText("Remove:");
-            Optional<String> result = dialog.showAndWait();
-            result.ifPresent(selectedName -> {
-                javafx.scene.control.Alert confirm = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
-                confirm.setTitle("Confirm Removal");
-                confirm.setHeaderText("Are you sure you want to remove " + selectedName + "?");
-                confirm.setContentText("This cannot be undone.");
-                Optional<javafx.scene.control.ButtonType> confirmation = confirm.showAndWait();
-                if (confirmation.isPresent() && confirmation.get() == javafx.scene.control.ButtonType.OK) {
-                    model.removeItem(selectedName);
-                    removeWeaponFromJson(selectedName);
-                    model.addItem(item);
-                    addWeaponToJson(item);
-                    System.out.println("[DEBUG] Removed weapon: " + selectedName +
-                        " | Added new item: " + item.getName());
-                    addItemProcessedScenes.add(nextSceneId);
-                    GameScene nextScene = SceneLoader.getSceneById(nextSceneId);
-                    if (nextScene != null) {
-                        showSceneView(nextScene, SceneLoader);
-                    } else {
-                        updateView();
-                    }
-                } else {
-                    showWeaponRemovalDialog(weaponNames, item, nextSceneId, SceneLoader);
-                }
-            });
-        });
-    }
-
-    private void handleFight(GameScene scene, int fightNumber, int decreaseDurAmount, int subHealthWin, int subHealthLose, String defaultWinSceneId, SceneLoader SceneLoader) {
-        int threatLevel = scene.getThreatLevel();
-        System.out.printf("[DEBUG] In handleFight: Scene \"%s\" with fightNumber: %d, threatLevel: %d%n",
-            scene.getId(), fightNumber, threatLevel);
-        List<InventoryItem> weapons = model.getInventory().getOrDefault(ItemType.WEAPON, new ArrayList<>());
-        List<InventoryItem> winningWeapons = weapons.stream()
-            .filter(w -> w.getPower() >= threatLevel && w.getDurability() > 0)
-            .sorted(Comparator.comparingInt(InventoryItem::getPower))
-            .toList();
-        InventoryItem chosenWeapon = winningWeapons.isEmpty() ? null : winningWeapons.get(0);
-        String winSceneId = (fightNumber > 0) ? "fight_result_win_" + fightNumber : defaultWinSceneId;
-        String loseSceneId = (fightNumber > 0) ? "fight_result_lose_" + fightNumber : "fight_result_lose_1";
-        System.out.printf("[DEBUG] Computed winSceneId: %s, loseSceneId: %s%n", winSceneId, loseSceneId);
-
-        if (chosenWeapon != null) {
-            int oldDurability = chosenWeapon.getDurability();
-            chosenWeapon.decreaseDurability(decreaseDurAmount);
-            int newDurability = chosenWeapon.getDurability();
-            model.subtractHealth(-subHealthWin);
-            System.out.printf("[DEBUG] WIN | used %s (power %d >= threat %d), durability decreased from %d to %d | new health: %d%n",
-                chosenWeapon.getName(), chosenWeapon.getPower(), threatLevel, oldDurability, newDurability, model.getHealth());
-            GameScene winScene = SceneLoader.getSceneById(winSceneId);
-            if (winScene != null) {
-                showSceneView(winScene, SceneLoader);
-            } else {
-                System.out.println("[DEBUG] No win scene found with id " + winSceneId);
-                model.setCurrentState(GameState.ENDING);
-                updateView();
-            }
-        } else {
-            int fistsPower = 2;
-            if (fistsPower >= threatLevel) {
-                model.subtractHealth(-subHealthWin);
-                System.out.printf("[DEBUG] WIN (unarmed) | fists power(%d) >= threat(%d) | new health: %d%n",
-                    fistsPower, threatLevel, model.getHealth());
-                GameScene winScene = SceneLoader.getSceneById(winSceneId);
-                if (winScene != null) {
-                    showSceneView(winScene, SceneLoader);
-                } else {
-                    System.out.println("[DEBUG] No win scene found with id " + winSceneId);
-                    model.setCurrentState(GameState.ENDING);
-                    updateView();
-                }
-            } else {
-                model.subtractHealth(-subHealthLose);
-                System.out.printf("[DEBUG] LOSE (unarmed) | fists power(%d) < threat(%d) | new health: %d%n",
-                    fistsPower, threatLevel, model.getHealth());
-                GameScene loseScene = SceneLoader.getSceneById(loseSceneId);
-                if (loseScene != null) {
-                    showSceneView(loseScene, SceneLoader);
-                } else {
-                    System.out.println("[DEBUG] No lose scene found with id " + loseSceneId);
-                    model.setCurrentState(GameState.ENDING);
-                    updateView();
-                }
-            }
-        }
-    }
-
-    private int computeDurabilityDecrease(int threatLevel) {
-        return (threatLevel >= 5) ? 2 : 1;
-    }
-
-    private int computeWinHealthPenalty(int threatLevel) {
-        return 10 + threatLevel;
-    }
-
-    private int computeLoseHealthPenalty(int threatLevel) {
-        return 25 + (2 * threatLevel);
-    }
-
-    private void applyInventoryChoice(String choiceLabel) {
-        model.clearInventory();
-        switch (choiceLabel.toLowerCase()) {
-            case "health heavy":
-                List<InventoryItem> healthItems = loadInventoryFromJson("c:\\Users\\tthom\\Desktop\\ZombieChoiceGame\\src\\data\\health_inventory.json");
-                for (InventoryItem item : healthItems) {
-                    model.addItem(item);
-                }
-                break;
-            case "attack heavy":
-                List<InventoryItem> attackItems = loadInventoryFromJson("c:\\Users\\tthom\\Desktop\\ZombieChoiceGame\\src\\data\\attack_inventory.json");
-                for (InventoryItem item : attackItems) {
-                    model.addItem(item);
-                }
-                break;
-            case "balanced":
-                List<InventoryItem> balancedItems = loadInventoryFromJson("c:\\Users\\tthom\\Desktop\\ZombieChoiceGame\\src\\data\\balanced_inventory.json");
-                for (InventoryItem item : balancedItems) {
-                    model.addItem(item);
-                }
-                break;
-            default:
-                break;
-        }
-        System.out.println("[DEBUG] Applied " + choiceLabel + " inventory");
-    }
-
-    private List<InventoryItem> loadInventoryFromJson(String filePath) {
-        try (Reader reader = new FileReader(filePath)) {
-            InventoryItem[] items = new Gson().fromJson(reader, InventoryItem[].class);
-            return Arrays.asList(items);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return Collections.emptyList();
-        }
-    }
-
-    private void showInventoryChoiceView(SceneLoader SceneLoader, String startSceneId) {
+        private void showInventoryChoiceView(SceneLoader SceneLoader, String startSceneId) {
         InventoryChoiceView inventoryView = new InventoryChoiceView(
             model.isDarkMode(),
             model.getHealth(),
@@ -536,6 +202,45 @@ public class MainController {
         rootPane.setCenter(inventoryView);
     }
 
+        private void applyInventoryChoice(String choiceLabel) {
+        model.clearInventory();
+        switch (choiceLabel.toLowerCase()) {
+            case "health heavy":
+                List<InventoryItem> healthItems = loadInventoryFromJson("c:\\Users\\tthom\\documents\\--Main\\ZombieChoiceGame\\src\\data\\health_inventory.json");
+                for (InventoryItem item : healthItems) {
+                    model.addItem(item);
+                }
+                break;
+            case "attack heavy":
+                List<InventoryItem> attackItems = loadInventoryFromJson("c:\\Users\\tthom\\documents\\--Main\\ZombieChoiceGame\\src\\data\\attack_inventory.json");
+                for (InventoryItem item : attackItems) {
+                    model.addItem(item);
+                }
+                break;
+            case "balanced":
+                List<InventoryItem> balancedItems = loadInventoryFromJson("c:\\Users\\tthom\\documents\\--Main\\ZombieChoiceGame\\src\\data\\balanced_inventory.json");
+                for (InventoryItem item : balancedItems) {
+                    model.addItem(item);
+                }
+                break;
+            default:
+                break;
+        }
+        System.out.println("[DEBUG] Applied " + choiceLabel + " inventory");
+    }
+
+    private List<InventoryItem> loadInventoryFromJson(String filePath) {
+        try (Reader reader = new FileReader(filePath)) {
+            InventoryItem[] items = new Gson().fromJson(reader, InventoryItem[].class);
+            return Arrays.asList(items);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
+    }
+
+
+
     // Adds a weapon to the inventory, using existing addWeaponToJson and showWeaponRemovalDialog methods.
     public void addWeaponToInventory(InventoryItem weapon, String nextSceneId, SceneLoader sceneLoader) {
         if (weapon.getType() != ItemType.WEAPON) {
@@ -568,4 +273,326 @@ public class MainController {
             showWeaponRemovalDialog(weaponNames, weapon, nextSceneId, sceneLoader);
         }
     }
+
+    private void resetInventoryToDefault() {
+        try {
+            File defaultFile = new File("src/data/empty_inventory.json");
+            File inventoryFile = new File("src/data/inventory.json");
+            try (
+                FileReader reader = new FileReader(defaultFile);
+                FileWriter writer = new FileWriter(inventoryFile)
+            ) {
+                int c;
+                while ((c = reader.read()) != -1) {
+                    writer.write(c);
+                }
+            }
+            System.out.println("[DEBUG] Inventory reset to default.");
+        } catch (IOException e) {
+            System.err.println("Failed to reset inventory: " + e.getMessage());
+        }
+    }
+
+    private void showSceneView(GameScene scene, SceneLoader sceneLoader) {
+        System.out.println("[DEBUG] Scene " + scene.getId() + " bitten flag: " + scene.isBitten());
+        this.currentScene = scene;
+        GameScene modifiedScene = scene;
+
+        if (modifiedScene.isBitten()) {
+            boolean hasAntidote = false;
+            List<InventoryItem> keyItems = model.getInventory().get(ItemType.KEY_ITEM);
+            if (keyItems != null) {
+                hasAntidote = keyItems.stream().anyMatch(item -> item.getName().equalsIgnoreCase("Antidote"));
+            }
+            if (hasAntidote) {
+                System.out.println("[DEBUG] Player is bitten and has the antidote, switching to infection_choice scene.");
+                modifiedScene = sceneLoader.getSceneById("infection_choice");
+            } else {
+                System.out.println("[DEBUG] Player is bitten and does NOT have the antidote, switching to game_over_infection scene.");
+                modifiedScene = sceneLoader.getSceneById("game_over_infection");
+            }
+        }
+
+        final GameScene currentSceneFinal = modifiedScene;
+
+        // Only apply healthChange if entering a new scene
+        if (!currentSceneFinal.getId().equals(lastHealthAppliedSceneId)) {
+            int before = model.getHealth();
+            // Skip applying the JSON healthChange if this is a fight result scene.
+            if (!currentSceneFinal.getId().startsWith("fight_result")) {
+                model.subtractHealth(currentSceneFinal.getHealthChange());
+                System.out.println("[DEBUG] Applied scene healthChange: " + currentSceneFinal.getHealthChange() +
+                    " | Health before: " + before + ", after: " + model.getHealth());
+            } else {
+                System.out.println("[DEBUG] Skipped JSON healthChange for fight result scene: " + currentSceneFinal.getId());
+            }
+            lastHealthAppliedSceneId = currentSceneFinal.getId();
+        }
+
+        // Inventory choice screen logic
+        if ("inventory_choice".equals(currentSceneFinal.getId())) {
+            showInventoryChoiceView(sceneLoader, "start");
+            return;
+        }
+
+        if (currentSceneFinal.getAddItem() != null && !addItemProcessedScenes.contains(currentSceneFinal.getId())) {
+            InventoryItem item = currentSceneFinal.getAddItem();
+            addItemProcessedScenes.add(currentSceneFinal.getId()); // mark current scene as processed
+            if (item.getType() == ItemType.WEAPON) {
+                // You must pass a next scene id that is not the same as the current scene!
+                // For example, if the scene’s choices lead to a new scene, pass that id.
+                // Here we assume the scene has a proper next id stored (you might need to adjust this):
+                String nextSceneId = currentSceneFinal.getChoices().get(0).getNextId(); 
+                addWeaponToInventory(item, nextSceneId, sceneLoader);
+            } else {
+                model.addItem(item);
+                System.out.println("[DEBUG] Added item from scene: " + item.getName());
+            }
+        }
+
+        if (currentSceneFinal.getNewKeyItem() != null && !currentSceneFinal.getNewKeyItem().trim().isEmpty()) {
+            // Build file path based on the key item name (e.g., "antidote" becomes "src/data/antidote.json")
+            String keyItemFilePath = "src/data/" + currentSceneFinal.getNewKeyItem().toLowerCase() + ".json";
+            InventoryItem keyItem = InventoryLoader.loadKeyItemFromJson(keyItemFilePath);
+            if (keyItem != null) {
+                model.setKeyItem(keyItem);
+                System.out.println("[DEBUG] New key item set: " + keyItem.getName());
+            } else {
+                System.out.println("[DEBUG] Failed to load key item from: " + keyItemFilePath);
+            }
+        }
+
+        // Build the choice screen view
+        ChoiceScreenView view = new ChoiceScreenView(
+            model.getHealth(),
+            currentSceneFinal.getPrompt(),
+            currentSceneFinal.getChoices(),
+            model.isDarkMode(),
+            model.getInventory(),
+            choice -> {
+                // Inventory choice logic
+                if ("inventory_choice".equals(currentSceneFinal.getId())) {
+                    applyInventoryChoice(choice.getLabel());
+                    showSceneView(sceneLoader.getSceneById("start"), sceneLoader);
+                    return;
+                }
+                // Fight logic: if the choice label is "Fight" or contains "fight"
+                if (currentSceneFinal.getThreatLevel() > -1 && choice.getLabel().toLowerCase().contains("fight")) {
+                    int threat = currentSceneFinal.getThreatLevel();
+                    int fightNumber = currentSceneFinal.getFightNumber();
+                    int ded = computeDurabilityDecrease(threat);
+                    int winPenalty = computeWinHealthPenalty(threat);
+                    int losePenalty = computeLoseHealthPenalty(threat);
+                    handleFight(currentSceneFinal, fightNumber, ded, winPenalty, losePenalty, choice.getNextId(), sceneLoader);
+                    return;
+                }
+                // Normal scene transition
+                System.out.printf("[DEBUG] No fight calculation for choice \"%s\"; loading scene: %s%n", 
+                    choice.getLabel(), choice.getNextId());
+                GameScene next = sceneLoader.getSceneById(choice.getNextId());
+                if (next != null) {
+                    showSceneView(next, sceneLoader);
+                } else {
+                    System.out.println("[DEBUG] No scene found with id " + choice.getNextId());
+                    model.setCurrentState(GameState.ENDING);
+                    updateView();
+                }
+            },
+            () -> {
+                model.toggleDarkMode();
+                showSceneView(scene, sceneLoader);
+            },
+            () -> {
+                javafx.scene.control.Alert confirm =
+                    new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
+                confirm.setTitle("Reset Game");
+                confirm.setHeaderText("Are you sure you want to return to the title screen?");
+                confirm.setContentText("Any current progress will be lost.");
+                Optional<javafx.scene.control.ButtonType> res = confirm.showAndWait();
+                if (res.isPresent() && res.get() == javafx.scene.control.ButtonType.OK) {
+                    lastHealthAppliedSceneId = null;
+                    addItemProcessedScenes.clear();
+                    resetInventoryToDefault();
+                    model.resetHealth();
+                    model.setCurrentState(GameState.TITLE);
+                    updateView();
+                }
+            },
+            item -> {
+                System.out.println("[DEBUG] Attempting to consume item: " + item.getName() + ", type: " + item.getType());
+                boolean consumed = model.consumeItem(item);
+                if (consumed) {
+                    System.out.println("[DEBUG] Consumed item: " + item.getName() +
+                        " | Health after: " + model.getHealth());
+                    showSceneView(scene, sceneLoader);
+                } else {
+                    System.out.println("[DEBUG] Failed to consume item: " + item.getName());
+                }
+            }
+        );
+        rootPane.setCenter(view);
+    }
+
+        private void removeWeaponFromJson(String weaponName) {
+        try {
+            File file = new File("src/data/inventory.json");
+            JsonArray arr = JsonParser.parseReader(new FileReader(file)).getAsJsonArray();
+            JsonArray newArr = new JsonArray();
+            for (JsonElement el : arr) {
+                JsonObject obj = el.getAsJsonObject();
+                if (!obj.has("name") || !weaponName.equals(obj.get("name").getAsString())) {
+                    newArr.add(obj);
+                }
+            }
+            try (FileWriter writer = new FileWriter(file)) {
+                new GsonBuilder().setPrettyPrinting().create().toJson(newArr, writer);
+            }
+        } catch (IOException e) {
+            System.err.println("Failed to remove weapon from JSON: " + e.getMessage());
+        }
+    }
+
+    private void showWeaponRemovalDialog(List<String> weaponNames, InventoryItem item, String nextSceneId, SceneLoader SceneLoader) {
+        Platform.runLater(() -> {
+            ChoiceDialog<String> dialog = new ChoiceDialog<>(weaponNames.get(0), weaponNames);
+            dialog.setTitle("Weapon Inventory Full");
+            dialog.setHeaderText("Choose a weapon to remove to make space for: " + item.getName());
+            dialog.setContentText("Remove:");
+            Optional<String> result = dialog.showAndWait();
+            result.ifPresent(selectedName -> {
+                javafx.scene.control.Alert confirm = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
+                confirm.setTitle("Confirm Removal");
+                confirm.setHeaderText("Are you sure you want to remove " + selectedName + "?");
+                confirm.setContentText("This cannot be undone.");
+                Optional<javafx.scene.control.ButtonType> confirmation = confirm.showAndWait();
+                if (confirmation.isPresent() && confirmation.get() == javafx.scene.control.ButtonType.OK) {
+                    model.removeItem(selectedName);
+                    removeWeaponFromJson(selectedName);
+                    model.addItem(item);
+                    addWeaponToJson(item);
+                    System.out.println("[DEBUG] Removed weapon: " + selectedName +
+                        " | Added new item: " + item.getName());
+                    addItemProcessedScenes.add(nextSceneId);
+                    GameScene nextScene = SceneLoader.getSceneById(nextSceneId);
+                    if (nextScene != null) {
+                        showSceneView(nextScene, SceneLoader);
+                    } else {
+                        updateView();
+                    }
+                } else {
+                    showWeaponRemovalDialog(weaponNames, item, nextSceneId, SceneLoader);
+                }
+            });
+        });
+    }
+
+    private void addWeaponToJson(InventoryItem item) {
+        try (FileReader reader = new FileReader("src/data/inventory.json")) {
+            JsonElement element = JsonParser.parseReader(reader);
+            JsonArray arr;
+            if (element == null || !element.isJsonArray()) {
+                arr = new JsonArray();
+            } else {
+                arr = element.getAsJsonArray();
+            }
+            JsonObject obj = new JsonObject();
+            obj.addProperty("name", item.getName());
+            obj.addProperty("type", item.getType().toString());
+            obj.addProperty("durability", item.getDurability());
+            obj.addProperty("power", item.getPower());
+            arr.add(obj);
+            try (FileWriter writer = new FileWriter("src/data/inventory.json")) {
+                new GsonBuilder().setPrettyPrinting().create().toJson(arr, writer);
+            }
+        } catch (IOException e) {
+            System.err.println("Failed to add weapon to JSON: " + e.getMessage());
+        }
+    }
+
+    private void writeTempWeaponJson(InventoryItem item) {
+        try (FileWriter writer = new FileWriter("src/data/new_weapon.json")) {
+            JsonObject obj = new JsonObject();
+            obj.addProperty("name", item.getName());
+            obj.addProperty("type", item.getType().toString());
+            obj.addProperty("durability", item.getDurability());
+            obj.addProperty("power", item.getPower());
+            new Gson().toJson(obj, writer);
+        } catch (IOException e) {
+            System.err.println("Failed to write temp weapon JSON: " + e.getMessage());
+        }
+    }
+
+    private void handleFight(GameScene scene, int fightNumber, int decreaseDurAmount, int subHealthWin, int subHealthLose, String defaultWinSceneId, SceneLoader SceneLoader) {
+        int threatLevel = scene.getThreatLevel();
+        System.out.printf("[DEBUG] In handleFight: Scene \"%s\" with fightNumber: %d, threatLevel: %d%n",
+            scene.getId(), fightNumber, threatLevel);
+        List<InventoryItem> weapons = model.getInventory().getOrDefault(ItemType.WEAPON, new ArrayList<>());
+        List<InventoryItem> winningWeapons = weapons.stream()
+            .filter(w -> w.getPower() >= threatLevel && w.getDurability() > 0)
+            .sorted(Comparator.comparingInt(InventoryItem::getPower))
+            .toList();
+        InventoryItem chosenWeapon = winningWeapons.isEmpty() ? null : winningWeapons.get(0);
+        String winSceneId = (fightNumber > 0) ? "fight_result_win_" + fightNumber : defaultWinSceneId;
+        String loseSceneId = (fightNumber > 0) ? "fight_result_lose_" + fightNumber : "fight_result_lose_1";
+        System.out.printf("[DEBUG] Computed winSceneId: %s, loseSceneId: %s%n", winSceneId, loseSceneId);
+
+        if (chosenWeapon != null) {
+            int oldDurability = chosenWeapon.getDurability();
+            chosenWeapon.decreaseDurability(decreaseDurAmount);
+            int newDurability = chosenWeapon.getDurability();
+            model.subtractHealth(-subHealthWin);
+            System.out.printf("[DEBUG] WIN | used %s (power %d >= threat %d), durability decreased from %d to %d | new health: %d%n",
+                chosenWeapon.getName(), chosenWeapon.getPower(), threatLevel, oldDurability, newDurability, model.getHealth());
+            GameScene winScene = SceneLoader.getSceneById(winSceneId);
+            if (winScene != null) {
+                showSceneView(winScene, SceneLoader);
+            } else {
+                System.out.println("[DEBUG] No win scene found with id " + winSceneId);
+                model.setCurrentState(GameState.ENDING);
+                updateView();
+            }
+        } else {
+            int fistsPower = 2;
+            if (fistsPower >= threatLevel) {
+                model.subtractHealth(-subHealthWin);
+                System.out.printf("[DEBUG] WIN (unarmed) | fists power(%d) >= threat(%d) | new health: %d%n",
+                    fistsPower, threatLevel, model.getHealth());
+                GameScene winScene = SceneLoader.getSceneById(winSceneId);
+                if (winScene != null) {
+                    showSceneView(winScene, SceneLoader);
+                } else {
+                    System.out.println("[DEBUG] No win scene found with id " + winSceneId);
+                    model.setCurrentState(GameState.ENDING);
+                    updateView();
+                }
+            } else {
+                model.subtractHealth(-subHealthLose);
+                System.out.printf("[DEBUG] LOSE (unarmed) | fists power(%d) < threat(%d) | new health: %d%n",
+                    fistsPower, threatLevel, model.getHealth());
+                GameScene loseScene = SceneLoader.getSceneById(loseSceneId);
+                if (loseScene != null) {
+                    showSceneView(loseScene, SceneLoader);
+                } else {
+                    System.out.println("[DEBUG] No lose scene found with id " + loseSceneId);
+                    model.setCurrentState(GameState.ENDING);
+                    updateView();
+                }
+            }
+        }
+    }
+
+    private int computeDurabilityDecrease(int threatLevel) {
+        return (threatLevel >= 5) ? 2 : 1;
+    }
+
+    private int computeWinHealthPenalty(int threatLevel) {
+        // return 10 + threatLevel;
+        return 0;
+    }
+
+    private int computeLoseHealthPenalty(int threatLevel) {
+        return 25 + (2 * threatLevel);
+    }
+
+
 }

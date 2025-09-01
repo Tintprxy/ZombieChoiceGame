@@ -7,6 +7,7 @@ public class GameScene {
 
     // new field for fight number; default to 1 if not set
     private int fightNumber = 1;
+    private String newKeyItem;
 
     public GameScene(String id, String prompt, List<GameChoice> choices) {
         this.id = id;
@@ -47,6 +48,7 @@ public class GameScene {
     private List<GameChoice> choices;
     private InventoryItem addItem;
     private int threatLevel = -1; 
+    private boolean bitten;
 
     public String getId() { return id; }
     public String getPrompt() { return prompt; }
@@ -72,6 +74,14 @@ public class GameScene {
         return addItem;
     }
 
+    public void setNewKeyItem(String newKeyItem) {
+        this.newKeyItem = newKeyItem;
+    }
+
+    public String getNewKeyItem() {
+        return newKeyItem;
+    }
+
     public void setThreatLevel(int threatLevel) {
         this.threatLevel = threatLevel;
     }
@@ -84,5 +94,13 @@ public class GameScene {
     // Optionally, a setter if you need to set it after construction
     public void setRawJson(JsonObject rawJson) {
         this.rawJson = rawJson;
+    }
+
+    public boolean isBitten() {
+        return bitten;
+    }
+
+    public void setBitten(boolean bitten) {
+        this.bitten = bitten;
     }
 }

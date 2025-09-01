@@ -218,8 +218,40 @@
 },
 
 {
+  "id": "add_antidote",
+  "prompt": "You carefully place the Antidote in your inventory, knowing it could be a lifesaver in the future.",
+  "newKeyItem": "antidote",
+  "choices": [
+    {
+      "label": "Continue",
+      "imagePath": "imgs/continueImg.jpg",
+      "id": "return_to_car"
+    }
+  ],
+  "addItem": {
+    "name": "Antidote",
+    "type": "KEY_ITEM",
+    "durability": 1,
+    "power": 0
+  }
+},
+
+{
+  "id": "keep_map",
+  "prompt": "You decide to leave the Antidote behind, feeling uncertain about carrying it. You continue your journey without it.",
+  "choices": [
+    {
+      "label": "Continue",
+      "imagePath": "imgs/continueImg.jpg",
+      "id": "return_to_car"
+    }
+  ]
+},
+
+{
   "id": "fight_result_lose_2",
   "prompt": "You tried to fight the zombie, but your efforts weren't enough. The zombie overpowers you and sinks its teeth into your arm. The bite quickly shows signs of infection, and without a chance to use an antidote, your fate seems sealed. Your vision fades as the infection takes hold.",
+  "bitten": true,
   "choices": [
     {
       "label": "Accept your fate",
@@ -232,6 +264,7 @@
 {
   "id": "return_to_car",
   "prompt": "You make your way back to the car, your heart racing with every step. The streets are eerily quiet, but you can still feel the presence of danger lurking around every corner.",
+  "bitten": true,
   "choices": [
     {
       "label": "Get in the Car",
@@ -345,6 +378,23 @@
     }
   ]
 }, 
+
+{
+  "id": "infection_choice",
+  "prompt": "You feel the bite and the infection starting to spread through your veins. You check your inventory and see the Antidote. Do you want to use it to cure yourself, or let the infection take over and transform you into one of them?",
+  "choices": [
+    {
+      "label": "Use Antidote",
+      "imagePath": "imgs/antidoteUse.jpg",
+      "id": "infection_cured"
+    },
+    {
+      "label": "Let Infection Take Over",
+      "imagePath": "imgs/zombieImg.jpg",
+      "id": "game_over_infection"
+    }
+  ]
+},
 
 {
   "id": "game_over_infection",

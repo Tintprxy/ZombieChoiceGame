@@ -18,6 +18,7 @@ public class SceneLoader {
                     System.out.println("[DEBUG] Parsing scene ID: " + sceneId);
                     String prompt = sceneObj.get("prompt").getAsString();
                     int healthChange = sceneObj.has("healthChange") ? sceneObj.get("healthChange").getAsInt() : 0;
+                    boolean bitten = sceneObj.has("bitten") ? sceneObj.get("bitten").getAsBoolean() : false;
                     List<GameChoice> choices = new ArrayList<>();
                     JsonArray choicesArray = sceneObj.getAsJsonArray("choices");
                     for (JsonElement choiceElem : choicesArray) {
@@ -54,6 +55,7 @@ public class SceneLoader {
 
                     int fightNumber = sceneObj.has("fightNumber") ? sceneObj.get("fightNumber").getAsInt() : 1;
                     scene.setFightNumber(fightNumber);
+                    scene.setBitten(bitten);
 
                     System.out.println("[DEBUG] Loaded scene: " + scene.getId() + ", addItem: " + scene.getAddItem());
 

@@ -1,0 +1,7 @@
+{
+    "name": "Antidote",
+    "type": "KEY_ITEM",
+    "healthRestore": 0,
+    "durability": 1,
+    "power": 0
+}
