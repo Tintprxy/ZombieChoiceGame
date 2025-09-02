@@ -14,7 +14,6 @@ import model.InventoryItem;
 import model.InventoryLoader;
 import model.ItemType;
 import model.SceneLoader;
-//import view.ChooseStoryView;
 import view.ChoiceScreenView;
 import view.InstructionsView;
 import view.TitleView;
@@ -37,15 +36,14 @@ public class MainController {
         this.stage = stage;
         this.model = new GameModel();
         this.rootPane = new BorderPane();
-        // this.SceneLoader = new SceneLoader("src/data/scenes.json"); 
     }
 
     public void startApp() {
         Scene scene = new Scene(rootPane, 800, 600);
         stage.setScene(scene);
         stage.setTitle("Zombie Choice Game");
-        stage.setMinWidth(900);
-        stage.setMinHeight(600);
+        stage.setMinWidth(10);
+        stage.setMinHeight(10);
         updateView(); 
         stage.show();
     }
@@ -102,7 +100,7 @@ public class MainController {
         turnstileView.getTopBar().toggleButton.setOnAction(e -> {
             model.toggleDarkMode();
             System.out.println("[DEBUG] Dark mode toggled: " + model.isDarkMode());
-            turnstileView.applyTheme(model.isDarkMode()); // <-- Update theme for the whole view
+            turnstileView.applyTheme(model.isDarkMode());
         });
 
         turnstileView.getTopBar().resetButton.setOnAction(e -> {
@@ -115,19 +113,19 @@ public class MainController {
             updateView();
         });
         
-        Button story1Button = (Button) turnstileView.getStory1Box().getChildren().get(2);
-        story1Button.setOnAction(e -> {
-            SceneLoader SceneLoader = new SceneLoader("src/data/scenes_story1.json");
-            showInventoryChoiceView(SceneLoader, "start"); // Pass the correct scene id.
+        // Update indices because we added a subtitle (extra child)
+        Button driveButton = (Button) turnstileView.getStory1Box().getChildren().get(3);
+        driveButton.setOnAction(e -> {
+            SceneLoader sceneLoader = new SceneLoader("src/data/drive_story1.json");
+            showInventoryChoiceView(sceneLoader, "start");
         });
         
-        Button story2Button = (Button) turnstileView.getStory2Box().getChildren().get(2);
-        story2Button.setOnAction(e -> {
-            SceneLoader SceneLoader = new SceneLoader("src/data/scenes_story2.json");
-            showInventoryChoiceView(SceneLoader, "start"); // Pass the correct scene id.
+        Button walkButton = (Button) turnstileView.getStory2Box().getChildren().get(3);
+        walkButton.setOnAction(e -> {
+            SceneLoader sceneLoader = new SceneLoader("src/data/walk_story2.json");
+            showInventoryChoiceView(sceneLoader, "start");
         });
         
-        // Set the turnstile view as the center of the root pane.
         rootPane.setCenter(turnstileView);
         System.out.println("Story1Box children: " + turnstileView.getStory1Box().getChildren().size());
         System.out.println("Story2Box children: " + turnstileView.getStory2Box().getChildren().size());
@@ -143,7 +141,7 @@ public class MainController {
         inventoryView.getTopBar().toggleButton.setOnAction(e -> {
             model.toggleDarkMode();
             System.out.println("[DEBUG] Dark mode toggled: " + model.isDarkMode());
-            inventoryView.applyTheme(model.isDarkMode()); // <-- Update theme for the whole view
+            inventoryView.applyTheme(model.isDarkMode());
         });
 
         inventoryView.getTopBar().resetButton.setOnAction(e -> {

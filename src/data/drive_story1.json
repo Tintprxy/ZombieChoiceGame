@@ -1,44 +1,12 @@
 [
   {
-    "id": "inventory_choice",
-    "prompt": "Select your starting inventory:\n\nHealth Heavy, Attack Heavy, or Balanced?",
-    "choices": [
-      {
-        "label": "Health Heavy",
-        "imagePath": "imgs/healthHeavyImg.jpg",
-        "id": "start"
-      },
-      {
-        "label": "Attack Heavy",
-        "imagePath": "imgs/attackHeavyImg.jpg",
-        "id": "start"
-      },
-      {
-        "label": "Balanced",
-        "imagePath": "imgs/balancedImg.jpg",
-        "id": "start"
-      },
-      {
-        "label": "empty",
-        "imagePath": "imgs/emptyImg.jpg",
-        "id": "start"
-      }
-    ]
-  },
-
-  {
     "id": "start",
-    "prompt": "The street is quiet but you hear a distant moan. Zombies? Enemies? only one way to find out. Do you want to drive your armored car or Ditch it and go on foot?",
+    "prompt": "The street is quiet but you hear a distant moan. Zombies? Enemies? only one way to find out. Start your journey.",
     "choices": [
       {
         "label": "Drive",
         "imagePath": "imgs/armoredCarImg.jpg",
         "id": "drive_path"
-      },
-      {
-        "label": "Walk",
-        "imagePath": "imgs/walkingImg.jpg",
-        "id": "walk_path"
       }
     ]
   },

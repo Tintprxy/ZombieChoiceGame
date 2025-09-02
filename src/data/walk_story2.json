@@ -1,19 +1,19 @@
 [
   {
-    "id": "walk_path",
+    "id": "start",
     "prompt": "You walk down the street and find a hidden alley. There could be supplies or danger but you can't tell from here. Do you want to explore it or keep walking?",
-      "healthChange": -10,
-      "choices": [
-        {
-          "label": "Explore Alley",
-          "imagePath": "imgs/alleyImg.jpg",
-          "id": "weapon_choice"
-        },
-        {
-          "label": "Keep Walking",
-          "imagePath": "imgs/streetImg.jpg",
-          "id": "startRunning"
-        }
+    "healthChange": 0,
+    "choices": [
+      {
+        "label": "Explore Alley",
+        "imagePath": "imgs/alleyImg.jpg",
+        "id": "weapon_choice"
+      },
+      {
+        "label": "Keep Walking",
+        "imagePath": "imgs/streetImg.jpg",
+        "id": "startRunning"
+      }
       ]
     },
 

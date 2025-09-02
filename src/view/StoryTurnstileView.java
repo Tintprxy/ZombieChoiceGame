@@ -20,22 +20,29 @@ public class StoryTurnstileView extends BorderPane {
     private final ScrollPane scrollPane;
 
     public StoryTurnstileView(boolean darkMode) {
-        // Initialize local top bar
         topBar = new TopBarView();
         topBar.applyTheme(darkMode);
         setTop(topBar);
 
+        // Set a fixed size for this view.
+        setPrefSize(800, 600); // adjust width and height as needed
+
         setPadding(new Insets(20));
 
-        // Create story boxes
-        story1Box = createStoryBox("file:imgs/healthHeavyImg.jpg", "Story 1", "Play Story 1");
-        story2Box = createStoryBox("file:imgs/attackHeavyImg.jpg", "Story 2", "Play Story 2");
+        story1Box = createStoryBox("file:imgs/armoredCarImg.jpg", "Drive", "A fast route to survival", "Play Drive");
+        story2Box = createStoryBox("file:imgs/walkingImg.jpg", "Walk", "Steady and safe on foot", "Play Walk");
 
         container = new HBox(50, story1Box, story2Box);
         container.setAlignment(Pos.CENTER);
         container.setPadding(new Insets(20));
 
+        // You can set a fixed preferred size for the container if desired.
+        container.setPrefSize(800, 600);
+
         scrollPane = new ScrollPane(container);
+        // Set viewport size for the internal ScrollPane.
+        scrollPane.setPrefViewportWidth(800);
+        scrollPane.setPrefViewportHeight(600);
         scrollPane.setFitToHeight(true);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
@@ -49,13 +56,10 @@ public class StoryTurnstileView extends BorderPane {
 
         setCenter(scrollPane);
 
-        // Apply initial theme
         applyTheme(darkMode);
     }
 
-    // Creates a VBox with an image, a title, and a button.
-    private VBox createStoryBox(String imagePath, String title, String buttonText) {
-        // Load the image.
+    private VBox createStoryBox(String imagePath, String title, String subtitle, String buttonText) {
         ImageView imageView = new ImageView();
         try {
             Image image = new Image(imagePath);
@@ -65,19 +69,18 @@ public class StoryTurnstileView extends BorderPane {
         } catch (Exception e) {
             System.err.println("[DEBUG] Failed to load image: " + imagePath);
         }
-        // Create the title and button.
+
         Label titleLabel = new Label(title);
+        Label subtitleLabel = new Label(subtitle);
         Button button = new Button(buttonText);
-        // Arrange the elements in a VBox.
-        VBox box = new VBox(10, imageView, titleLabel, button);
+
+        VBox box = new VBox(10, imageView, titleLabel, subtitleLabel, button);
         box.setAlignment(Pos.CENTER);
         box.setPadding(new Insets(10));
-        // Set a default light-mode style.
         box.setStyle("-fx-background-color: #cccccc; -fx-border-color: #888888; -fx-border-width: 2px;");
         return box;
     }
 
-    // Applies dark or light theme to the view.
     public void applyTheme(boolean darkMode) {
         String bgColor = darkMode ? DARK_BG : LIGHT_BG;
         String boxColor = darkMode ? DARK_BOX : LIGHT_BOX;
@@ -100,11 +103,14 @@ public class StoryTurnstileView extends BorderPane {
 
         java.util.function.Consumer<VBox> styleStoryBox = box -> {
             box.setStyle(boxStyle);
-            if (box.getChildren().size() >= 3) {
+            if (box.getChildren().size() >= 4) {
                 if (box.getChildren().get(1) instanceof Label titleLabel) {
                     titleLabel.setTextFill(Color.web(titleColor));
                 }
-                if (box.getChildren().get(2) instanceof Button button) {
+                if (box.getChildren().get(2) instanceof Label subtitleLabel) {
+                    subtitleLabel.setTextFill(Color.web(textColor));
+                }
+                if (box.getChildren().get(3) instanceof Button button) {
                     button.setStyle(buttonStyle);
                 }
             }
@@ -138,7 +144,6 @@ public class StoryTurnstileView extends BorderPane {
         return topBar;
     }
 
-    // Getters for wiring story selection in your controller.
     public VBox getStory1Box() {
         return story1Box;
     }
