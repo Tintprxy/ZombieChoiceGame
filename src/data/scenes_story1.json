@@ -91,7 +91,7 @@
     ]
   },
 
-    {
+  {
     "id": "fight_result_lose_1",
     "prompt": "You tried to fight the zombie, but your weapon was too weak and You are hurt.",
     "choices": [
@@ -104,302 +104,221 @@
   },
 
   {
-  "id": "find_shelter",
-  "prompt": "You find a nearby building that looks like it could provide shelter. Do you want to enter it or continue your journey towards the Military Base?",
-  "choices": [
-    {
-      "label": "Enter Building",
-      "imagePath": "imgs/enterBuildingImg.jpg",
-      "id": "up_or_down"
-    },
-    {
-      "label": "Keep Moving",
-      "imagePath": "imgs/keepMovingImg.jpg",
-      "id": "next_id"
-    }
-  ]
-},
+    "id": "find_shelter",
+    "prompt": "You find a nearby building that looks like it could provide shelter. Do you want to enter it or continue your journey towards the Military Base?",
+    "choices": [
+      {
+        "label": "Enter Building",
+        "imagePath": "imgs/enterBuildingImg.jpg",
+        "id": "up_or_down"
+      },
+      {
+        "label": "Keep Moving",
+        "imagePath": "imgs/keepMovingImg.jpg",
+        "id": "car_scene"
+      }
+    ]
+  },
 
-{
-  "id": "up_or_down",
-  "prompt": "Inside the building, the air is stale and the floor creaks under your feet. Do you want to go upstairs or stay on the ground floor?",
-  "choices": [
-    {
-      "label": "Go Upstairs",
-      "imagePath": "imgs/upstairsImg.jpg",
-      "id": "upstairs_scene"
-    },
-    {
-      "label": "Stay Downstairs",
-      "imagePath": "imgs/downstairsImg.jpg",
-      "id": "downstairs_scene"
-    }
-  ]
-},
+  {
+    "id": "up_or_down",
+    "prompt": "Inside the building, the air is stale and the floor creaks under your feet. Do you want to go upstairs or stay on the ground floor?",
+    "choices": [
+      {
+        "label": "Go Upstairs",
+        "imagePath": "imgs/upstairsImg.jpg",
+        "id": "upstairs_scene"
+      },
+      {
+        "label": "Stay Downstairs",
+        "imagePath": "imgs/downstairsImg.jpg",
+        "id": "downstairs_scene"
+      }
+    ]
+  },
 
-{
-  "id": "upstairs_scene",
-  "prompt": "The floor is rotted and giving way. As you try to go upstairs, the weakened floor collapses and you fall back down to the first floor, taking damage in the process.",
-  "healthChange": -20,
-  "choices": [
-    {
-      "label": "Get Up and Continue",
-      "imagePath": "imgs/fallThroughImg.jpg",
-      "id": "downstairs_scene"
-    }
-  ]
-},
+  {
+    "id": "upstairs_scene",
+    "prompt": "The floor is rotted and giving way. As you try to go upstairs, the weakened floor collapses and you fall back down to the first floor, taking damage in the process.",
+    "healthChange": -20,
+    "choices": [
+      {
+        "label": "Get Up and Continue",
+        "imagePath": "imgs/fallThroughImg.jpg",
+        "id": "downstairs_scene"
+      }
+    ]
+  },
 
-{
-  "id": "downstairs_scene",
-  "prompt": "As you slowly approach one of the rooms on the ground floor, you see a zombie standing right in front of a medical bag. The sight sends a shiver down your spine. Do you want to run and quickly grab the medical bag or fight the zombie?",
-  "threatLevel": 9,
-  "fightNumber": 2,
-  "choices": [
-    {
-      "label": "Grab Medical Bag",
-      "imagePath": "imgs/drzombiemedbagImg.jpg",
-      "id": "grab_medical_bag_failed"
-    },
-    {
-      "label": "Fight Zombie",
-      "imagePath": "imgs/drzombiefightImg.jpg",
-      "id": "fight_result_win_2"
-    }
-  ]
-},
+  {
+    "id": "downstairs_scene",
+    "prompt": "As you slowly approach one of the rooms on the ground floor, you see a zombie standing right in front of a medical bag. The sight sends a shiver down your spine. Do you want to run and quickly grab the medical bag or fight the zombie?",
+    "threatLevel": 9,
+    "fightNumber": 2,
+    "choices": [
+      {
+        "label": "Grab Medical Bag",
+        "imagePath": "imgs/drzombiemedbagImg.jpg",
+        "id": "grab_medical_bag_failed"
+      },
+      {
+        "label": "Fight Zombie",
+        "imagePath": "imgs/drzombiefightImg.jpg",
+        "id": "fight_result_win_2"
+      }
+    ]
+  },
 
-{
-  "id": "grab_medical_bag_failed",
-  "prompt": "You dash forward to grab the medical bag, but the doctor zombie lunges and slashes across your arm. Pain shoots through your body as you lose 20 health. Stumbling back, you realize the bag is out of reach — and the supplies are lost to you.",
-  "healthChange": -20,
-  "choices": [
-    {
-      "label": "fight zombie",
-      "imagePath": "imgs/doctorZombieSlash.jpg",
-      "id": "fight_result_win_2"
-    },
-    {
-      "label": "Retreat",
-      "imagePath": "imgs/retreatImg.jpg",
-      "id": "retreat_scene"
-    }
-  ]
-},
+  {
+    "id": "grab_medical_bag_failed",
+    "prompt": "You dash forward to grab the medical bag, but the doctor zombie lunges and slashes across your arm. Pain shoots through your body as you lose 20 health. Stumbling back, you realize the bag is out of reach — and the supplies are lost to you.",
+    "healthChange": -20,
+    "choices": [
+      {
+        "label": "fight zombie",
+        "imagePath": "imgs/doctorZombieSlash.jpg",
+        "id": "fight_result_win_2"
+      },
+      {
+        "label": "Retreat",
+        "imagePath": "imgs/retreatImg.jpg",
+        "id": "retreat_scene"
+      }
+    ]
+  },
 
-{
-  "id": "retreat_scene",
-  "prompt": "You stumble back, clutching your wounded arm. The doctor zombie snarls and stands guard over the medical bag. You retreat deeper into the building, leaving the supplies behind.",
-  "healthChange": -10,
-  "choices": [
-    {
-      "label": "Continue On",
-      "imagePath": "imgs/retreatImg.jpg",
-      "id": "next_path"
-    }
-  ]
-},
-
-{
-  "id": "fight_result_win_2",
-  "prompt": "After defeating the zombie, you open the bag and notice a small vial labeled 'Antidote' lying inside. This key item can cure the infection caused by a zombie bite, but you can only use it once. Do you want to pick up the Antidote? (The map is a place holder key item with no effect)",
-  "choices": [
-    {
-      "label": "Pick Up Antidote",
-      "imagePath": "imgs/antidoteImg.jpg",
-      "id": "add_antidote"
-    },
-    {
-      "label": "Leave it Behind",
-      "imagePath": "imgs/emptyHandsImg.jpg",
-      "id": "keep_map"
-    }
-  ]
-},
-
-{
-  "id": "add_antidote",
-  "prompt": "You carefully place the Antidote in your inventory, knowing it could be a lifesaver in the future.",
-  "newKeyItem": "antidote",
-  "choices": [
-    {
-      "label": "Continue",
-      "imagePath": "imgs/continueImg.jpg",
-      "id": "return_to_car"
-    }
-  ],
-  "addItem": {
-    "name": "Antidote",
-    "type": "KEY_ITEM",
-    "durability": 1,
-    "power": 0
-  }
-},
-
-{
-  "id": "keep_map",
-  "prompt": "You decide to leave the Antidote behind, feeling uncertain about carrying it. You continue your journey without it.",
-  "choices": [
-    {
-      "label": "Continue",
-      "imagePath": "imgs/continueImg.jpg",
-      "id": "return_to_car"
-    }
-  ]
-},
-
-{
-  "id": "fight_result_lose_2",
-  "prompt": "You tried to fight the zombie, but your efforts weren't enough. The zombie overpowers you and sinks its teeth into your arm. The bite quickly shows signs of infection, and without a chance to use an antidote, your fate seems sealed. Your vision fades as the infection takes hold.",
-  "bitten": true,
-  "choices": [
-    {
-      "label": "Accept your fate",
-      "imagePath": "imgs/doctorZombieBite.jpg",
-      "id": "game_over_infection"
-    }
-  ]
-},
-
-{
-  "id": "return_to_car",
-  "prompt": "You make your way back to the car, your heart racing with every step. The streets are eerily quiet, but you can still feel the presence of danger lurking around every corner.",
-  "bitten": true,
-  "choices": [
-    {
-      "label": "Get in the Car",
-      "imagePath": "imgs/carImg.jpg",
-      "id": "car_scene"
-    }
-  ]
-},
-
-{
-  "id": "walk_path",
-  "prompt": "You walk down the street and find a hidden alley. There could be supplies or danger but you can't tell from here. Do you want to explore it or keep walking?",
+  {
+    "id": "retreat_scene",
+    "prompt": "You stumble back, clutching your wounded arm. The doctor zombie snarls and stands guard over the medical bag. You retreat deeper into the building, leaving the supplies behind.",
     "healthChange": -10,
     "choices": [
       {
-        "label": "Explore Alley",
-        "imagePath": "imgs/alleyImg.jpg",
-        "id": "weapon_choice"
-      },
-      {
-        "label": "Keep Walking",
-        "imagePath": "imgs/streetImg.jpg",
-        "id": "startRunning"
+        "label": "Continue On",
+        "imagePath": "imgs/retreatImg.jpg",
+        "id": "next_path"
       }
     ]
   },
 
   {
-    "id": "weapon_choice",
-    "prompt": "You discover a stash of weapons! Which one do you take?",
+    "id": "fight_result_win_2",
+    "prompt": "After defeating the zombie, you open the bag and notice a small vial labeled 'Antidote' lying inside. This key item can cure the infection caused by a zombie bite, but you can only use it once. Do you want to pick up the Antidote? (The map is a place holder key item with no effect)",
     "choices": [
       {
-        "label": "Take Sword",
-        "imagePath": "imgs/swordImg.jpg",
-        "id": "sword_taken"
+        "label": "Pick Up Antidote",
+        "imagePath": "imgs/antidoteImg.jpg",
+        "id": "add_antidote"
       },
       {
-        "label": "Take Baseball Bat",
-        "imagePath": "imgs/baseballBatImg.jpg",
-        "id": "bat_taken"
-      },
-      {
-        "label": "Take Neither",
+        "label": "Leave it Behind",
         "imagePath": "imgs/emptyHandsImg.jpg",
-        "id": "neither_taken"
+        "id": "keep_map"
       }
     ]
   },
 
   {
-    "id": "sword_taken",
-    "prompt": "You take the sword and leave the bat behind.",
+    "id": "add_antidote",
+    "prompt": "You carefully place the Antidote in your inventory, knowing it could be a lifesaver in the future.",
+    "newKeyItem": "antidote",
     "choices": [
       {
         "label": "Continue",
-        "imagePath": "imgs/swordTakenImg.jpg",
-        "id": "startRunning"
+        "imagePath": "imgs/continueImg.jpg",
+        "id": "return_to_car"
       }
     ],
     "addItem": {
-      "name": "Sword",
-      "type": "WEAPON",
-      "durability": 12,
-      "power": 9
+      "name": "Antidote",
+      "type": "KEY_ITEM",
+      "durability": 1,
+      "power": 0
     }
   },
 
   {
-    "id": "bat_taken",
-    "prompt": "You take the baseball bat and leave the sword behind.",
+    "id": "keep_map",
+    "prompt": "You decide to leave the Antidote behind, feeling uncertain about carrying it. You continue your journey without it.",
     "choices": [
       {
         "label": "Continue",
-        "imagePath": "imgs/batTakenImg.jpg",
-        "id": "startRunning"
+        "imagePath": "imgs/continueImg.jpg",
+        "id": "return_to_car"
       }
-    ],
-    "addItem": {
-      "name": "Baseball Bat",
-      "type": "WEAPON",
-      "durability": 10,
-      "power": 7
-    }
+    ]
   },
 
   {
-    "id": "neither_taken",
-    "prompt": "You decide to leave both weapons behind and continue unarmed. You feel vulnerable, but lighter on your feet.",
+    "id": "fight_result_lose_2",
+    "prompt": "You tried to fight the zombie, but your efforts weren't enough. The zombie overpowers you and sinks its teeth into your arm. The bite quickly shows signs of infection, and without a chance to use an antidote, your fate seems sealed. Your vision fades as the infection takes hold.",
+    "bitten": true,
     "choices": [
       {
-        "label": "Continue",
-        "imagePath": "imgs/titleImg.jpg",
-        "id": "startRunning"
+        "label": "Accept your fate",
+        "imagePath": "imgs/doctorZombieBite.jpg",
+        "id": "game_over_infection"
       }
-  ]
-},
+    ]
+  },
 
-{
-  "id": "startRunning",
-  "prompt": "You keep walking down the alley till you make it to a street, staying alert for any signs of danger. The city is eerily quiet, but you can hear distant moans and shuffling feet. Then suddenly, you hear a loud crash and a scream behind you. Do you want to start running or find a place to hide?",
-  "choices": [
-    {
-      "label": "Start Running",
-      "imagePath": "imgs/startRunningImg.jpg",
-      "id": "next_id"
-    },
-    {
-      "label": "Find a Place to Hide",
-      "imagePath": "imgs/hideImg.jpg",
-      "id": "next_id"
-    }
-  ]
-}, 
+  {
+    "id": "return_to_car",
+    "prompt": "You make your way back to the car, your heart racing with every step. The streets are eerily quiet, but you can still feel the presence of danger lurking around every corner.",
+    "bitten": false,
+    "choices": [
+      {
+        "label": "Get in the Car",
+        "imagePath": "imgs/carImg.jpg",
+        "id": "car_scene"
+      }
+    ]
+  },
 
-{
-  "id": "infection_choice",
-  "prompt": "You feel the bite and the infection starting to spread through your veins. You check your inventory and see the Antidote. Do you want to use it to cure yourself, or let the infection take over and transform you into one of them?",
-  "choices": [
-    {
-      "label": "Use Antidote",
-      "imagePath": "imgs/antidoteUse.jpg",
-      "id": "infection_cured"
-    },
-    {
-      "label": "Let Infection Take Over",
-      "imagePath": "imgs/zombieImg.jpg",
-      "id": "game_over_infection"
-    }
-  ]
-},
+  {
+    "id": "car_scene",
+    "prompt": "Now you're driving away, headed directly for the military base. The road is clear, but you can't shake the feeling that something is watching you. You glance in the rearview mirror and think you see a figure in the distance. do you want to drive recklessly fast or a moderate speed?",
+    "choices": [
+      {
+        "label": "Drive Fast",
+        "imagePath": "imgs/armoredCarImg.jpg",
+        "id": "next_id"
+      },
+      {
+        "label": "Drive Moderate Speed",
+        "imagePath": "imgs/armoredCarImg.jpg",
+        "id": "next_id"
+      }
+    ]
+  },
 
-{
-  "id": "game_over_infection",
-  "prompt": "The infection spreads rapidly through your body. Your strength fades as your vision blurs, the world darkening with every heartbeat.Everything goes black. Game Over. (Every choice can have dangerous consequences, press reset to play again)",
-  "choices": []
-}
 
+
+  {
+    "id": "infection_choice",
+    "prompt": "You feel the bite and the infection starting to spread through your veins. You check your inventory and see the Antidote. Do you want to use it to cure yourself, or let the infection take over and transform you into one of them?",
+    "choices": [
+      {
+        "label": "Use Antidote",
+        "imagePath": "imgs/antidoteUse.jpg",
+        "id": "infection_cured"
+      },
+      {
+        "label": "Let Infection Take Over",
+        "imagePath": "imgs/zombieImg.jpg",
+        "id": "game_over_infection"
+      }
+    ]
+  },
+
+  {
+    "id": "game_over_infection",
+    "prompt": "The infection spreads rapidly through your body. Your strength fades as your vision blurs, the world darkening with every heartbeat.Everything goes black. Game Over. (Every choice can have dangerous consequences, press reset to play again)",
+    "choices": []
+  },
+
+  {
+    "id": "next_id",
+    "prompt": "reset the game",
+    "choices": []
+  }
 ]

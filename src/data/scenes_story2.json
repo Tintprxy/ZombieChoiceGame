@@ -1,44 +1,105 @@
 [
+  {
+    "id": "walk_path",
+    "prompt": "You walk down the street and find a hidden alley. There could be supplies or danger but you can't tell from here. Do you want to explore it or keep walking?",
+      "healthChange": -10,
+      "choices": [
+        {
+          "label": "Explore Alley",
+          "imagePath": "imgs/alleyImg.jpg",
+          "id": "weapon_choice"
+        },
+        {
+          "label": "Keep Walking",
+          "imagePath": "imgs/streetImg.jpg",
+          "id": "startRunning"
+        }
+      ]
+    },
+
     {
-    "id": "inventory_choice",
-    "prompt": "Select your starting inventory:\n\nHealth Heavy, Attack Heavy, or Balanced?",
-    "choices": [
-      {
-        "label": "Health Heavy",
-        "imagePath": "imgs/healthHeavyImg.jpg",
-        "id": "start"
-      },
-      {
-        "label": "Attack Heavy",
-        "imagePath": "imgs/attackHeavyImg.jpg",
-        "id": "start"
-      },
-      {
-        "label": "Balanced",
-        "imagePath": "imgs/balancedImg.jpg",
-        "id": "start"
-      },
-      {
-        "label": "empty",
-        "imagePath": "imgs/emptyImg.jpg",
-        "id": "start"
+      "id": "weapon_choice",
+      "prompt": "You discover a stash of weapons! Which one do you take?",
+      "choices": [
+        {
+          "label": "Take Sword",
+          "imagePath": "imgs/swordImg.jpg",
+          "id": "sword_taken"
+        },
+        {
+          "label": "Take Baseball Bat",
+          "imagePath": "imgs/baseballBatImg.jpg",
+          "id": "bat_taken"
+        },
+        {
+          "label": "Take Neither",
+          "imagePath": "imgs/emptyHandsImg.jpg",
+          "id": "neither_taken"
+        }
+      ]
+    },
+
+    {
+      "id": "sword_taken",
+      "prompt": "You take the sword and leave the bat behind.",
+      "choices": [
+        {
+          "label": "Continue",
+          "imagePath": "imgs/swordTakenImg.jpg",
+          "id": "startRunning"
+        }
+      ],
+      "addItem": {
+        "name": "Sword",
+        "type": "WEAPON",
+        "durability": 12,
+        "power": 9
       }
+    },
+
+    {
+      "id": "bat_taken",
+      "prompt": "You take the baseball bat and leave the sword behind.",
+      "choices": [
+        {
+          "label": "Continue",
+          "imagePath": "imgs/batTakenImg.jpg",
+          "id": "startRunning"
+        }
+      ],
+      "addItem": {
+        "name": "Baseball Bat",
+        "type": "WEAPON",
+        "durability": 10,
+        "power": 7
+      }
+    },
+
+    {
+      "id": "neither_taken",
+      "prompt": "You decide to leave both weapons behind and continue unarmed. You feel vulnerable, but lighter on your feet.",
+      "choices": [
+        {
+          "label": "Continue",
+          "imagePath": "imgs/titleImg.jpg",
+          "id": "startRunning"
+        }
     ]
   },
 
   {
-    "id": "start",
-    "prompt": " STORY_2 !!!!The street is quiet but you hear a distant moan. Zombies? Enemies? only one way to find out. Do you want to drive your armored car or Ditch it and go on foot?",
+    "id": "startRunning",
+    "prompt": "You keep walking down the alley till you make it to a street, staying alert for any signs of danger. The city is eerily quiet, but you can hear distant moans and shuffling feet. Then suddenly, you hear a loud crash and a scream behind you. Do you want to start running or find a place to hide?",
     "choices": [
       {
-        "label": "Drive",
-        "imagePath": "imgs/armoredCarImg.jpg",
-        "id": "drive_path"
+        "label": "Start Running",
+        "imagePath": "imgs/startRunningImg.jpg",
+        "id": "next_id"
       },
       {
-        "label": "Walk",
-        "imagePath": "imgs/walkingImg.jpg",
-        "id": "walk_path"
+        "label": "Find a Place to Hide",
+        "imagePath": "imgs/hideImg.jpg",
+        "id": "next_id"
       }
     ]
   }
