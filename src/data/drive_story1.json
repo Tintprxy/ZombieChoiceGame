@@ -248,18 +248,148 @@
     "choices": [
       {
         "label": "Drive Fast",
-        "imagePath": "imgs/armoredCarImg.jpg",
-        "id": "next_id"
+        "imagePath": "imgs/defaultImg.jpg",
+        "id": "drive_choice"
       },
       {
         "label": "Drive Moderate Speed",
-        "imagePath": "imgs/armoredCarImg.jpg",
+        "imagePath": "imgs/defaultImg.jpg",
         "id": "next_id"
       }
     ]
   },
 
+  {
+    "id": "drive_choice",
+    "prompt": "As your car speeds along the open road, the engine's roar and the rush of wind remind you of the power beneath your feet. Yet the road ahead remains uncertain. You continue, running over debris and hearing weird noises from the engine. Do you slam the pedal to the floor and embrace breakneck speed, or do you ease off and slow down to better survey your surroundings?",
+    "choices": [
+      {
+        "label": "Drive Fast",
+        "imagePath": "imgs/defaultImg.jpg",
+        "id": "car_crash"
+      },
+      {
+        "label": "Slow Down",
+        "imagePath": "imgs/defaultImg.jpg",
+        "id": "slow_drive"
+      }
+    ]
+  },
 
+  {
+    "id": "car_crash",
+    "prompt": "You lose control of the car when a sudden swerve overwhelms your focus. The vehicle careens violently toward a hotel, and the collision is disastrous. The impact sends shattering metal and shards of glass flying in every direction. For a moment, the world fades to black—a cacophony of noise and blurred light fills your senses. As you slowly regain consciousness, your body aches with every movement, and you struggle to understand the magnitude of what just happened.",
+    "healthChange": -20,
+    "choices": [
+      {
+        "label": "Get Out of the Car",
+        "imagePath": "imgs/defaultImg.jpg",
+        "id": "zombie_woman"
+      }
+    ]
+  },
+
+  {
+    "id": "zombie_woman",
+    "prompt": "After the crash, you make your way slowly on foot through the wreckage. As you navigate the debris-strewn road, you notice a lone figure in the distance. Drawing nearer, you realize it’s a woman—her eyes vacant and her face contorting with pain as she seems to teeter between humanity and zombification. The transformation has begun. Do you risk approaching her to see if you can help, or do you keep your distance and continue on your way?",
+    "choices": [
+      {
+        "label": "Approach Her",
+        "imagePath": "imgs/defaultImg.jpg",
+        "id": "help_zombie_woman"
+      },
+      {
+        "label": "Keep Walking",
+        "imagePath": "imgs/defaultImg.jpg",
+        "id": "she_chases_you"
+      }
+    ]
+  },
+
+  {
+    "id": "she_chases_you",
+    "prompt": "You decide not to linger and keep walking, but as soon as you turn away, the zombie woman breaks into a hasty pursuit. Her guttural moans echo behind you as her shuffling footsteps close the gap. Heart pounding, you sprint down the street, desperate to escape the relentless chase. Do you try to find a place to hide or push yourself to run even faster?",
+    "threatLevel": 9,
+    "fightNumber": 3,
+    "choices": [
+      {
+        "label": "Turn and fight",
+        "imagePath": "imgs/defaultImg.jpg",
+        "id": "fight_result_win_3"
+      },
+      {
+        "label": "Run Faster",
+        "imagePath": "imgs/defaultImg.jpg",
+        "id": "she_out_runs_you"
+      }
+    ]
+  },
+
+{
+    "id": "fight_result_win_3",
+    "prompt": "You stop and turn to face the zombie woman. As she lunges at you, you manage to dodge her grasp and counter with a swift kick. The impact sends her stumbling back, momentarily disoriented. Seizing the opportunity, you deliver a decisive blow that incapacitates her. Breathing heavily, you watch as she collapses to the ground, no longer a threat. You feel a mix of relief and sorrow, knowing that you had to fight someone who was once human.",
+    "choices": [
+      {
+        "label": "leave the scene",
+        "imagePath": "imgs/defaultImg.jpg",
+        "id": "escape_success"
+      }
+    ]
+  },
+  
+{
+    "id": "fight_result_lose_3",
+    "prompt": "You try to fight the zombie woman, but she overpowers you. Her teeth sink into your flesh, and you feel the infection spreading through your body. You struggle to break free, but it's too late. Everything goes black. Game Over. (Every choice can have dangerous consequences, press reset to play again)",
+    "choices": []
+  },
+
+ {
+    "id": "she_out_runs_you",
+    "bitten": true,
+    "prompt": "Despite your best efforts to outrun her, the zombie woman closes the distance with terrifying speed. You can hear her ragged breathing and the sound of her feet pounding the pavement behind you. Just when you think you might escape, she lunges forward and tackles you to the ground. Everything goes black. Game Over. (Every choice can have dangerous consequences, press reset to play again)",
+    "choices": []
+  },
+
+  {
+    "id": "help_zombie_woman",
+    "prompt": "You cautiously approach the afflicted woman. As you get closer, you notice that while the infection has already begun to take hold of her, her eyes still hold a glimpse of the person she once was. Do you risk administering the antidote in hopes of saving a life, or do you decide that it's safer to walk away and focus on your own survival?",
+    "choices": [
+      {
+        "label": "Administer Antidote",
+        "imagePath": "imgs/antidoteUse.jpg",
+        "id": "infection_cured"
+      },
+      {
+        "label": "Walk Away",
+        "imagePath": "imgs/walkAwayImg.jpg",
+        "id": "she_chases_you"
+      }
+    ]
+  },
+
+  {
+    "id": "infection_cured",
+    "prompt": "You carefully administer the antidote to the woman. As the serum enters her system, you watch in awe as the signs of infection begin to recede. Her eyes regain their focus, and for a moment, she seems to be herself again. \"Thank you,\" she whispers, before collapsing into unconsciousness.",
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/continueImg.jpg",
+        "id": "win_infection_cured"
+      }
+    ]
+  },
+
+  {
+    "id": "win_infection_cured",
+    "prompt": "You managed to save the woman from the brink of death. As she slowly regains consciousness, you feel a sense of hope. Together you both walk aimlessly down the road until you reach the military base. You made it. You Win! (Press reset to play again)",
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/defaultImg.jpg",
+        "id": "next_id"
+      }
+    ]
+  },
 
   {
     "id": "infection_choice",

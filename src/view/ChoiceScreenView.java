@@ -98,6 +98,22 @@ public class ChoiceScreenView extends VBox {
             imageView.setPreserveRatio(true);
 
             Button button = new Button(choice.getLabel());
+            // Check if this is the "Administer Antidote" option.
+            if (choice.getNextId() != null && choice.getNextId().contains("infection_cured")) {
+                // Look for an antidote in key items.
+                boolean hasAntidote = false;
+                List<InventoryItem> keyItems = inventory.get(ItemType.KEY_ITEM);
+                if (keyItems != null) {
+                    hasAntidote = keyItems.stream().anyMatch(
+                        item -> item.getName().equalsIgnoreCase("Antidote")
+                    );
+                }
+                if (!hasAntidote) {
+                    button.setDisable(true);
+                    button.setStyle("-fx-opacity: 0.5;");
+                }
+            }
+            
             button.setOnAction(e -> {
                 if ("Fight".equalsIgnoreCase(choice.getLabel())) {
                     System.out.println("[DEBUG] Button clicked: " + choice.getLabel() +
