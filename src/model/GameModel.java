@@ -16,6 +16,7 @@ public class GameModel {
     private static final int MAX_WEAPONS = 2;
     private static final int INITIAL_HEALTH = 100;
     private InventoryItem keyItem;
+    private boolean antidoteUsed = false;
 
     public GameModel() {
         isDarkMode = false;
@@ -66,6 +67,34 @@ public class GameModel {
     }
     
     public boolean addItem(InventoryItem item) {
+        if (item.getType() == ItemType.KEY_ITEM) {
+            // If the new item is an antidote, reset the antidoteUsed flag.
+            if (item.getName().equalsIgnoreCase("Antidote")) {
+                // Reset the flag so that the new antidote can be used.
+                // (Assuming you added a boolean field 'antidoteUsed' with its getters/setters.)
+                setAntidoteUsed(false);
+                System.out.println("[DEBUG] Antidote used flag reset since a new antidote was found.");
+            }
+            List<InventoryItem> keyItems = inventory.get(ItemType.KEY_ITEM);
+            if (keyItems != null && !keyItems.isEmpty()) {
+                javafx.scene.control.Alert confirm = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
+                confirm.setTitle("Key Item Swap Confirmation");
+                confirm.setHeaderText("Key item already exists.");
+                confirm.setContentText("You already have the key item \""
+                    + keyItems.get(0).getName()
+                    + "\". Are you sure you want to swap it for \""
+                    + item.getName() + "\"?");
+
+                java.util.Optional<javafx.scene.control.ButtonType> result = confirm.showAndWait();
+                if (result.isPresent() && result.get() == javafx.scene.control.ButtonType.OK) {
+                    keyItems.clear();
+                    System.out.println("[DEBUG] Existing key item removed for swap.");
+                } else {
+                    System.out.println("[DEBUG] User canceled key item swap. Skipping add for: " + item.getName());
+                    return false;
+                }
+            }
+        }
         inventory.putIfAbsent(item.getType(), new ArrayList<>());
         List<InventoryItem> items = inventory.get(item.getType());
 
@@ -79,7 +108,6 @@ public class GameModel {
             System.out.println("[DEBUG] Weapon limit reached, not adding: " + item.getName());
             return false;
         }
-
         items.add(item);
         System.out.println("[DEBUG] Added item: " + item.getName() + ", inventory now: " + inventory);
         return true;
@@ -135,5 +163,13 @@ public class GameModel {
 
     public void resetHealth() {
         this.health = INITIAL_HEALTH;
+    }
+
+    public boolean isAntidoteUsed() {
+        return antidoteUsed;
+    }
+
+    public void setAntidoteUsed(boolean antidoteUsed) {
+        this.antidoteUsed = antidoteUsed;
     }
 }

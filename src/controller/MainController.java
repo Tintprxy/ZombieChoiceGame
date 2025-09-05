@@ -313,10 +313,9 @@ public class MainController {
 
         final GameScene currentSceneFinal = modifiedScene;
 
-        // Only apply healthChange if entering a new scene
+        // Only apply healthChange if entering a new scene.
         if (!currentSceneFinal.getId().equals(lastHealthAppliedSceneId)) {
             int before = model.getHealth();
-            // Skip applying the JSON healthChange if this is a fight result scene.
             if (!currentSceneFinal.getId().startsWith("fight_result")) {
                 model.subtractHealth(currentSceneFinal.getHealthChange());
                 System.out.println("[DEBUG] Applied scene healthChange: " + currentSceneFinal.getHealthChange() +
@@ -327,7 +326,23 @@ public class MainController {
             lastHealthAppliedSceneId = currentSceneFinal.getId();
         }
 
-        // Inventory choice screen logic
+        // --- NEW LOGIC: Remove antidote if current scene contains "infection_cured" ---
+        if (currentSceneFinal.getId().contains("infection_cured")) {
+            List<InventoryItem> keyItems = model.getInventory().get(ItemType.KEY_ITEM);
+            if (keyItems != null) {
+                boolean removed = keyItems.removeIf(item -> item.getName().equalsIgnoreCase("Antidote"));
+                if (removed) {
+                    System.out.println("[DEBUG] Antidote has been removed from inventory for scene: " + currentSceneFinal.getId());
+                    // Mark that antidote has been used.
+                    model.setAntidoteUsed(true);
+                } else {
+                    System.out.println("[DEBUG] No antidote found to remove for scene: " + currentSceneFinal.getId());
+                }
+            }
+        }
+        // -------------------------------------------------------------------------
+
+        // Inventory choice screen logic.
         if ("inventory_choice".equals(currentSceneFinal.getId())) {
             showInventoryChoiceView(sceneLoader, "start");
             return;
@@ -337,9 +352,6 @@ public class MainController {
             InventoryItem item = currentSceneFinal.getAddItem();
             addItemProcessedScenes.add(currentSceneFinal.getId()); // mark current scene as processed
             if (item.getType() == ItemType.WEAPON) {
-                // You must pass a next scene id that is not the same as the current scene!
-                // For example, if the scene’s choices lead to a new scene, pass that id.
-                // Here we assume the scene has a proper next id stored (you might need to adjust this):
                 String nextSceneId = currentSceneFinal.getChoices().get(0).getNextId(); 
                 addWeaponToInventory(item, nextSceneId, sceneLoader);
             } else {
@@ -349,7 +361,6 @@ public class MainController {
         }
 
         if (currentSceneFinal.getNewKeyItem() != null && !currentSceneFinal.getNewKeyItem().trim().isEmpty()) {
-            // Build file path based on the key item name (e.g., "antidote" becomes "src/data/antidote.json")
             String keyItemFilePath = "src/data/" + currentSceneFinal.getNewKeyItem().toLowerCase() + ".json";
             InventoryItem keyItem = InventoryLoader.loadKeyItemFromJson(keyItemFilePath);
             if (keyItem != null) {
@@ -360,21 +371,20 @@ public class MainController {
             }
         }
 
-        // Build the choice screen view
+        // Build and show the choice screen view...
         ChoiceScreenView view = new ChoiceScreenView(
             model.getHealth(),
             currentSceneFinal.getPrompt(),
             currentSceneFinal.getChoices(),
             model.isDarkMode(),
             model.getInventory(),
+            model,   // Added model here.
             choice -> {
-                // Inventory choice logic
                 if ("inventory_choice".equals(currentSceneFinal.getId())) {
                     applyInventoryChoice(choice.getLabel());
                     showSceneView(sceneLoader.getSceneById("start"), sceneLoader);
                     return;
                 }
-                // Fight logic: if the choice label is "Fight" or contains "fight"
                 if (currentSceneFinal.getThreatLevel() > -1 && choice.getLabel().toLowerCase().contains("fight")) {
                     int threat = currentSceneFinal.getThreatLevel();
                     int fightNumber = currentSceneFinal.getFightNumber();
@@ -384,7 +394,6 @@ public class MainController {
                     handleFight(currentSceneFinal, fightNumber, ded, winPenalty, losePenalty, choice.getNextId(), sceneLoader);
                     return;
                 }
-                // Normal scene transition
                 System.out.printf("[DEBUG] No fight calculation for choice \"%s\"; loading scene: %s%n", 
                     choice.getLabel(), choice.getNextId());
                 GameScene next = sceneLoader.getSceneById(choice.getNextId());
@@ -401,13 +410,12 @@ public class MainController {
                 showSceneView(scene, sceneLoader);
             },
             () -> {
-                javafx.scene.control.Alert confirm =
-                    new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
+                Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
                 confirm.setTitle("Reset Game");
                 confirm.setHeaderText("Are you sure you want to return to the title screen?");
                 confirm.setContentText("Any current progress will be lost.");
-                Optional<javafx.scene.control.ButtonType> res = confirm.showAndWait();
-                if (res.isPresent() && res.get() == javafx.scene.control.ButtonType.OK) {
+                Optional<ButtonType> res = confirm.showAndWait();
+                if (res.isPresent() && res.get() == ButtonType.OK) {
                     lastHealthAppliedSceneId = null;
                     addItemProcessedScenes.clear();
                     resetInventoryToDefault();

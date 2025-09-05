@@ -12,6 +12,7 @@ import model.ItemType;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import model.GameModel;
 
 public class ChoiceScreenView extends VBox {
     private Label healthLabel;
@@ -27,6 +28,7 @@ public class ChoiceScreenView extends VBox {
     private Runnable onToggleTheme;
     private Runnable onReset;         
     private Consumer<InventoryItem> onConsumeItem;
+    private GameModel model; // add this field
 
     public ChoiceScreenView(
         int health,
@@ -34,16 +36,18 @@ public class ChoiceScreenView extends VBox {
         List<GameChoice> choices,
         boolean darkMode,
         Map<ItemType, List<InventoryItem>> inventory,
+        GameModel model,                      // add model as a parameter
         Consumer<GameChoice> onChoiceSelected,
         Runnable onToggleTheme,
-        Runnable onReset,              
-        Consumer<InventoryItem> onConsumeItem 
+        Runnable onReset,
+        Consumer<InventoryItem> onConsumeItem
     ) {
         this.health = health;
         this.promptText = promptText;
         this.choices = choices;
         this.darkMode = darkMode;
         this.inventory = inventory;
+        this.model = model; // store it for later use
         this.onChoiceSelected = onChoiceSelected;
         this.onToggleTheme = onToggleTheme;
         this.onReset = onReset;        
@@ -100,7 +104,7 @@ public class ChoiceScreenView extends VBox {
             Button button = new Button(choice.getLabel());
             // Check if this is the "Administer Antidote" option.
             if (choice.getNextId() != null && choice.getNextId().contains("infection_cured")) {
-                // Look for an antidote in key items.
+                // Check if the antidote is either available in inventory OR has already been used.
                 boolean hasAntidote = false;
                 List<InventoryItem> keyItems = inventory.get(ItemType.KEY_ITEM);
                 if (keyItems != null) {
@@ -108,7 +112,8 @@ public class ChoiceScreenView extends VBox {
                         item -> item.getName().equalsIgnoreCase("Antidote")
                     );
                 }
-                if (!hasAntidote) {
+                // Disable the button only if there's no antidote and it hasn't been used already.
+                if (!hasAntidote && !model.isAntidoteUsed()) {
                     button.setDisable(true);
                     button.setStyle("-fx-opacity: 0.5;");
                 }
