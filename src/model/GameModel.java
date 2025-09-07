@@ -172,4 +172,14 @@ public class GameModel {
     public void setAntidoteUsed(boolean antidoteUsed) {
         this.antidoteUsed = antidoteUsed;
     }
+
+    // Call this method after updating weapon durability.
+    public void removeBrokenWeapons() {
+        List<InventoryItem> weapons = inventory.get(ItemType.WEAPON);
+        if (weapons != null) {
+            // Remove any weapons with durability 0 or below.
+            weapons.removeIf(weapon -> weapon.getDurability() <= 0);
+            System.out.println("[DEBUG] Broken weapons removed. Current weapons: " + weapons);
+        }
+    }
 }

@@ -113,7 +113,6 @@ public class MainController {
             updateView();
         });
         
-        // Update indices because we added a subtitle (extra child)
         Button driveButton = (Button) turnstileView.getStory1Box().getChildren().get(3);
         driveButton.setOnAction(e -> {
             SceneLoader sceneLoader = new SceneLoader("src/data/drive_story1.json");
@@ -164,7 +163,7 @@ public class MainController {
         inventoryView.getHealthHeavyButton().setOnAction(e -> {
             System.out.println("[DEBUG] Health Heavy button clicked.");
             applyInventoryChoice("Health Heavy");
-            GameScene next = SceneLoader.getSceneById(startSceneId); // Use passed parameter here.
+            GameScene next = SceneLoader.getSceneById(startSceneId); 
             if (next != null) {
                 System.out.println("[DEBUG] Starting scene: " + next.getId());
                 showSceneView(next, SceneLoader);
@@ -237,24 +236,20 @@ public class MainController {
         }
     }
 
-
-
-    // Adds a weapon to the inventory, using existing addWeaponToJson and showWeaponRemovalDialog methods.
     public void addWeaponToInventory(InventoryItem weapon, String nextSceneId, SceneLoader sceneLoader) {
         if (weapon.getType() != ItemType.WEAPON) {
             System.out.println("[DEBUG] Tried to add non-weapon item as weapon.");
             return;
         }
         List<InventoryItem> weapons = model.getInventory().getOrDefault(ItemType.WEAPON, new ArrayList<>());
-        // Use the same limit as in GameModel (MAX_WEAPONS = 2)
         int maxWeapons = 2;
         if (weapons.size() < maxWeapons) {
-            boolean added = model.addItem(weapon); // This call will fail if limit reached in GameModel
+            boolean added = model.addItem(weapon);
             if (added) {
                 writeTempWeaponJson(weapon);
                 addWeaponToJson(weapon);
                 System.out.println("[DEBUG] Added weapon: " + weapon.getName());
-                addItemProcessedScenes.add(nextSceneId); // mark next scene as processed
+                addItemProcessedScenes.add(nextSceneId); 
                 GameScene nextScene = sceneLoader.getSceneById(nextSceneId);
                 if (nextScene != null) {
                     showSceneView(nextScene, sceneLoader);
@@ -262,7 +257,6 @@ public class MainController {
                     updateView();
                 }
             } else {
-                // Fallback if model.addItem still fails
                 List<String> weaponNames = weapons.stream().map(InventoryItem::getName).toList();
                 showWeaponRemovalDialog(weaponNames, weapon, nextSceneId, sceneLoader);
             }
@@ -313,36 +307,33 @@ public class MainController {
 
         final GameScene currentSceneFinal = modifiedScene;
 
-        // Only apply healthChange if entering a new scene.
         if (!currentSceneFinal.getId().equals(lastHealthAppliedSceneId)) {
-            int before = model.getHealth();
-            if (!currentSceneFinal.getId().startsWith("fight_result")) {
-                model.subtractHealth(currentSceneFinal.getHealthChange());
-                System.out.println("[DEBUG] Applied scene healthChange: " + currentSceneFinal.getHealthChange() +
-                    " | Health before: " + before + ", after: " + model.getHealth());
+            if (currentSceneFinal.getHealthChange() == -1) {
+                model.setHealth(0);
+                System.out.println("[DEBUG] HealthChange is -1 for scene " + currentSceneFinal.getId() + ". Health set to 0.");
             } else {
-                System.out.println("[DEBUG] Skipped JSON healthChange for fight result scene: " + currentSceneFinal.getId());
+                int before = model.getHealth();
+                model.subtractHealth(currentSceneFinal.getHealthChange());
+                System.out.println("[DEBUG] Applied scene healthChange: " 
+                    + currentSceneFinal.getHealthChange() + " | Health before: " 
+                    + before + ", after: " + model.getHealth());
             }
             lastHealthAppliedSceneId = currentSceneFinal.getId();
         }
-
-        // --- NEW LOGIC: Remove antidote if current scene contains "infection_cured" ---
+        
         if (currentSceneFinal.getId().contains("infection_cured")) {
             List<InventoryItem> keyItems = model.getInventory().get(ItemType.KEY_ITEM);
             if (keyItems != null) {
                 boolean removed = keyItems.removeIf(item -> item.getName().equalsIgnoreCase("Antidote"));
                 if (removed) {
                     System.out.println("[DEBUG] Antidote has been removed from inventory for scene: " + currentSceneFinal.getId());
-                    // Mark that antidote has been used.
                     model.setAntidoteUsed(true);
                 } else {
                     System.out.println("[DEBUG] No antidote found to remove for scene: " + currentSceneFinal.getId());
                 }
             }
         }
-        // -------------------------------------------------------------------------
 
-        // Inventory choice screen logic.
         if ("inventory_choice".equals(currentSceneFinal.getId())) {
             showInventoryChoiceView(sceneLoader, "start");
             return;
@@ -350,7 +341,7 @@ public class MainController {
 
         if (currentSceneFinal.getAddItem() != null && !addItemProcessedScenes.contains(currentSceneFinal.getId())) {
             InventoryItem item = currentSceneFinal.getAddItem();
-            addItemProcessedScenes.add(currentSceneFinal.getId()); // mark current scene as processed
+            addItemProcessedScenes.add(currentSceneFinal.getId());
             if (item.getType() == ItemType.WEAPON) {
                 String nextSceneId = currentSceneFinal.getChoices().get(0).getNextId(); 
                 addWeaponToInventory(item, nextSceneId, sceneLoader);
@@ -371,14 +362,13 @@ public class MainController {
             }
         }
 
-        // Build and show the choice screen view...
         ChoiceScreenView view = new ChoiceScreenView(
             model.getHealth(),
             currentSceneFinal.getPrompt(),
             currentSceneFinal.getChoices(),
             model.isDarkMode(),
             model.getInventory(),
-            model,   // Added model here.
+            model, 
             choice -> {
                 if ("inventory_choice".equals(currentSceneFinal.getId())) {
                     applyInventoryChoice(choice.getLabel());
@@ -392,6 +382,7 @@ public class MainController {
                     int winPenalty = computeWinHealthPenalty(threat);
                     int losePenalty = computeLoseHealthPenalty(threat);
                     handleFight(currentSceneFinal, fightNumber, ded, winPenalty, losePenalty, choice.getNextId(), sceneLoader);
+                    model.removeBrokenWeapons();
                     return;
                 }
                 System.out.printf("[DEBUG] No fight calculation for choice \"%s\"; loading scene: %s%n", 
@@ -407,7 +398,7 @@ public class MainController {
             },
             () -> {
                 model.toggleDarkMode();
-                showSceneView(scene, sceneLoader);
+                showSceneView(currentSceneFinal, sceneLoader);
             },
             () -> {
                 Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
@@ -592,7 +583,6 @@ public class MainController {
     }
 
     private int computeWinHealthPenalty(int threatLevel) {
-        // return 10 + threatLevel;
         return 0;
     }
 

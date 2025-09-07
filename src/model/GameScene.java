@@ -8,6 +8,7 @@ public class GameScene {
     // new field for fight number; default to 1 if not set
     private int fightNumber = 1;
     private String newKeyItem;
+    private boolean eaten;
 
     public GameScene(String id, String prompt, List<GameChoice> choices) {
         this.id = id;
@@ -37,6 +38,16 @@ public class GameScene {
         this.choices = choices;
         this.addItem = addItem;
         this.threatLevel = threatLevel;
+    }
+
+    public GameScene(String id, String prompt, int healthChange, List<GameChoice> choices, InventoryItem addItem, int threatLevel, boolean eaten) {
+        this.id = id;
+        this.prompt = prompt;
+        this.healthChange = healthChange;
+        this.choices = choices;
+        this.addItem = addItem;
+        this.threatLevel = threatLevel;
+        this.eaten = eaten;
     }
 
     // Add a field to store the raw JSON object
@@ -102,5 +113,13 @@ public class GameScene {
 
     public void setBitten(boolean bitten) {
         this.bitten = bitten;
+    }
+
+    public boolean isEaten() {
+        return eaten;
+    }
+
+    public void setEaten(boolean eaten) {
+        this.eaten = eaten;
     }
 }

@@ -14,13 +14,13 @@
     "name": "Baseball Bat",
     "type": "WEAPON",
     "durability": 10,
-    "power": 7
+    "power": 4
   },
   {
     "name": "Knife",
     "type": "WEAPON",
     "durability": 6,
-    "power": 5
+    "power": 3
   },
   {
   "name": "Map",
