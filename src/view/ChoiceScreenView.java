@@ -36,7 +36,7 @@ public class ChoiceScreenView extends VBox {
         List<GameChoice> choices,
         boolean darkMode,
         Map<ItemType, List<InventoryItem>> inventory,
-        GameModel model,                      // add model as a parameter
+        GameModel model,
         Consumer<GameChoice> onChoiceSelected,
         Runnable onToggleTheme,
         Runnable onReset,
@@ -47,7 +47,7 @@ public class ChoiceScreenView extends VBox {
         this.choices = choices;
         this.darkMode = darkMode;
         this.inventory = inventory;
-        this.model = model; // store it for later use
+        this.model = model;
         this.onChoiceSelected = onChoiceSelected;
         this.onToggleTheme = onToggleTheme;
         this.onReset = onReset;        
@@ -84,6 +84,7 @@ public class ChoiceScreenView extends VBox {
         choiceRow.setAlignment(Pos.CENTER);
 
         for (GameChoice choice : choices) {
+            // Print some debug info based on the choice label.
             if ("Fight".equalsIgnoreCase(choice.getLabel())) {
                 System.out.println("[DEBUG] Creating button for choice: " + choice.getLabel() +
                     ", possible nextIds: fight_result_win_1 / fight_result_lose_1" +
@@ -102,9 +103,9 @@ public class ChoiceScreenView extends VBox {
             imageView.setPreserveRatio(true);
 
             Button button = new Button(choice.getLabel());
-            // Check if this is the "Administer Antidote" option.
-            if (choice.getNextId() != null && choice.getNextId().contains("infection_cured")) {
-                // Check if the antidote is either available in inventory OR has already been used.
+
+            // Check if this choice relates to the antidote and disable it if the user doesn't have it.
+            if (choice.getLabel().toLowerCase().contains("use antidote") || choice.getLabel().toLowerCase().contains("administer antidote")) {
                 boolean hasAntidote = false;
                 List<InventoryItem> keyItems = inventory.get(ItemType.KEY_ITEM);
                 if (keyItems != null) {
@@ -112,7 +113,6 @@ public class ChoiceScreenView extends VBox {
                         item -> item.getName().equalsIgnoreCase("Antidote")
                     );
                 }
-                // Disable the button only if there's no antidote and it hasn't been used already.
                 if (!hasAntidote && !model.isAntidoteUsed()) {
                     button.setDisable(true);
                     button.setStyle("-fx-opacity: 0.5;");

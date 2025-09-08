@@ -589,6 +589,4 @@ public class MainController {
     private int computeLoseHealthPenalty(int threatLevel) {
         return 25 + (2 * threatLevel);
     }
-
-
 }

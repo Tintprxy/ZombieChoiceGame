@@ -14,7 +14,7 @@
     "name": "Baseball Bat",
     "type": "WEAPON",
     "durability": 10,
-    "power": 4
+    "power": 3
   },
   {
     "name": "Knife",

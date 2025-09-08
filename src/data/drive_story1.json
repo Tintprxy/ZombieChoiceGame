@@ -163,7 +163,7 @@
       {
         "label": "Continue On",
         "imagePath": "imgs/retreatImg.jpg",
-        "id": "next_path"
+        "id": "return_to_car"
       }
     ]
   },
@@ -219,8 +219,13 @@
   {
     "id": "fight_result_lose_2",
     "prompt": "You tried to fight the zombie, but your efforts weren't enough. The zombie overpowers you and sinks its teeth into your arm. The bite quickly shows signs of infection, and without a chance to use an antidote, your fate seems sealed. Your vision fades as the infection takes hold.",
-    "bitten": true,
     "choices": [
+      {
+        "label": "Use Antidote",
+        "imagePath": "imgs/antidoteUse.jpg",
+        "id": "fight_hoard_bitten"
+      },
+
       {
         "label": "Accept your fate",
         "imagePath": "imgs/doctorZombieBite.jpg",
@@ -232,29 +237,11 @@
   {
     "id": "return_to_car",
     "prompt": "You make your way back to the car, your heart racing with every step. The streets are eerily quiet, but you can still feel the presence of danger lurking around every corner.",
-    "bitten": false,
     "choices": [
       {
         "label": "Get in the Car",
         "imagePath": "imgs/carImg.jpg",
         "id": "car_scene"
-      }
-    ]
-  },
-
-  {
-    "id": "car_scene",
-    "prompt": "Now you're driving away, headed directly for the military base. The road is clear, but you can't shake the feeling that something is watching you. You glance in the rearview mirror and think you see a figure in the distance. do you want to drive recklessly fast or a moderate speed?",
-    "choices": [
-      {
-        "label": "Drive Fast",
-        "imagePath": "imgs/defaultImg.jpg",
-        "id": "drive_choice"
-      },
-      {
-        "label": "Drive Moderate Speed",
-        "imagePath": "imgs/defaultImg.jpg",
-        "id": "normal_drive"
       }
     ]
   },
@@ -271,7 +258,7 @@
       {
         "label": "Slow Down",
         "imagePath": "imgs/defaultImg.jpg",
-        "id": "slow_drive"
+        "id": "normal_drive"
       }
     ]
   },
@@ -350,10 +337,40 @@
     "prompt": "As you catch your breath after the fierce battle, the echo of fading footsteps mixes with the tense silence of a world reborn in chaos. In the distance, emerging from the haze of a broken cityscape, you glimpse the towering gates of the military base, their iron frames silhouetted against a blood-tinged sky. Every scar on your body and every beat of your heart testifies to the struggle for survival. Against all odds, you have overcome the nightmare—today, hope still burns. You made it. You Win! (Press reset to play again)"
   },
 
- {
+  {
     "id": "she_out_runs_you",
-    "bitten": true,
-    "prompt": "Despite your best efforts to outrun her, the zombie woman closes the distance with terrifying speed. You can hear her ragged breathing and the sound of her feet pounding the pavement behind you. Just when you think you might escape, she lunges forward and tackles you to the ground. Everything goes black. Game Over. (Every choice can have dangerous consequences, press reset to play again)",
+    "prompt": "Despite your best efforts to outrun her, the zombie woman closes the distance with terrifying speed. She lunges forward and sinks her teeth into your arm, and the infection begins to spread through your veins. In that crucial moment, your fate hangs in the balance. Do you fight back with the antidote, or resign yourself to the inevitable?",
+    "choices": [
+      {
+        "label": "Use Antidote",
+        "imagePath": "imgs/antidoteUse.jpg",
+        "id": "Bitten_from_behind_win"
+      },
+      {
+        "label": "Accept Your Fate",
+        "imagePath": "imgs/doctorZombieBite.jpg",
+        "id": "game_over_infection"
+      }
+    ]
+  },
+
+  {
+    "id": "Bitten_from_behind_win",
+    "prompt": "You quickly administer the antidote, and a wave of relief washes over you as the infection is halted. Weakened but resolute, you stagger through a landscape of shattered glass and twisted metal. The ruins of the old world stretch before you, yet in the distance, an imposing fortress looms—the military base, its high walls and steady lights a promise of sanctuary. Every painful step brings you closer to safety; the base's fortified gates inspire hope amidst despair. Against all odds, you cross its threshold. Victory is yours. You Win! (Press reset to play again)",
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/defaultImg.jpg",
+        "id": "next_id"
+      }
+    ]
+  },
+
+  {
+    "id": "game_over_infection",
+    "eaten": true,
+    "healthChange": -1,
+    "prompt": "The infection takes hold rapidly, and your vision blurs as your body succumbs to the virus. In your final moments, you feel a cold numbness spreading through you, and everything fades to black. Game Over. (Every choice can have dangerous consequences—press reset to play again)",
     "choices": []
   },
 
@@ -419,7 +436,7 @@
 
   {
     "id": "fight_result_win_4",
-    "prompt": "against all odds, you manage to fend off the hoard of zombies. Your weapon takes some damage, but you survive the encounter. You continue on your way to the military base.",
+    "prompt": "In the crucible of battle, you defy impossible odds and repel the relentless tide of zombies. Though your weapon bears the scars of a brutal fight, you stand resolute amid the chaos. Each trembling, determined step carries you closer to salvation, as the distant glow of the military base transforms into a brilliant beacon of hope against the night. Its towering, fortified walls promise sanctuary from the darkness—a realm where despair is replaced by the promise of new beginnings. With fierce determination, you push through the debris and cross the Military base’s threshold. Against all odds, you have overcome. Victory is yours. You Win! (Press reset to play again)",
     "choices": [
       {
         "label": "Continue",
@@ -432,19 +449,66 @@
   {
     "id": "fight_result_lose_4",
     "prompt": "You tried to fight the hoard of zombies, but they overwhelm you. You are bitten and the infection quickly spreads through your body. Everything goes black. Game Over. (Every choice can have dangerous consequences, press reset to play again)",
-    "bitten": true,
-    "choices": []
+    
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/defaultImg.jpg",
+        "id": "fight_hoard_bitten"
+      }
+    ]
+  },
+
+  {
+    "id": "fight_hoard_bitten",
+    "prompt": "After being overpowered by the hoard, you have been bitten—your life now hangs in the balance as the infection sets in. Do you choose to fight back with the antidote or accept your fate?",
+    "choices": [
+      {
+        "label": "Use Antidote",
+        "imagePath": "imgs/antidoteUse.jpg",
+        "id": "fight_hoard_bitten_win"
+      },
+      {
+        "label": "Accept Your Fate",
+        "imagePath": "imgs/doctorZombieBite.jpg",
+        "id": "game_over_infection"
+      }
+    ]
+  },
+
+{
+    "id": "fight_hoard_bitten_win",
+    "prompt": "You quickly administer the antidote, and a wave of relief washes over you as the infection is halted. Weakened but resolute, you stagger through a landscape of shattered glass and twisted metal. The ruins of the old world stretch before you, yet in the distance, an imposing fortress looms—the military base, its high walls and steady lights a promise of sanctuary. Every painful step brings you closer to safety; the base's fortified gates inspire hope amidst despair. Against all odds, you cross its threshold, marking a hard-won victory. You Win! (Press reset to play again)",
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/defaultImg.jpg",
+        "id": "next_id"
+      }
+    ]
   },
 
   {
     "id": "run_them_over",
-    "prompt": "You decide to run over the hoard of zombies with your car. The impact is brutal, and you hear the sickening crunch of bones as you plow through them. However, the car takes significant damage in the process, and you lose control of the vehicle. You crash into a tree and sustain injuries.",
+    "prompt": "You slam on the accelerator, and your car barrels forward like a raging beast. In one cataclysmic moment, you crash into the horde of zombies—metal screams and bone shatters as the vehicle crushes the undead with ruthless force. The impact reverberates through the night, and as chaos erupts around you, the car spirals wildly, hurtling toward a looming tree. In a collision of fate and metal, you crash into the trunk, the world exploding in a haze of shattered glass and twisted steel, leaving you dazed and wounded.",
     "healthChange": -20,
     "choices": [
       {
         "label": "Get Out of the Car",
         "imagePath": "imgs/defaultImg.jpg",
-        "id": "drive_around"
+        "id": "Run_em_Over_Win"
+      }
+    ]
+  },
+
+  {
+    "id": "Run_em_Over_win",
+    "prompt": "Bruised and battered, you push forward through the wreckage and ruin. With every agonizing step, the military base looms closer—a steadfast beacon amidst chaos. Against all odds and despite your injuries, you cross its threshold, triumphant and resolute. Victory is yours. You Win! (Press reset to play again)",
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/defaultImg.jpg",
+        "id": "next_id"
       }
     ]
   },
