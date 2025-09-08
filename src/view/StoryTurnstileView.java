@@ -12,42 +12,52 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import static view.Theme.*;
 
-public class StoryTurnstileView extends BorderPane {
-    private final VBox story1Box;
-    private final VBox story2Box;
-    private final TopBarView topBar;
-    private final HBox container;
-    private final ScrollPane scrollPane;
+import model.SaveData;
+import model.SaveManager;
+import model.SceneLoader;
 
-    public StoryTurnstileView(boolean darkMode) {
+public class StoryTurnstileView extends BorderPane {
+    private static final String BADGE_ID = "completed-badge";
+
+    private VBox story1Box;
+    private VBox story2Box;
+    private TopBarView topBar;
+    private HBox container;
+    private ScrollPane scrollPane;
+
+    private Button story1Button;
+    private Button story2Button;
+
+    private final int activeSaveSlot; 
+
+    public StoryTurnstileView(boolean darkMode, int activeSaveSlot) {
+        this.activeSaveSlot = activeSaveSlot;
+
         topBar = new TopBarView();
         topBar.applyTheme(darkMode);
         setTop(topBar);
 
-        // Set a fixed size for this view.
-        setPrefSize(800, 600); // adjust width and height as needed
-
+        setPrefSize(800, 600);
         setPadding(new Insets(20));
 
-        story1Box = createStoryBox("file:imgs/armoredCarImg.jpg", "Drive", "A fast route to survival", "Play Drive");
-        story2Box = createStoryBox("file:imgs/walkingImg.jpg", "Walk", "Steady and safe on foot", "Play Walk");
+        story1Box = createStoryBox("file:imgs/armoredCarImg.jpg", "Drive", "A fast route to survival", "Play Drive", /*index*/1);
+        story2Box = createStoryBox("file:imgs/walkingImg.jpg", "Walk",  "Steady and safe on foot",   "Play Walk",  /*index*/2);
+
+        decorateCompletedBadge(story1Box, "src/data/drive_story1.json");
+        decorateCompletedBadge(story2Box, "src/data/walk_story2.json");
 
         container = new HBox(50, story1Box, story2Box);
         container.setAlignment(Pos.CENTER);
         container.setPadding(new Insets(20));
-
-        // You can set a fixed preferred size for the container if desired.
         container.setPrefSize(800, 600);
 
         scrollPane = new ScrollPane(container);
-        // Set viewport size for the internal ScrollPane.
         scrollPane.setPrefViewportWidth(800);
         scrollPane.setPrefViewportHeight(600);
         scrollPane.setFitToHeight(true);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setStyle("-fx-background-color: transparent;");
-
         scrollPane.addEventFilter(ScrollEvent.SCROLL, e -> {
             double deltaY = e.getDeltaY();
             scrollPane.setHvalue(scrollPane.getHvalue() - deltaY / container.getWidth());
@@ -55,11 +65,17 @@ public class StoryTurnstileView extends BorderPane {
         });
 
         setCenter(scrollPane);
-
         applyTheme(darkMode);
     }
 
-    private VBox createStoryBox(String imagePath, String title, String subtitle, String buttonText) {
+    public StoryTurnstileView(boolean darkMode) {
+        this(darkMode, 0);
+    }
+
+    public Button getStory1Button() { return story1Button; }
+    public Button getStory2Button() { return story2Button; }
+
+    private VBox createStoryBox(String imagePath, String title, String subtitle, String buttonText, int index) {
         ImageView imageView = new ImageView();
         try {
             Image image = new Image(imagePath);
@@ -74,11 +90,61 @@ public class StoryTurnstileView extends BorderPane {
         Label subtitleLabel = new Label(subtitle);
         Button button = new Button(buttonText);
 
+        if (index == 1) story1Button = button;
+        if (index == 2) story2Button = button;
+
         VBox box = new VBox(10, imageView, titleLabel, subtitleLabel, button);
         box.setAlignment(Pos.CENTER);
         box.setPadding(new Insets(10));
         box.setStyle("-fx-background-color: #cccccc; -fx-border-color: #888888; -fx-border-width: 2px;");
         return box;
+    }
+
+    private void decorateCompletedBadge(VBox storyCard, String storyJsonPath) {
+        storyCard.getChildren().removeIf(n -> BADGE_ID.equals(n.getId()));
+
+        if (!isStoryCompleted(storyJsonPath)) return;
+
+        HBox row = new HBox();
+        row.setId(BADGE_ID);
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        Label badge = new Label("✓");
+        badge.setStyle(
+            "-fx-background-color: #16a34a;" +  
+            "-fx-text-fill: white;" +
+            "-fx-font-weight: 800;" +
+            "-fx-background-radius: 12;" +
+            "-fx-padding: 2 6;" +
+            "-fx-font-size: 12px;" +
+            "-fx-opacity: 0.95;"
+        );
+
+        row.getChildren().addAll(spacer, badge);
+        row.setPickOnBounds(false);
+        storyCard.getChildren().add(0, row);
+    }
+
+    private boolean isStoryCompleted(String storyJsonPath) {
+        if (activeSaveSlot <= 0) return false;
+
+        var opt = SaveManager.load(activeSaveSlot);
+        if (opt.isEmpty()) return false;
+
+        SaveData data = opt.get();
+        if (data.completedWinSceneIds == null || data.completedWinSceneIds.isEmpty()) return false;
+
+        try {
+            SceneLoader loader = new SceneLoader(storyJsonPath);
+            var sceneIds = loader.getScenes().keySet();
+            for (String winId : data.completedWinSceneIds) {
+                if (sceneIds.contains(winId)) return true;
+            }
+        } catch (Exception ex) {
+            System.err.println("[DEBUG] Failed to load story for completion check: " + storyJsonPath + " -> " + ex.getMessage());
+        }
+        return false;
     }
 
     public void applyTheme(boolean darkMode) {
@@ -110,45 +176,24 @@ public class StoryTurnstileView extends BorderPane {
                 if (box.getChildren().get(2) instanceof Label subtitleLabel) {
                     subtitleLabel.setTextFill(Color.web(textColor));
                 }
-                if (box.getChildren().get(3) instanceof Button button) {
-                    button.setStyle(buttonStyle);
+                if (box.getChildren().get(3) instanceof Button btn) {
+                    btn.setStyle(buttonStyle);
                 }
             }
         };
 
-        if (story1Box != null) {
-            styleStoryBox.accept(story1Box);
-            story1Box.getChildren().filtered(n -> n instanceof Label).forEach(n -> {
-                ((Label)n).setStyle("-fx-text-fill: " + textColor);
-            });
-        }
-        if (story2Box != null) {
-            styleStoryBox.accept(story2Box);
-            story2Box.getChildren().filtered(n -> n instanceof Label).forEach(n -> {
-                ((Label)n).setStyle("-fx-text-fill: " + textColor);
-            });
-        }
+        if (story1Box != null) styleStoryBox.accept(story1Box);
+        if (story2Box != null) styleStoryBox.accept(story2Box);
 
-        if (topBar != null) {
-            topBar.applyTheme(darkMode);
-        }
-        if (container != null) {
-            container.setBackground(new Background(new BackgroundFill(Color.web(containerColor), CornerRadii.EMPTY, Insets.EMPTY)));
-        }
-        if (scrollPane != null) {
-            scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
-        }
+        if (story1Button != null) Theme.applyButtonStyle(story1Button, darkMode);
+        if (story2Button != null) Theme.applyButtonStyle(story2Button, darkMode);
+
+        if (topBar != null) topBar.applyTheme(darkMode);
+        if (container != null) container.setBackground(new Background(new BackgroundFill(Color.web(containerColor), CornerRadii.EMPTY, Insets.EMPTY)));
+        if (scrollPane != null) scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
     }
 
-    public TopBarView getTopBar() {
-        return topBar;
-    }
-
-    public VBox getStory1Box() {
-        return story1Box;
-    }
-
-    public VBox getStory2Box() {
-        return story2Box;
-    }
+    public TopBarView getTopBar() { return topBar; }
+    public VBox getStory1Box() { return story1Box; }
+    public VBox getStory2Box() { return story2Box; }
 }

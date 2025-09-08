@@ -22,6 +22,9 @@ import view.StoryTurnstileView;
 import javafx.scene.control.Button;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.TextInputDialog;
+import model.SaveManager;
+import model.SaveData;
 
 public class MainController {
     private final Stage stage;
@@ -31,6 +34,11 @@ public class MainController {
     private String lastHealthAppliedSceneId = null;
     private final Set<String> addItemProcessedScenes = new HashSet<>();
     private GameScene currentScene;
+    // Save/Story session info
+    private int activeSaveSlot = -1;
+    private String playerName = null;
+    private SceneLoader activeSceneLoader = null;
+    private String activeStoryFilePath = null;
 
     public MainController(Stage stage) {
         this.stage = stage;
@@ -51,7 +59,6 @@ public class MainController {
     public void updateView() {
         rootPane.setTop(null);
         rootPane.setCenter(null);
-
         switch (model.getCurrentState()) {
             case TITLE -> showTitleView();
             case INSTRUCTIONS -> showInstructionsView();
@@ -65,9 +72,15 @@ public class MainController {
         titleView.applyTheme(model.isDarkMode());
 
         titleView.startButton.setOnAction(e -> {
-            model.clearInventory();
-            showChooseStoryView();
+            // New Game: pick slot and enter player name
+            if (selectSaveSlotAndPlayerName()) {
+                model.clearInventory();
+                showChooseStoryView();
+            }
         });
+
+        // NEW: Load Game action
+        titleView.loadButton.setOnAction(e -> selectLoadSlotAndStart());
 
         titleView.instructionsButton.setOnAction(e -> {
             model.setCurrentState(GameState.INSTRUCTIONS);
@@ -77,6 +90,7 @@ public class MainController {
         titleView.topBar.toggleButton.setOnAction(e -> {
             model.toggleDarkMode();
             titleView.applyTheme(model.isDarkMode());
+            autosaveIfPossible();
         });
         rootPane.setCenter(titleView);
     }
@@ -96,14 +110,15 @@ public class MainController {
     }
 
     private void showChooseStoryView() {
-        StoryTurnstileView turnstileView = new StoryTurnstileView(model.isDarkMode());
-        turnstileView.getTopBar().toggleButton.setOnAction(e -> {
+        StoryTurnstileView view = new StoryTurnstileView(model.isDarkMode(), activeSaveSlot);
+        view.getTopBar().toggleButton.setOnAction(e -> {
             model.toggleDarkMode();
             System.out.println("[DEBUG] Dark mode toggled: " + model.isDarkMode());
-            turnstileView.applyTheme(model.isDarkMode());
+            view.applyTheme(model.isDarkMode());
+            autosaveIfPossible();
         });
 
-        turnstileView.getTopBar().resetButton.setOnAction(e -> {
+        view.getTopBar().resetButton.setOnAction(e -> {
             System.out.println("[DEBUG] Reset button clicked.");
             lastHealthAppliedSceneId = null;
             addItemProcessedScenes.clear();
@@ -113,21 +128,25 @@ public class MainController {
             updateView();
         });
         
-        Button driveButton = (Button) turnstileView.getStory1Box().getChildren().get(3);
-        driveButton.setOnAction(e -> {
-            SceneLoader sceneLoader = new SceneLoader("src/data/drive_story1.json");
-            showInventoryChoiceView(sceneLoader, "start");
+        Button driveButton = view.getStory1Button();
+        if (driveButton != null) driveButton.setOnAction(e -> {
+             activeStoryFilePath = "src/data/drive_story1.json";
+             activeSceneLoader = new SceneLoader(activeStoryFilePath);
+             showInventoryChoiceView(activeSceneLoader, "start");
+             autosaveIfPossible(); 
         });
         
-        Button walkButton = (Button) turnstileView.getStory2Box().getChildren().get(3);
+        Button walkButton = (Button) view.getStory2Box().getChildren().get(3);
         walkButton.setOnAction(e -> {
-            SceneLoader sceneLoader = new SceneLoader("src/data/walk_story2.json");
-            showInventoryChoiceView(sceneLoader, "start");
+            activeStoryFilePath = "src/data/walk_story2.json";
+            activeSceneLoader = new SceneLoader(activeStoryFilePath);
+            showInventoryChoiceView(activeSceneLoader, "start");
+            autosaveIfPossible();
         });
         
-        rootPane.setCenter(turnstileView);
-        System.out.println("Story1Box children: " + turnstileView.getStory1Box().getChildren().size());
-        System.out.println("Story2Box children: " + turnstileView.getStory2Box().getChildren().size());
+        rootPane.setCenter(view);
+        System.out.println("Story1Box children: " + view.getStory1Box().getChildren().size());
+        System.out.println("Story2Box children: " + view.getStory2Box().getChildren().size());
     }
 
         private void showInventoryChoiceView(SceneLoader SceneLoader, String startSceneId) {
@@ -141,6 +160,7 @@ public class MainController {
             model.toggleDarkMode();
             System.out.println("[DEBUG] Dark mode toggled: " + model.isDarkMode());
             inventoryView.applyTheme(model.isDarkMode());
+            autosaveIfPossible();
         });
 
         inventoryView.getTopBar().resetButton.setOnAction(e -> {
@@ -368,7 +388,7 @@ public class MainController {
             currentSceneFinal.getChoices(),
             model.isDarkMode(),
             model.getInventory(),
-            model, 
+            model,
             choice -> {
                 if ("inventory_choice".equals(currentSceneFinal.getId())) {
                     applyInventoryChoice(choice.getLabel());
@@ -415,6 +435,22 @@ public class MainController {
                     updateView();
                 }
             },
+            () -> { // NEW: onChooseStory
+                Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+                confirm.setTitle("Choose Story");
+                confirm.setHeaderText("Return to story selection?");
+                confirm.setContentText("Current progress will be lost.");
+                Optional<ButtonType> res = confirm.showAndWait();
+                if (res.isPresent() && res.get() == ButtonType.OK) {
+                    lastHealthAppliedSceneId = null;
+                    addItemProcessedScenes.clear();
+                    resetInventoryToDefault();
+                    model.resetHealth();
+                    activeStoryFilePath = null;
+                    activeSceneLoader = null;
+                    showChooseStoryView();
+                }
+            },
             item -> {
                 System.out.println("[DEBUG] Attempting to consume item: " + item.getName() + ", type: " + item.getType());
                 boolean consumed = model.consumeItem(item);
@@ -428,6 +464,8 @@ public class MainController {
             }
         );
         rootPane.setCenter(view);
+
+        ChooseStoryAfterWin(currentSceneFinal);
     }
 
         private void removeWeaponFromJson(String weaponName) {
@@ -588,5 +626,203 @@ public class MainController {
 
     private int computeLoseHealthPenalty(int threatLevel) {
         return 25 + (2 * threatLevel);
+    }
+
+    private boolean selectSaveSlotAndPlayerName() {
+        List<String> options = new ArrayList<>();
+        for (int i = 1; i <= 3; i++) {
+            String label = "Slot " + i + " - " + SaveManager.peekPlayerName(i).orElse("Empty");
+            options.add(label);
+        }
+        ChoiceDialog<String> slotDialog = new ChoiceDialog<>(options.get(0), options);
+        slotDialog.setTitle("Select Save Slot");
+        slotDialog.setHeaderText("Choose a save slot for your new game");
+        slotDialog.setContentText("Slot:");
+        Optional<String> chosen = slotDialog.showAndWait();
+        if (chosen.isEmpty()) return false;
+
+        int slot = options.indexOf(chosen.get()) + 1;
+        boolean occupied = SaveManager.exists(slot);
+        if (occupied) {
+            Alert overwrite = new Alert(Alert.AlertType.CONFIRMATION);
+            overwrite.setTitle("Overwrite Save");
+            overwrite.setHeaderText("Slot " + slot + " already has a save.");
+            overwrite.setContentText("Overwrite this slot?");
+            Optional<ButtonType> res = overwrite.showAndWait();
+            if (res.isEmpty() || res.get() != ButtonType.OK) return false;
+        }
+
+        TextInputDialog nameDialog = new TextInputDialog();
+        nameDialog.setTitle("Player Name");
+        nameDialog.setHeaderText("Enter your name");
+        nameDialog.setContentText("Name:");
+        Optional<String> nameOpt = nameDialog.showAndWait();
+        if (nameOpt.isEmpty() || nameOpt.get().trim().isEmpty()) return false;
+
+        this.playerName = nameOpt.get().trim();
+        this.activeSaveSlot = slot;
+
+        SaveData data = new SaveData();
+        data.playerName = this.playerName;
+        data.darkMode = model.isDarkMode();
+        data.health = model.getHealth();
+        data.inventory = new HashMap<>(model.getInventory());
+        data.addItemProcessedScenes = new ArrayList<>(this.addItemProcessedScenes);
+        data.lastHealthAppliedSceneId = this.lastHealthAppliedSceneId;
+        data.storyFilePath = this.activeStoryFilePath; 
+        data.currentSceneId = null;
+        System.out.println("[DEBUG] Writing initial save for slot " + this.activeSaveSlot + " name=" + this.playerName);
+        SaveManager.save(this.activeSaveSlot, data);
+        System.out.println("[DEBUG] Initial save written.");
+
+        System.out.println("[DEBUG] New game created for \"" + playerName + "\" in slot " + activeSaveSlot);
+        return true;
+    }
+
+    private void selectLoadSlotAndStart() {
+        List<String> options = new ArrayList<>();
+        for (int i = 1; i <= 3; i++) {
+            String label = "Slot " + i + " - " + SaveManager.peekPlayerName(i).orElse("Empty");
+            options.add(label);
+        }
+        ChoiceDialog<String> slotDialog = new ChoiceDialog<>(options.get(0), options);
+        slotDialog.setTitle("Load Game");
+        slotDialog.setHeaderText("Select a save slot to load");
+        slotDialog.setContentText("Slot:");
+        Optional<String> chosen = slotDialog.showAndWait();
+        if (chosen.isEmpty()) return;
+
+        int slot = options.indexOf(chosen.get()) + 1;
+        if (!SaveManager.exists(slot)) {
+            Alert a = new Alert(Alert.AlertType.INFORMATION);
+            a.setTitle("No Save Found");
+            a.setHeaderText("That slot is empty.");
+            a.setContentText("Start a New Game first, or choose a slot with a save.");
+            a.showAndWait();
+            return;
+        }
+        loadFromSlot(slot);
+    }
+
+    private void loadFromSlot(int slot) {
+        SaveManager.load(slot).ifPresentOrElse(data -> {
+            try {
+                this.activeSaveSlot = slot;
+                this.playerName = data.playerName;
+
+                if (data.darkMode != model.isDarkMode()) {
+                    model.toggleDarkMode();
+                }
+
+                model.clearInventory();
+                if (data.inventory != null) {
+                    data.inventory.values().forEach(list -> {
+                        for (InventoryItem it : list) model.addItem(it);
+                    });
+                }
+                model.setHealth(data.health > 0 ? data.health : 100);
+
+                this.addItemProcessedScenes.clear();
+                if (data.addItemProcessedScenes != null) {
+                    this.addItemProcessedScenes.addAll(data.addItemProcessedScenes);
+                }
+                this.lastHealthAppliedSceneId = data.lastHealthAppliedSceneId;
+
+                boolean hasSavedWin =
+                        data.currentSceneId != null && !data.currentSceneId.isBlank() &&
+                        data.storyFilePath != null && !data.storyFilePath.isBlank();
+
+                if (!hasSavedWin) {
+                    System.out.println("[DEBUG] Slot " + slot + " has no wins. Opening Choose Story.");
+                    this.activeStoryFilePath = null;
+                    this.activeSceneLoader = null;
+                    showChooseStoryView();
+                }
+
+                this.activeStoryFilePath = data.storyFilePath;
+                this.activeSceneLoader = new SceneLoader(this.activeStoryFilePath);
+                GameScene scene = this.activeSceneLoader.getSceneById(data.currentSceneId);
+                if (scene == null) {
+                    System.out.println("[DEBUG] Saved scene not found. Opening Choose Story.");
+                    showChooseStoryView();
+                    return;
+                }
+                showSceneView(scene, this.activeSceneLoader);
+            } catch (Exception ex) {
+                Alert a = new Alert(Alert.AlertType.ERROR);
+                a.setTitle("Load Failed");
+                a.setHeaderText("An error occurred while loading the game.");
+                a.setContentText(ex.getMessage());
+                a.showAndWait();
+            }
+        }, () -> {
+            Alert a = new Alert(Alert.AlertType.ERROR);
+            a.setTitle("Load Failed");
+            a.setHeaderText("No save data found in that slot.");
+            a.showAndWait();
+        });
+    }
+
+    private void autosaveIfPossible() {
+        // intentionally no-op to enforce "save on win only"
+    }
+
+
+    private boolean isWinningEnding(GameScene scene) {
+        return scene != null && scene.isWinEnding();
+    }
+
+    private void saveWinningEnding(GameScene winScene) {
+        if (activeSaveSlot <= 0) {
+            System.out.println("[DEBUG] No active save slot; skipping save.");
+            return;
+        }
+        SaveData data = new SaveData();
+        data.playerName = this.playerName;
+        data.storyFilePath = this.activeStoryFilePath;
+        data.currentSceneId = winScene.getId(); 
+        data.health = model.getHealth();
+        data.darkMode = model.isDarkMode();
+        data.lastHealthAppliedSceneId = this.lastHealthAppliedSceneId;
+        data.addItemProcessedScenes = new ArrayList<>(this.addItemProcessedScenes);
+        data.inventory = new HashMap<>(model.getInventory());
+
+        SaveManager.load(activeSaveSlot).ifPresent(existing -> {
+            if (existing.completedWinSceneIds != null) {
+                data.completedWinSceneIds = new ArrayList<>(existing.completedWinSceneIds);
+            }
+        });
+        if (!data.completedWinSceneIds.contains(winScene.getId())) {
+            data.completedWinSceneIds.add(winScene.getId());
+        }
+
+        SaveManager.save(this.activeSaveSlot, data);
+        System.out.println("[DEBUG] Saved WIN to slot " + activeSaveSlot + " at scene: " + winScene.getId());
+    }
+
+    // After a win, save progress, show a dialog, and send the player to the Choose Story screen
+    private void ChooseStoryAfterWin(GameScene scene) {
+        if (!isWinningEnding(scene)) return;
+
+        System.out.println("[DEBUG] Win reached: " + scene.getId() + " -> saving and returning to Choose Story.");
+        saveWinningEnding(scene);
+
+        // Show "You Win" dialog
+        Alert a = new Alert(Alert.AlertType.INFORMATION);
+        a.initOwner(stage);
+        a.setTitle("You Win!");
+        a.setHeaderText("Victory saved to slot " + activeSaveSlot + ".");
+        a.setContentText("Choose another story to play.");
+        a.showAndWait();
+
+        lastHealthAppliedSceneId = null;
+        addItemProcessedScenes.clear();
+        resetInventoryToDefault(); // restore inventory.json to default
+        model.resetHealth();
+
+        activeStoryFilePath = null;
+        activeSceneLoader = null;
+
+        showChooseStoryView();
     }
 }

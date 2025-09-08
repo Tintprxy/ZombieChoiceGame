@@ -19,8 +19,10 @@ public class SceneLoader {
                     String prompt = sceneObj.get("prompt").getAsString();
                     int healthChange = sceneObj.has("healthChange") ? sceneObj.get("healthChange").getAsInt() : 0;
                     boolean bitten = sceneObj.has("bitten") ? sceneObj.get("bitten").getAsBoolean() : false;
+                    String ending = sceneObj.has("ending") ? sceneObj.get("ending").getAsString() : null; 
+
                     List<GameChoice> choices = new ArrayList<>();
-                    JsonArray choicesArray = sceneObj.getAsJsonArray("choices");
+                    JsonArray choicesArray = sceneObj.has("choices") ? sceneObj.getAsJsonArray("choices") : new JsonArray(); 
                     for (JsonElement choiceElem : choicesArray) {
                         JsonObject choiceObj = choiceElem.getAsJsonObject();
                         String label = choiceObj.get("label").getAsString();
@@ -52,10 +54,10 @@ public class SceneLoader {
                     }
 
                     scene.setThreatLevel(threatLevel);
-
                     int fightNumber = sceneObj.has("fightNumber") ? sceneObj.get("fightNumber").getAsInt() : 1;
                     scene.setFightNumber(fightNumber);
                     scene.setBitten(bitten);
+                    if (ending != null && !ending.isBlank()) scene.setEnding(ending);
 
                     System.out.println("[DEBUG] Loaded scene: " + scene.getId() + ", addItem: " + scene.getAddItem());
 
@@ -75,7 +77,7 @@ public class SceneLoader {
     }
 
     public GameScene getSceneById(String id) {
-        return sceneMap.get(id); // Ensure sceneMap contains the "start" scene
+        return sceneMap.get(id); 
     }
 
     public Map<String, GameScene> getScenes() {
@@ -88,7 +90,6 @@ public class SceneLoader {
         GameScene next = sceneLoader.getSceneById("start");
         if (next != null) {
             System.out.println("[DEBUG] Starting scene: " + next.getId());
-            // showSceneView(next, sceneLoader); // Uncomment this line when showSceneView method is available
         } else {
             System.out.println("[DEBUG] Failed to load starting scene.");
         }

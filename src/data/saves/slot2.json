@@ -1,0 +1,13 @@
+{
+  "playerName": "2",
+  "health": 100,
+  "darkMode": true,
+  "addItemProcessedScenes": [],
+  "inventory": {
+    "CONSUMABLE": [],
+    "KEY_ITEM": [],
+    "WEAPON": []
+  },
+  "lastUpdatedEpochMillis": 0,
+  "completedWinSceneIds": []
+}

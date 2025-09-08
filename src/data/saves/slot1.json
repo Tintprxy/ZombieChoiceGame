@@ -1,0 +1,50 @@
+{
+  "playerName": "t",
+  "storyFilePath": "src/data/drive_story1.json",
+  "currentSceneId": "zombie_woman_win",
+  "health": 80,
+  "darkMode": true,
+  "addItemProcessedScenes": [],
+  "lastHealthAppliedSceneId": "zombie_woman_win",
+  "inventory": {
+    "CONSUMABLE": [
+      {
+        "name": "Energy Drink",
+        "type": "CONSUMABLE",
+        "healthRestore": 10,
+        "durability": 0,
+        "power": 0
+      }
+    ],
+    "KEY_ITEM": [
+      {
+        "name": "Map",
+        "type": "KEY_ITEM",
+        "healthRestore": 0,
+        "durability": 0,
+        "power": 0
+      }
+    ],
+    "WEAPON": [
+      {
+        "name": "Pistol",
+        "type": "WEAPON",
+        "healthRestore": 0,
+        "durability": 6,
+        "power": 10
+      },
+      {
+        "name": "Knife",
+        "type": "WEAPON",
+        "healthRestore": 0,
+        "durability": 6,
+        "power": 5
+      }
+    ]
+  },
+  "lastUpdatedEpochMillis": 0,
+  "completedWinSceneIds": [
+    "fight_result_win_4",
+    "zombie_woman_win"
+  ]
+}

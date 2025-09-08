@@ -4,8 +4,6 @@ import java.util.List;
 import com.google.gson.JsonObject;
 
 public class GameScene {
-
-    // new field for fight number; default to 1 if not set
     private int fightNumber = 1;
     private String newKeyItem;
     private boolean eaten;
@@ -50,7 +48,6 @@ public class GameScene {
         this.eaten = eaten;
     }
 
-    // Add a field to store the raw JSON object
     private JsonObject rawJson;
 
     private String id;
@@ -61,18 +58,18 @@ public class GameScene {
     private int threatLevel = -1; 
     private boolean bitten;
 
+    private String ending = "NEUTRAL"; 
+
     public String getId() { return id; }
     public String getPrompt() { return prompt; }
     public int getHealthChange() { return healthChange; }
     public List<GameChoice> getChoices() { return choices; }
     public int getThreatLevel() { return threatLevel; }
 
-    // New getter for fightNumber
     public int getFightNumber() { 
         return fightNumber; 
     }
     
-    // Optional setter for fightNumber
     public void setFightNumber(int fightNumber) {
         this.fightNumber = fightNumber;
     }
@@ -122,4 +119,10 @@ public class GameScene {
     public void setEaten(boolean eaten) {
         this.eaten = eaten;
     }
+
+    public boolean isWinEnding() {
+        return "WIN".equalsIgnoreCase(ending);
+    }
+    public String getEnding() { return ending; }
+    public void setEnding(String ending) { this.ending = ending; }
 }

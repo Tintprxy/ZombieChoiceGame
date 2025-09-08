@@ -246,6 +246,18 @@
     ]
   },
 
+{
+    "id": "car_scene",
+    "prompt": "You get into the car and close the door, the world outside feeling distant and dangerous. The interior is a mess, with empty wrappers and discarded items strewn about. You take a moment to collect yourself and plan your next move.",
+    "choices": [
+      {
+        "label": "Start Driving",
+        "imagePath": "imgs/continueImg.jpg",
+        "id": "drive_choice"
+      }
+    ]
+  },
+
   {
     "id": "drive_choice",
     "prompt": "As your car speeds along the open road, the engine's roar and the rush of wind remind you of the power beneath your feet. Yet the road ahead remains uncertain. You continue, running over debris and hearing weird noises from the engine. Do you slam the pedal to the floor and embrace breakneck speed, or do you ease off and slow down to better survey your surroundings?",
@@ -312,7 +324,7 @@
     ]
   },
 
-{
+  {
     "id": "fight_result_win_3",
     "prompt": "You stop and turn to face the zombie woman. As she lunges at you, you manage to dodge her grasp and counter with a swift kick. The impact sends her stumbling back, momentarily disoriented. Seizing the opportunity, you deliver a decisive blow that incapacitates her. Breathing heavily, you watch as she collapses to the ground, no longer a threat. You feel a mix of relief and sorrow, knowing that you had to fight someone who was once human.",
     "choices": [
@@ -334,7 +346,9 @@
 
   {
     "id": "zombie_woman_win",
-    "prompt": "As you catch your breath after the fierce battle, the echo of fading footsteps mixes with the tense silence of a world reborn in chaos. In the distance, emerging from the haze of a broken cityscape, you glimpse the towering gates of the military base, their iron frames silhouetted against a blood-tinged sky. Every scar on your body and every beat of your heart testifies to the struggle for survival. Against all odds, you have overcome the nightmare—today, hope still burns. You made it. You Win! (Press reset to play again)"
+    "prompt": "As you catch your breath after the fierce battle, the echo of fading footsteps mixes with the tense silence of a world reborn in chaos. In the distance, emerging from the haze of a broken cityscape, you glimpse the towering gates of the military base, their iron frames silhouetted against a blood-tinged sky. Every scar on your body and every beat of your heart testifies to the struggle for survival. Against all odds, you have overcome the nightmare—today, hope still burns. You made it. You Win! (Press reset to play again)",
+    "ending": "WIN",
+    "choices": [] 
   },
 
   {
@@ -356,7 +370,8 @@
 
   {
     "id": "Bitten_from_behind_win",
-    "prompt": "You quickly administer the antidote, and a wave of relief washes over you as the infection is halted. Weakened but resolute, you stagger through a landscape of shattered glass and twisted metal. The ruins of the old world stretch before you, yet in the distance, an imposing fortress looms—the military base, its high walls and steady lights a promise of sanctuary. Every painful step brings you closer to safety; the base's fortified gates inspire hope amidst despair. Against all odds, you cross its threshold. Victory is yours. You Win! (Press reset to play again)",
+    "prompt": "You quickly administer the antidote, and a wave of relief washes over you as the infection is halted. Weakened but resolute, you stagger through a landscape of shattered glass and twisted metal. The ruins of the old world stretch before you, yet in the distance, an imposing fortress looms—the military base, its high walls and steady lights a promise of sanctuary. Every painful step brings you closer to safety; the base's fortified gates inspire hope amidst despair. Against all odds, you cross its threshold, marking a hard-won victory. You Win! (Press reset to play again)",
+    "ending": "WIN",
     "choices": [
       {
         "label": "Continue",
@@ -406,6 +421,7 @@
   {
     "id": "win_infection_cured",
     "prompt": "You managed to save the woman from the brink of death. As she slowly regains consciousness, you feel a sense of hope. Together you both walk aimlessly down the road until you reach the military base. You made it. You Win! (Press reset to play again)",
+    "ending": "WIN",
     "choices": [
       {
         "label": "Continue",
@@ -437,6 +453,7 @@
   {
     "id": "fight_result_win_4",
     "prompt": "In the crucible of battle, you defy impossible odds and repel the relentless tide of zombies. Though your weapon bears the scars of a brutal fight, you stand resolute amid the chaos. Each trembling, determined step carries you closer to salvation, as the distant glow of the military base transforms into a brilliant beacon of hope against the night. Its towering, fortified walls promise sanctuary from the darkness—a realm where despair is replaced by the promise of new beginnings. With fierce determination, you push through the debris and cross the Military base’s threshold. Against all odds, you have overcome. Victory is yours. You Win! (Press reset to play again)",
+    "ending": "WIN",
     "choices": [
       {
         "label": "Continue",
@@ -479,6 +496,7 @@
 {
     "id": "fight_hoard_bitten_win",
     "prompt": "You quickly administer the antidote, and a wave of relief washes over you as the infection is halted. Weakened but resolute, you stagger through a landscape of shattered glass and twisted metal. The ruins of the old world stretch before you, yet in the distance, an imposing fortress looms—the military base, its high walls and steady lights a promise of sanctuary. Every painful step brings you closer to safety; the base's fortified gates inspire hope amidst despair. Against all odds, you cross its threshold, marking a hard-won victory. You Win! (Press reset to play again)",
+    "ending": "WIN",
     "choices": [
       {
         "label": "Continue",
@@ -496,7 +514,7 @@
       {
         "label": "Get Out of the Car",
         "imagePath": "imgs/defaultImg.jpg",
-        "id": "Run_em_Over_Win"
+        "id": "Run_em_Over_win" 
       }
     ]
   },
@@ -504,6 +522,7 @@
   {
     "id": "Run_em_Over_win",
     "prompt": "Bruised and battered, you push forward through the wreckage and ruin. With every agonizing step, the military base looms closer—a steadfast beacon amidst chaos. Against all odds and despite your injuries, you cross its threshold, triumphant and resolute. Victory is yours. You Win! (Press reset to play again)",
+    "ending": "WIN",
     "choices": [
       {
         "label": "Continue",

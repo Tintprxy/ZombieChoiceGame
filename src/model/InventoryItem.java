@@ -7,7 +7,6 @@ public class InventoryItem {
     private int durability;
     private int power;
 
-    // Existing constructor
     public InventoryItem(String name, ItemType type, int healthRestore, int durability, int power) {
         this.name = name;
         this.type = type;
@@ -16,7 +15,6 @@ public class InventoryItem {
         this.power = power;
     }
 
-    // New constructor for (String name, ItemType type, int durability, int power)
     public InventoryItem(String name, ItemType type, int durability, int power) {
         this(name, type, 0, durability, power);
     }

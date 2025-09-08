@@ -1,11 +1,13 @@
 package view;
 
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.scene.text.Font;
 import model.GameChoice;
 import model.InventoryItem;
 import model.ItemType;
@@ -13,12 +15,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import model.GameModel;
+import javafx.scene.control.OverrunStyle;
+import javafx.scene.layout.Region;
 
-public class ChoiceScreenView extends VBox {
+public class ChoiceScreenView extends BorderPane {
+    private static final int CHOICE_IMG_WIDTH = 160;
+    private final TopBarView topBar = new TopBarView();
     private Label healthLabel;
     private ProgressBar healthBar;
     private Label promptLabel;
-    private TopBarView topBar = new TopBarView();
     private int health;
     private String promptText;
     private List<GameChoice> choices;
@@ -28,37 +33,36 @@ public class ChoiceScreenView extends VBox {
     private Runnable onToggleTheme;
     private Runnable onReset;         
     private Consumer<InventoryItem> onConsumeItem;
-    private GameModel model; // add this field
+    private GameModel model; 
 
     public ChoiceScreenView(
-        int health,
-        String promptText,
-        List<GameChoice> choices,
-        boolean darkMode,
-        Map<ItemType, List<InventoryItem>> inventory,
-        GameModel model,
-        Consumer<GameChoice> onChoiceSelected,
-        Runnable onToggleTheme,
-        Runnable onReset,
-        Consumer<InventoryItem> onConsumeItem
+            int health,
+            String prompt,
+            List<GameChoice> choices,
+            boolean darkMode,
+            Map<ItemType, List<InventoryItem>> inventory,
+            GameModel model,
+            Consumer<GameChoice> onChoice,
+            Runnable onToggleTheme,
+            Runnable onReset,
+            Runnable onChooseStory,    // keep this
+            Consumer<InventoryItem> onConsumeItem
     ) {
         this.health = health;
-        this.promptText = promptText;
+        this.promptText = prompt;
         this.choices = choices;
         this.darkMode = darkMode;
         this.inventory = inventory;
         this.model = model;
-        this.onChoiceSelected = onChoiceSelected;
+        this.onChoiceSelected = onChoice;
         this.onToggleTheme = onToggleTheme;
         this.onReset = onReset;        
         this.onConsumeItem = onConsumeItem;
 
-        setSpacing(20);
-        setPadding(new Insets(20));
-        setAlignment(Pos.TOP_CENTER);
-
         topBar.toggleButton.setOnAction(e -> onToggleTheme.run());
-        topBar.resetButton.setOnAction(e -> onReset.run()); 
+        topBar.resetButton.setOnAction(e -> onReset.run());
+        topBar.showChooseStoryButton(true);
+        topBar.chooseStoryButton.setOnAction(e -> onChooseStory.run());
 
         VBox inventoryView = buildInventoryUI(inventory, darkMode);
         inventoryView.setPrefWidth(300); 
@@ -84,7 +88,6 @@ public class ChoiceScreenView extends VBox {
         choiceRow.setAlignment(Pos.CENTER);
 
         for (GameChoice choice : choices) {
-            // Print some debug info based on the choice label.
             if ("Fight".equalsIgnoreCase(choice.getLabel())) {
                 System.out.println("[DEBUG] Creating button for choice: " + choice.getLabel() +
                     ", possible nextIds: fight_result_win_1 / fight_result_lose_1" +
@@ -99,12 +102,11 @@ public class ChoiceScreenView extends VBox {
                 System.out.println("[DEBUG] Failed to load image: " + choice.getImagePath());
             }
             ImageView imageView = new ImageView(img);
-            imageView.setFitWidth(150);
+            imageView.setFitWidth(CHOICE_IMG_WIDTH);
             imageView.setPreserveRatio(true);
 
             Button button = new Button(choice.getLabel());
 
-            // Check if this choice relates to the antidote and disable it if the user doesn't have it.
             if (choice.getLabel().toLowerCase().contains("use antidote") || choice.getLabel().toLowerCase().contains("administer antidote")) {
                 boolean hasAntidote = false;
                 List<InventoryItem> keyItems = inventory.get(ItemType.KEY_ITEM);
@@ -129,20 +131,23 @@ public class ChoiceScreenView extends VBox {
                 }
                 onChoiceSelected.accept(choice);
             });
-            Theme.applyButtonStyle(button, darkMode);
 
-            VBox column = new VBox(10, imageView, button);
+            styleChoiceButton(button, darkMode);
+
+            VBox column = new VBox(8, imageView, button);
             column.setAlignment(Pos.CENTER);
             choiceRow.getChildren().add(column);
         }
 
-        VBox rightSide = new VBox(20, healthLabel, healthBar, promptLabel, choiceRow);
-        rightSide.setAlignment(Pos.TOP_CENTER);
+        VBox centerContent = new VBox(20, healthLabel, healthBar, promptLabel, choiceRow);
+        centerContent.setAlignment(Pos.TOP_CENTER);
+        centerContent.setPadding(new Insets(20)); 
 
-        HBox mainContent = new HBox(40, inventoryView, rightSide);
-        mainContent.setAlignment(Pos.TOP_CENTER);
+        setTop(topBar);
+        setCenter(centerContent);
+        setLeft(inventoryView);
+        BorderPane.setMargin(inventoryView, new Insets(20, 10, 20, 20));
 
-        getChildren().addAll(topBar, mainContent);
         applyTheme(darkMode);
     }
 
@@ -185,9 +190,9 @@ public class ChoiceScreenView extends VBox {
         return topBar;
     }
 
-    public VBox getLayout() {
-        return this;
-    }
+    // public VBox getLayout() {
+    //     return this;
+    // }
 
     private VBox buildInventoryUI(Map<ItemType, List<InventoryItem>> inventory, boolean darkMode) {
         VBox inventoryBox = new VBox(10);
@@ -248,5 +253,21 @@ public class ChoiceScreenView extends VBox {
             inventoryBox.getChildren().add(section);
         }
         return inventoryBox;
+    }
+
+    private void styleChoiceButton(Button b, boolean darkMode) {
+        Theme.applyButtonStyle(b, darkMode);
+
+        b.setWrapText(false);
+        b.setTextOverrun(OverrunStyle.CLIP);
+        b.setFont(Font.font(13));
+
+        b.setMinWidth(Region.USE_PREF_SIZE);
+        b.setPrefWidth(Region.USE_COMPUTED_SIZE);
+        b.setMaxWidth(Region.USE_PREF_SIZE);
+    
+        Runnable resize = () -> Theme.sizeToText(b, 32 + 10, 360); 
+        Platform.runLater(resize);
+        b.textProperty().addListener((obs, o, n) -> resize.run());
     }
 }

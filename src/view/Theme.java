@@ -1,9 +1,12 @@
 package view;
 
 import javafx.scene.control.Button;
+import javafx.scene.control.Labeled;
+import javafx.scene.layout.Region;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 
-public class Theme {
-    // Centralized color palette
+public final class Theme {
     public static final String DARK_BG = "#23272e";
     public static final String DARK_BOX = "#181a1b";
     public static final String DARK_BORDER = "#222222";
@@ -42,9 +45,38 @@ public class Theme {
             : "-fx-background-color: " + LIGHT_BUTTON_BG + "; -fx-text-fill: " + LIGHT_BUTTON_TEXT + "; -fx-background-radius: 20; -fx-padding: 10 20;";
     }
 
-    public static void applyButtonStyle(Button button, boolean dark) {
-        button.setStyle(getButtonStyle(dark));
+    public static void applyButtonStyle(Button b, boolean dark) {
+        // Base palette
+        String base   = dark ? "#3c4149" : "#d4d9e1";  
+        String text   = dark ? "#e8ecf2" : "#1f2937";  
+        String style =
+            "-fx-background-color: " + base + ";" +
+            "-fx-text-fill: " + text + ";" +
+            "-fx-background-radius: 16;" +
+            "-fx-background-insets: 0;" +
+            "-fx-padding: 8 16;" +
+            "-fx-font-weight: 600;" +
+            "-fx-border-color: transparent;" +
+            "-fx-border-width: 0;" +
+            "-fx-focus-color: transparent;" +
+            "-fx-faint-focus-color: transparent;" +
+            "-fx-effect: null;";
+
+        b.setStyle(style);
     }
+
+    public static void sizeToText(Labeled node, double horizontalPadding, double maxWidth) {
+        Font font = node.getFont() != null ? node.getFont() : Font.getDefault();
+        Text measure = new Text(node.getText() == null ? "" : node.getText());
+        measure.setFont(font);
+        double textW = Math.ceil(measure.getLayoutBounds().getWidth());
+        double prefW = Math.min(textW + horizontalPadding, maxWidth > 0 ? maxWidth : Double.MAX_VALUE);
+
+        node.setMinWidth(Region.USE_PREF_SIZE);
+        node.setPrefWidth(prefW);
+        node.setMaxWidth(Region.USE_PREF_SIZE);
+    }
+
     public static String getInventoryBackground(boolean dark) {
         return dark ? DARK_CONTAINER : LIGHT_CONTAINER;
     }

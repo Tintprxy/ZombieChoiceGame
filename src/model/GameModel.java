@@ -68,10 +68,7 @@ public class GameModel {
     
     public boolean addItem(InventoryItem item) {
         if (item.getType() == ItemType.KEY_ITEM) {
-            // If the new item is an antidote, reset the antidoteUsed flag.
             if (item.getName().equalsIgnoreCase("Antidote")) {
-                // Reset the flag so that the new antidote can be used.
-                // (Assuming you added a boolean field 'antidoteUsed' with its getters/setters.)
                 setAntidoteUsed(false);
                 System.out.println("[DEBUG] Antidote used flag reset since a new antidote was found.");
             }
@@ -121,7 +118,7 @@ public class GameModel {
     }
 
     public Map<ItemType, List<InventoryItem>> getInventory() {
-        return inventory; // Ensure this matches the expected type
+        return inventory; 
     }
 
     public boolean consumeItem(InventoryItem item) {
@@ -173,11 +170,9 @@ public class GameModel {
         this.antidoteUsed = antidoteUsed;
     }
 
-    // Call this method after updating weapon durability.
     public void removeBrokenWeapons() {
         List<InventoryItem> weapons = inventory.get(ItemType.WEAPON);
         if (weapons != null) {
-            // Remove any weapons with durability 0 or below.
             weapons.removeIf(weapon -> weapon.getDurability() <= 0);
             System.out.println("[DEBUG] Broken weapons removed. Current weapons: " + weapons);
         }

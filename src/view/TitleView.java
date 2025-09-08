@@ -19,6 +19,7 @@ import static view.Theme.*;
 
 public class TitleView extends BorderPane {
     public final Button startButton = new Button("Start Game");
+    public final Button loadButton = new Button("Load Game"); 
     public final Button instructionsButton = new Button("Instructions");
     public final TopBarView topBar = new TopBarView();
 
@@ -50,11 +51,15 @@ public class TitleView extends BorderPane {
         instructionText.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
 
         if (imageView != null) contentBox.getChildren().add(imageView);
-        contentBox.getChildren().addAll(titleText, creditText, instructionText, startButton, instructionsButton);
+        contentBox.getChildren().addAll(
+            titleText, creditText, instructionText,
+            startButton,
+            loadButton,           
+            instructionsButton
+        );
 
-        // Add padding to the top bar for consistency
         VBox topBarContainer = new VBox(topBar);
-        topBarContainer.setPadding(new Insets(20, 30, 0, 0)); // top, right, bottom, left
+        topBarContainer.setPadding(new Insets(20, 30, 0, 0)); 
         topBarContainer.setAlignment(Pos.TOP_RIGHT);
 
         setTop(topBarContainer);
@@ -68,16 +73,14 @@ public class TitleView extends BorderPane {
 
         topBar.applyTheme(isDarkMode);
 
-        for (Node node : contentBox.getChildren()) {
-            if (node instanceof Text text) {
-                text.setFill(Color.web(isDarkMode ? DARK_TEXT : LIGHT_TEXT));
-            } else if (node instanceof Button button) {
-                button.setStyle(String.format(
-                    "-fx-background-color: %s; -fx-text-fill: %s;",
-                    isDarkMode ? DARK_BUTTON_BG : LIGHT_BUTTON_BG,
-                    isDarkMode ? DARK_BUTTON_TEXT : LIGHT_BUTTON_TEXT
-                ));
-            }
-        }
+        Color textColor = isDarkMode ? Color.WHITE : Color.web("#1f2937");
+
+        titleText.setFill(textColor);
+        creditText.setFill(textColor);
+        instructionText.setFill(textColor);
+
+        Theme.applyButtonStyle(startButton, isDarkMode);
+        Theme.applyButtonStyle(loadButton, isDarkMode);
+        Theme.applyButtonStyle(instructionsButton, isDarkMode);
     }
 }
