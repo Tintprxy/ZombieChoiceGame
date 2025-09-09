@@ -23,6 +23,13 @@ public final class Theme {
     public static final String LIGHT_BUTTON_TEXT = "#23272e";
     public static final String LIGHT_CONTAINER = "#ffffff";
 
+    public static final String DISABLED_BUTTON_STYLE_LIGHT = "-fx-opacity: 0.5; -fx-text-fill: derive(-fx-control-inner-background, -30%); -fx-background-color: #d3d3d3;";
+    public static final String DISABLED_BUTTON_STYLE_DARK = "-fx-opacity: 0.5; -fx-text-fill: derive(-fx-control-inner-background, 50%); -fx-background-color: #666666;";
+
+    public static String getDisabledButtonStyle(boolean isDarkMode) {
+         return isDarkMode ? DISABLED_BUTTON_STYLE_DARK : DISABLED_BUTTON_STYLE_LIGHT;
+    }
+
     public static String getBodyBackground(boolean dark) {
         return dark ? DARK_BG : LIGHT_BG;
     }
@@ -63,6 +70,16 @@ public final class Theme {
             "-fx-effect: null;";
 
         b.setStyle(style);
+    }
+
+    public static void applyDisabledButtonStyle(Button button, boolean isDarkMode) {
+        button.setDisable(true);
+        button.setStyle(
+            "-fx-background-radius: 20;" +
+            "-fx-background-color: " + (isDarkMode ? "#444" : "#ccc") + ";" +
+            "-fx-text-fill: #aaa;" +
+            "-fx-opacity: 0.5;"
+        );
     }
 
     public static void sizeToText(Labeled node, double horizontalPadding, double maxWidth) {

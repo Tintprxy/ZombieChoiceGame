@@ -87,8 +87,11 @@ public class StoryTurnstileView extends BorderPane {
         }
 
         Label titleLabel = new Label(title);
+        titleLabel.setId("storyTitle");
         Label subtitleLabel = new Label(subtitle);
+        subtitleLabel.setId("storySubtitle");
         Button button = new Button(buttonText);
+        button.setId("storyButton");
 
         if (index == 1) story1Button = button;
         if (index == 2) story2Button = button;
@@ -152,13 +155,13 @@ public class StoryTurnstileView extends BorderPane {
         String boxColor = darkMode ? DARK_BOX : LIGHT_BOX;
         String borderColor = darkMode ? DARK_BORDER : LIGHT_BORDER;
         String titleColor = darkMode ? DARK_TEXT : LIGHT_TEXT;
+        String textColor = darkMode ? DARK_TEXT : LIGHT_TEXT;
         String containerColor = darkMode ? DARK_CONTAINER : LIGHT_CONTAINER;
         String buttonStyle = String.format(
             "-fx-background-color: %s; -fx-text-fill: %s; -fx-background-radius: 5px;",
             darkMode ? DARK_BUTTON_BG : LIGHT_BUTTON_BG,
             darkMode ? DARK_BUTTON_TEXT : LIGHT_BUTTON_TEXT
         );
-        String textColor = darkMode ? DARK_TEXT : LIGHT_TEXT;
 
         setBackground(new Background(new BackgroundFill(Color.web(bgColor), CornerRadii.EMPTY, Insets.EMPTY)));
 
@@ -169,17 +172,20 @@ public class StoryTurnstileView extends BorderPane {
 
         java.util.function.Consumer<VBox> styleStoryBox = box -> {
             box.setStyle(boxStyle);
-            if (box.getChildren().size() >= 4) {
-                if (box.getChildren().get(1) instanceof Label titleLabel) {
-                    titleLabel.setTextFill(Color.web(titleColor));
+            box.getChildren().forEach(n -> {
+                if (n instanceof Label lbl) {
+                    lbl.setStyle("");
                 }
-                if (box.getChildren().get(2) instanceof Label subtitleLabel) {
-                    subtitleLabel.setTextFill(Color.web(textColor));
-                }
-                if (box.getChildren().get(3) instanceof Button btn) {
+            });
+            box.getChildren().forEach(child -> {
+                if ("storyTitle".equals(child.getId()) && child instanceof Label lbl) {
+                    lbl.setStyle("-fx-text-fill: " + titleColor + " !important;");
+                } else if ("storySubtitle".equals(child.getId()) && child instanceof Label lbl) {
+                    lbl.setStyle("-fx-text-fill: " + textColor + " !important;");
+                } else if ("storyButton".equals(child.getId()) && child instanceof Button btn) {
                     btn.setStyle(buttonStyle);
                 }
-            }
+            });
         };
 
         if (story1Box != null) styleStoryBox.accept(story1Box);
@@ -191,6 +197,8 @@ public class StoryTurnstileView extends BorderPane {
         if (topBar != null) topBar.applyTheme(darkMode);
         if (container != null) container.setBackground(new Background(new BackgroundFill(Color.web(containerColor), CornerRadii.EMPTY, Insets.EMPTY)));
         if (scrollPane != null) scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+
+        System.out.println("Applying theme: darkMode=" + darkMode + ", titleColor=" + titleColor + ", textColor=" + textColor);
     }
 
     public TopBarView getTopBar() { return topBar; }

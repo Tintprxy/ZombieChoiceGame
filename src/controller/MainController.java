@@ -25,20 +25,20 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextInputDialog;
 import model.SaveManager;
 import model.SaveData;
+import view.Theme;
 
 public class MainController {
     private final Stage stage;
     private final GameModel model;
     private final BorderPane rootPane;
-    // private final SceneLoader SceneLoader;
     private String lastHealthAppliedSceneId = null;
     private final Set<String> addItemProcessedScenes = new HashSet<>();
     private GameScene currentScene;
-    // Save/Story session info
     private int activeSaveSlot = -1;
     private String playerName = null;
     private SceneLoader activeSceneLoader = null;
     private String activeStoryFilePath = null;
+    private boolean navigatingToGameOver = false; 
 
     public MainController(Stage stage) {
         this.stage = stage;
@@ -72,14 +72,12 @@ public class MainController {
         titleView.applyTheme(model.isDarkMode());
 
         titleView.startButton.setOnAction(e -> {
-            // New Game: pick slot and enter player name
             if (selectSaveSlotAndPlayerName()) {
                 model.clearInventory();
                 showChooseStoryView();
             }
         });
 
-        // NEW: Load Game action
         titleView.loadButton.setOnAction(e -> selectLoadSlotAndStart());
 
         titleView.instructionsButton.setOnAction(e -> {
@@ -327,7 +325,7 @@ public class MainController {
 
         final GameScene currentSceneFinal = modifiedScene;
 
-        if (!currentSceneFinal.getId().equals(lastHealthAppliedSceneId)) {
+        if (!scene.getId().equals(lastHealthAppliedSceneId)) {
             if (currentSceneFinal.getHealthChange() == -1) {
                 model.setHealth(0);
                 System.out.println("[DEBUG] HealthChange is -1 for scene " + currentSceneFinal.getId() + ". Health set to 0.");
@@ -338,50 +336,9 @@ public class MainController {
                     + currentSceneFinal.getHealthChange() + " | Health before: " 
                     + before + ", after: " + model.getHealth());
             }
-            lastHealthAppliedSceneId = currentSceneFinal.getId();
+            lastHealthAppliedSceneId = scene.getId();
         }
         
-        if (currentSceneFinal.getId().contains("infection_cured")) {
-            List<InventoryItem> keyItems = model.getInventory().get(ItemType.KEY_ITEM);
-            if (keyItems != null) {
-                boolean removed = keyItems.removeIf(item -> item.getName().equalsIgnoreCase("Antidote"));
-                if (removed) {
-                    System.out.println("[DEBUG] Antidote has been removed from inventory for scene: " + currentSceneFinal.getId());
-                    model.setAntidoteUsed(true);
-                } else {
-                    System.out.println("[DEBUG] No antidote found to remove for scene: " + currentSceneFinal.getId());
-                }
-            }
-        }
-
-        if ("inventory_choice".equals(currentSceneFinal.getId())) {
-            showInventoryChoiceView(sceneLoader, "start");
-            return;
-        }
-
-        if (currentSceneFinal.getAddItem() != null && !addItemProcessedScenes.contains(currentSceneFinal.getId())) {
-            InventoryItem item = currentSceneFinal.getAddItem();
-            addItemProcessedScenes.add(currentSceneFinal.getId());
-            if (item.getType() == ItemType.WEAPON) {
-                String nextSceneId = currentSceneFinal.getChoices().get(0).getNextId(); 
-                addWeaponToInventory(item, nextSceneId, sceneLoader);
-            } else {
-                model.addItem(item);
-                System.out.println("[DEBUG] Added item from scene: " + item.getName());
-            }
-        }
-
-        if (currentSceneFinal.getNewKeyItem() != null && !currentSceneFinal.getNewKeyItem().trim().isEmpty()) {
-            String keyItemFilePath = "src/data/" + currentSceneFinal.getNewKeyItem().toLowerCase() + ".json";
-            InventoryItem keyItem = InventoryLoader.loadKeyItemFromJson(keyItemFilePath);
-            if (keyItem != null) {
-                model.setKeyItem(keyItem);
-                System.out.println("[DEBUG] New key item set: " + keyItem.getName());
-            } else {
-                System.out.println("[DEBUG] Failed to load key item from: " + keyItemFilePath);
-            }
-        }
-
         ChoiceScreenView view = new ChoiceScreenView(
             model.getHealth(),
             currentSceneFinal.getPrompt(),
@@ -435,7 +392,7 @@ public class MainController {
                     updateView();
                 }
             },
-            () -> { // NEW: onChooseStory
+            () -> { 
                 Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
                 confirm.setTitle("Choose Story");
                 confirm.setHeaderText("Return to story selection?");
@@ -465,7 +422,33 @@ public class MainController {
         );
         rootPane.setCenter(view);
 
-        ChooseStoryAfterWin(currentSceneFinal);
+        view.getChoiceButtons().forEach(button -> {
+            Theme.applyButtonStyle(button, model.isDarkMode());
+        });
+
+
+        if (model.getHealth() <= 0) {
+            view.getChoiceButtons().forEach(button -> {
+                Theme.applyDisabledButtonStyle(button, model.isDarkMode());
+            });
+        }
+
+        Platform.runLater(() -> {
+            if (model.getHealth() <= 0) {
+                interceptGameOverIfNoHealth(view);
+            }
+        });
+
+        if (isWinningEnding(currentSceneFinal)) {
+            ChooseStoryAfterWin(currentSceneFinal);
+        }
+
+        if (model.getHealth() <= 0) {
+            view.getChoiceButtons().forEach(button -> {
+                button.setDisable(true);
+                button.setStyle(Theme.getDisabledButtonStyle(model.isDarkMode()));
+            });
+        }
     }
 
         private void removeWeaponFromJson(String weaponName) {
@@ -800,29 +783,74 @@ public class MainController {
         System.out.println("[DEBUG] Saved WIN to slot " + activeSaveSlot + " at scene: " + winScene.getId());
     }
 
-    // After a win, save progress, show a dialog, and send the player to the Choose Story screen
     private void ChooseStoryAfterWin(GameScene scene) {
         if (!isWinningEnding(scene)) return;
 
-        System.out.println("[DEBUG] Win reached: " + scene.getId() + " -> saving and returning to Choose Story.");
+        System.out.println("[DEBUG] Win reached: " + scene.getId() + " -> saving and waiting for ENTER.");
         saveWinningEnding(scene);
 
-        // Show "You Win" dialog
-        Alert a = new Alert(Alert.AlertType.INFORMATION);
-        a.initOwner(stage);
-        a.setTitle("You Win!");
-        a.setHeaderText("Victory saved to slot " + activeSaveSlot + ".");
-        a.setContentText("Choose another story to play.");
-        a.showAndWait();
+        Alert winAlert = new Alert(Alert.AlertType.INFORMATION);
+        winAlert.initOwner(stage);
+        winAlert.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+        winAlert.setTitle("You Win!");
+        winAlert.setHeaderText("Victory saved to slot " + activeSaveSlot + ".");
+        winAlert.setContentText("Press ENTER to continue...");
 
-        lastHealthAppliedSceneId = null;
-        addItemProcessedScenes.clear();
-        resetInventoryToDefault(); // restore inventory.json to default
-        model.resetHealth();
+        winAlert.setOnShown(e -> {
+            winAlert.getDialogPane().getScene().getRoot().requestFocus();
+            winAlert.getDialogPane().getScene().addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
+                if (event.getCode() == javafx.scene.input.KeyCode.ENTER) {
+                    event.consume();
+                    winAlert.close();
+                    lastHealthAppliedSceneId = null;
+                    addItemProcessedScenes.clear();
+                    resetInventoryToDefault();
+                    model.resetHealth();
+                    activeStoryFilePath = null;
+                    activeSceneLoader = null;
+                    showChooseStoryView();
+                }
+            });
+        });
 
-        activeStoryFilePath = null;
-        activeSceneLoader = null;
-
-        showChooseStoryView();
+        winAlert.showAndWait();
     }
+
+    private void interceptGameOverIfNoHealth(ChoiceScreenView view) {
+        if (model.getHealth() <= 0) {
+            view.getChoiceButtons().forEach(button -> {
+                button.setVisible(false);
+                button.setManaged(false);
+            });
+
+            Platform.runLater(() -> {
+                Alert healthAlert = new Alert(Alert.AlertType.INFORMATION);
+                healthAlert.initOwner(stage);
+                healthAlert.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+                healthAlert.setTitle("Game Over");
+                healthAlert.setHeaderText("Your health is zero.");
+                healthAlert.setContentText("Press ENTER to continue to story selection.");
+
+                healthAlert.setOnShown(e -> {
+                    healthAlert.getDialogPane().getScene().getRoot().requestFocus();
+                    healthAlert.getDialogPane().getScene().addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
+                        if (event.getCode() == javafx.scene.input.KeyCode.ENTER) {
+                            event.consume();
+                            healthAlert.close();
+                            lastHealthAppliedSceneId = null;
+                            addItemProcessedScenes.clear();
+                            resetInventoryToDefault();
+                            model.resetHealth();
+                            activeStoryFilePath = null;
+                            activeSceneLoader = null;
+                            showChooseStoryView();
+                        }
+                    });
+                });
+
+                healthAlert.showAndWait();
+            });
+        }
+    }
+
 }

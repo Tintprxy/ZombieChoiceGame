@@ -20,7 +20,7 @@
     "name": "Spiked Baseball Bat",
     "type": "WEAPON",
     "durability": 5,
-    "power": 9
+    "power": 0
   },
   {
   "name": "Map",

@@ -28,6 +28,7 @@ public class TopBarView extends HBox {
         }
 
         getChildren().addAll(toggleButton, resetButton, chooseStoryButton);
+        toggleButton.setFocusTraversable(false);
     }
 
     public void showChooseStoryButton(boolean show) {

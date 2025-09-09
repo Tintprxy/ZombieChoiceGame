@@ -14,6 +14,7 @@
   {
     "id": "drive_path",
     "prompt": "You start the car and drive down the deserted street. Most stores have been abandoned and looted. Soon, you reach a barricade blocking the road. Do you want to get out and investigate or try to drive around?",
+    "healthChange": -100,
     "choices": [
       {
         "label": "Get Out and Investigate",
@@ -83,7 +84,7 @@
       {
         "label": "Keep Moving",
         "imagePath": "imgs/keepMovingImg.jpg",
-        "id": "car_scene"
+        "id": "drive_choice"
       }
     ]
   },
@@ -241,18 +242,6 @@
       {
         "label": "Get in the Car",
         "imagePath": "imgs/carImg.jpg",
-        "id": "car_scene"
-      }
-    ]
-  },
-
-{
-    "id": "car_scene",
-    "prompt": "You get into the car and close the door, the world outside feeling distant and dangerous. The interior is a mess, with empty wrappers and discarded items strewn about. You take a moment to collect yourself and plan your next move.",
-    "choices": [
-      {
-        "label": "Start Driving",
-        "imagePath": "imgs/continueImg.jpg",
         "id": "drive_choice"
       }
     ]
@@ -379,14 +368,6 @@
         "id": "next_id"
       }
     ]
-  },
-
-  {
-    "id": "game_over_infection",
-    "eaten": true,
-    "healthChange": -1,
-    "prompt": "The infection takes hold rapidly, and your vision blurs as your body succumbs to the virus. In your final moments, you feel a cold numbness spreading through you, and everything fades to black. Game Over. (Every choice can have dangerous consequences—press reset to play again)",
-    "choices": []
   },
 
   {
@@ -559,6 +540,12 @@
   {
     "id": "next_id",
     "prompt": "reset the game",
+    "choices": []
+  },
+
+  {
+    "id": "game_over_zero",
+    "prompt": "Your strength fades as your health drops to nothing. You collapse onto the cold ground, the world blurring into darkness. Game Over. (Every choice can have dangerous consequences — press reset to play again)",
     "choices": []
   }
 ]

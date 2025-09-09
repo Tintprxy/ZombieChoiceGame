@@ -17,6 +17,7 @@ import java.util.function.Consumer;
 import model.GameModel;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.layout.Region;
+import java.util.ArrayList;
 
 public class ChoiceScreenView extends BorderPane {
     private static final int CHOICE_IMG_WIDTH = 160;
@@ -34,6 +35,7 @@ public class ChoiceScreenView extends BorderPane {
     private Runnable onReset;         
     private Consumer<InventoryItem> onConsumeItem;
     private GameModel model; 
+    private final List<Button> choiceButtons = new ArrayList<>();
 
     public ChoiceScreenView(
             int health,
@@ -133,6 +135,7 @@ public class ChoiceScreenView extends BorderPane {
             });
 
             styleChoiceButton(button, darkMode);
+            choiceButtons.add(button);
 
             VBox column = new VBox(8, imageView, button);
             column.setAlignment(Pos.CENTER);
@@ -269,5 +272,9 @@ public class ChoiceScreenView extends BorderPane {
         Runnable resize = () -> Theme.sizeToText(b, 32 + 10, 360); 
         Platform.runLater(resize);
         b.textProperty().addListener((obs, o, n) -> resize.run());
+    }
+
+    public List<Button> getChoiceButtons() {
+        return choiceButtons;
     }
 }

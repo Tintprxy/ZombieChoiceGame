@@ -1,19 +1,15 @@
 {
-  "playerName": "k",
+  "playerName": "j",
   "storyFilePath": "src/data/drive_story1.json",
+  "currentSceneId": "Bitten_from_behind_win",
   "health": 80,
-  "darkMode": false,
-  "addItemProcessedScenes": [],
-  "lastHealthAppliedSceneId": "Run_em_Over_win",
+  "darkMode": true,
+  "addItemProcessedScenes": [
+    "add_antidote"
+  ],
+  "lastHealthAppliedSceneId": "Bitten_from_behind_win",
   "inventory": {
     "CONSUMABLE": [
-      {
-        "name": "Medkit",
-        "type": "CONSUMABLE",
-        "healthRestore": 25,
-        "durability": 0,
-        "power": 0
-      },
       {
         "name": "Energy Drink",
         "type": "CONSUMABLE",
@@ -24,30 +20,34 @@
     ],
     "KEY_ITEM": [
       {
-        "name": "Map",
+        "name": "Antidote",
         "type": "KEY_ITEM",
         "healthRestore": 0,
-        "durability": 0,
+        "durability": 1,
         "power": 0
       }
     ],
     "WEAPON": [
       {
-        "name": "Baseball Bat",
+        "name": "Pistol",
         "type": "WEAPON",
         "healthRestore": 0,
-        "durability": 10,
-        "power": 8
+        "durability": 6,
+        "power": 10
       },
       {
         "name": "Knife",
         "type": "WEAPON",
         "healthRestore": 0,
         "durability": 6,
-        "power": 8
+        "power": 5
       }
     ]
   },
   "lastUpdatedEpochMillis": 0,
-  "completedWinSceneIds": []
+  "completedWinSceneIds": [
+    "win_infection_cured",
+    "zombie_woman_win",
+    "Bitten_from_behind_win"
+  ]
 }
