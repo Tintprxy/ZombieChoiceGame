@@ -1,19 +1,13 @@
 {
-  "playerName": "k",
+  "playerName": "vrsfv",
   "storyFilePath": "src/data/drive_story1.json",
+  "currentSceneId": "Run_em_Over_win",
   "health": 80,
-  "darkMode": false,
+  "darkMode": true,
   "addItemProcessedScenes": [],
   "lastHealthAppliedSceneId": "Run_em_Over_win",
   "inventory": {
     "CONSUMABLE": [
-      {
-        "name": "Medkit",
-        "type": "CONSUMABLE",
-        "healthRestore": 25,
-        "durability": 0,
-        "power": 0
-      },
       {
         "name": "Energy Drink",
         "type": "CONSUMABLE",
@@ -33,21 +27,24 @@
     ],
     "WEAPON": [
       {
-        "name": "Baseball Bat",
+        "name": "Pistol",
         "type": "WEAPON",
         "healthRestore": 0,
-        "durability": 10,
-        "power": 8
+        "durability": 8,
+        "power": 10
       },
       {
         "name": "Knife",
         "type": "WEAPON",
         "healthRestore": 0,
         "durability": 6,
-        "power": 8
+        "power": 5
       }
     ]
   },
   "lastUpdatedEpochMillis": 0,
-  "completedWinSceneIds": []
+  "completedWinSceneIds": [
+    "Run_em_Over_win",
+    "fight_result_win_4"
+  ]
 }

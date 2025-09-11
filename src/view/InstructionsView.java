@@ -76,8 +76,6 @@ public class InstructionsView extends BorderPane {
 
         topBar.resetButton.setOnAction(e -> backButton.fire());
         backButton.setOnAction(e -> {
-            // Your logic to go back to the menu, e.g.:
-            // mainController.showTitleView();
         });
     }
 

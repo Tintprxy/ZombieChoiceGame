@@ -9,13 +9,10 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import model.InventoryItem;
 import model.ItemType;
-
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-
 import static view.Theme.*;
-import controller.MainController;
+
 
 public class InventoryChoiceView extends BorderPane {
     private final TopBarView topBar = new TopBarView();
@@ -37,14 +34,11 @@ public class InventoryChoiceView extends BorderPane {
         centerBox.setPadding(new Insets(20));
 
         promptLabel = new Label("Choose your inventory setup:");
-        // Style will be set in applyTheme
 
-        // Create images
         ImageView healthHeavyImg = createImageView("file:imgs/healthHeavyImg.jpg");
         ImageView attackHeavyImg = createImageView("file:imgs/attackHeavyImg.jpg");
         ImageView balancedImg = createImageView("file:imgs/balancedImg.jpg");
 
-        // Make the images bigger
         if (healthHeavyImg != null) {
             healthHeavyImg.setFitHeight(300);
             healthHeavyImg.setPreserveRatio(true);
@@ -58,12 +52,10 @@ public class InventoryChoiceView extends BorderPane {
             balancedImg.setPreserveRatio(true);
         }
 
-        // Create buttons without images
         healthHeavyButton = new Button("Health Heavy");
         attackHeavyButton = new Button("Attack Heavy");
         balancedButton = new Button("Balanced");
 
-        // VBox for each option: image above button
         VBox healthHeavyBox = new VBox(8, healthHeavyImg, healthHeavyButton);
         VBox attackHeavyBox = new VBox(8, attackHeavyImg, attackHeavyButton);
         VBox balancedBox = new VBox(8, balancedImg, balancedButton);
@@ -120,14 +112,11 @@ public class InventoryChoiceView extends BorderPane {
     public void applyTheme(boolean darkMode) {
         this.darkMode = darkMode;
 
-        // Top bar
         topBar.applyTheme(darkMode);
 
-        // Prompt label
         promptLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: " +
                 (darkMode ? DARK_TEXT : LIGHT_TEXT) + ";");
 
-        // Button style with consistent padding and rounded corners
         String btnStyle = String.format(
                 "-fx-background-color: %s; -fx-text-fill: %s; -fx-background-radius: 20; -fx-padding: 10 20;",
                 darkMode ? DARK_BUTTON_BG : LIGHT_BUTTON_BG,
@@ -137,7 +126,6 @@ public class InventoryChoiceView extends BorderPane {
         attackHeavyButton.setStyle(btnStyle);
         balancedButton.setStyle(btnStyle);
 
-        // Background
         setBackground(new Background(new BackgroundFill(
                 Color.web(darkMode ? DARK_BG : LIGHT_BG), CornerRadii.EMPTY, Insets.EMPTY)));
     }

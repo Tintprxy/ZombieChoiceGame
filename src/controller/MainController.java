@@ -62,7 +62,6 @@ public class MainController {
         switch (model.getCurrentState()) {
             case TITLE -> showTitleView();
             case INSTRUCTIONS -> showInstructionsView();
-            // case FIRST_CHOICE -> showFirstChoiceView();  
             default -> System.out.println("Unknown state.");
         }
     }
@@ -84,16 +83,19 @@ public class MainController {
             model.setCurrentState(GameState.INSTRUCTIONS);
             updateView();
         });
-        
-        titleView.topBar.toggleButton.setOnAction(e -> {
-            model.toggleDarkMode();
-            titleView.applyTheme(model.isDarkMode());
-            autosaveIfPossible();
-        });
+
+        wireTopBar(titleView.topBar, 
+            () -> { 
+                model.setCurrentState(GameState.TITLE); 
+                updateView(); 
+            }, 
+            this::showChooseStoryView);
+
+        titleView.setWinningAlbumHandler(slot -> showWinningPhotoAlbumView(slot));
         rootPane.setCenter(titleView);
     }
 
-        private void showInstructionsView() {
+    private void showInstructionsView() {
         InstructionsView view = new InstructionsView();
         view.applyTheme(model.isDarkMode());
         view.topBar.toggleButton.setOnAction(e -> {
@@ -109,6 +111,14 @@ public class MainController {
 
     private void showChooseStoryView() {
         StoryTurnstileView view = new StoryTurnstileView(model.isDarkMode(), activeSaveSlot);
+        wireTopBar(view.getTopBar(),
+            () -> { 
+                model.setCurrentState(GameState.TITLE); 
+                updateView(); 
+            }, 
+            this::showChooseStoryView
+        );
+
         view.getTopBar().toggleButton.setOnAction(e -> {
             model.toggleDarkMode();
             System.out.println("[DEBUG] Dark mode toggled: " + model.isDarkMode());
@@ -147,7 +157,7 @@ public class MainController {
         System.out.println("Story2Box children: " + view.getStory2Box().getChildren().size());
     }
 
-        private void showInventoryChoiceView(SceneLoader SceneLoader, String startSceneId) {
+    private void showInventoryChoiceView(SceneLoader SceneLoader, String startSceneId) {
         InventoryChoiceView inventoryView = new InventoryChoiceView(
             model.isDarkMode(),
             model.getHealth(),
@@ -176,7 +186,6 @@ public class MainController {
                 updateView();
             }
         });
-
 
         inventoryView.getHealthHeavyButton().setOnAction(e -> {
             System.out.println("[DEBUG] Health Heavy button clicked.");
@@ -217,7 +226,7 @@ public class MainController {
         rootPane.setCenter(inventoryView);
     }
 
-        private void applyInventoryChoice(String choiceLabel) {
+    private void applyInventoryChoice(String choiceLabel) {
         model.clearInventory();
         switch (choiceLabel.toLowerCase()) {
             case "health heavy":
@@ -426,7 +435,6 @@ public class MainController {
             Theme.applyButtonStyle(button, model.isDarkMode());
         });
 
-
         if (model.getHealth() <= 0) {
             view.getChoiceButtons().forEach(button -> {
                 Theme.applyDisabledButtonStyle(button, model.isDarkMode());
@@ -451,7 +459,7 @@ public class MainController {
         }
     }
 
-        private void removeWeaponFromJson(String weaponName) {
+    private void removeWeaponFromJson(String weaponName) {
         try {
             File file = new File("src/data/inventory.json");
             JsonArray arr = JsonParser.parseReader(new FileReader(file)).getAsJsonArray();
@@ -720,8 +728,9 @@ public class MainController {
                     this.activeStoryFilePath = null;
                     this.activeSceneLoader = null;
                     showChooseStoryView();
+                    return;
                 }
-
+                
                 this.activeStoryFilePath = data.storyFilePath;
                 this.activeSceneLoader = new SceneLoader(this.activeStoryFilePath);
                 GameScene scene = this.activeSceneLoader.getSceneById(data.currentSceneId);
@@ -747,9 +756,7 @@ public class MainController {
     }
 
     private void autosaveIfPossible() {
-        // intentionally no-op to enforce "save on win only"
     }
-
 
     private boolean isWinningEnding(GameScene scene) {
         return scene != null && scene.isWinEnding();
@@ -853,4 +860,50 @@ public class MainController {
         }
     }
 
+    private SaveData getCurrentSaveData() {
+        return SaveManager.load(activeSaveSlot).orElse(new SaveData());
+    }
+
+    private void showWinningPhotoAlbumView(int slot) {
+        if (slot < 1 || slot > 3) return;
+        SaveData currentData = SaveManager.load(slot).orElse(new SaveData());
+        view.WinningPhotoAlbumView albumView = new view.WinningPhotoAlbumView(currentData, () -> showTitleView());
+
+        wireTopBar(albumView.getTopBar(),
+            () -> { model.setCurrentState(GameState.TITLE); updateView(); },
+            this::showChooseStoryView
+        );
+
+        albumView.getTopBar().toggleButton.setOnAction(e -> {
+            model.toggleDarkMode();
+            System.out.println("[DEBUG] Dark mode toggled: " + model.isDarkMode());
+            albumView.getTopBar().applyTheme(model.isDarkMode());
+            albumView.applyTheme(model.isDarkMode());
+            autosaveIfPossible();
+        });
+
+        albumView.applyTheme(model.isDarkMode());
+
+        rootPane.setCenter(albumView);
+        System.out.println("Loaded completedWinSceneIds: " + currentData.completedWinSceneIds);
+    }
+
+    private void wireTopBar(view.TopBarView tb, Runnable onReset, Runnable onChooseStory) {
+        tb.toggleButton.setOnAction(e -> {
+            model.toggleDarkMode();
+            autosaveIfPossible();
+            try {
+                tb.applyTheme(model.isDarkMode());
+            } catch (Exception ignored) { }
+            updateView();
+        });
+        tb.resetButton.setOnAction(e -> {
+            lastHealthAppliedSceneId = null;
+            addItemProcessedScenes.clear();
+            model.clearInventory();
+            model.resetHealth();
+            onReset.run();
+        });
+        tb.chooseStoryButton.setOnAction(e -> onChooseStory.run());
+    }
 }

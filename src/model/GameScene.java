@@ -60,6 +60,8 @@ public class GameScene {
 
     private String ending = "NEUTRAL"; 
 
+    private String imagePath;
+
     public String getId() { return id; }
     public String getPrompt() { return prompt; }
     public int getHealthChange() { return healthChange; }
@@ -99,7 +101,6 @@ public class GameScene {
         return rawJson;
     }
 
-    // Optionally, a setter if you need to set it after construction
     public void setRawJson(JsonObject rawJson) {
         this.rawJson = rawJson;
     }
@@ -125,4 +126,12 @@ public class GameScene {
     }
     public String getEnding() { return ending; }
     public void setEnding(String ending) { this.ending = ending; }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
+    }
 }

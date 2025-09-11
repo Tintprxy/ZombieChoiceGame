@@ -1,9 +1,6 @@
 package model;
 
 import java.util.*;
-import model.InventoryItem;
-import model.ItemType;
-
 public class SaveData {
     public String playerName;
     public String storyFilePath;

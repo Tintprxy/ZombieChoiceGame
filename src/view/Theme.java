@@ -53,7 +53,6 @@ public final class Theme {
     }
 
     public static void applyButtonStyle(Button b, boolean dark) {
-        // Base palette
         String base   = dark ? "#3c4149" : "#d4d9e1";  
         String text   = dark ? "#e8ecf2" : "#1f2937";  
         String style =

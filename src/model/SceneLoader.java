@@ -21,16 +21,18 @@ public class SceneLoader {
                     boolean bitten = sceneObj.has("bitten") ? sceneObj.get("bitten").getAsBoolean() : false;
                     String ending = sceneObj.has("ending") ? sceneObj.get("ending").getAsString() : null; 
 
+                    String imagePath = sceneObj.has("imagePath") ? sceneObj.get("imagePath").getAsString() : null;
+
                     List<GameChoice> choices = new ArrayList<>();
                     JsonArray choicesArray = sceneObj.has("choices") ? sceneObj.getAsJsonArray("choices") : new JsonArray(); 
                     for (JsonElement choiceElem : choicesArray) {
                         JsonObject choiceObj = choiceElem.getAsJsonObject();
                         String label = choiceObj.get("label").getAsString();
-                        String imagePath = choiceObj.get("imagePath").getAsString();
+                        String choiceImagePath = choiceObj.get("imagePath").getAsString();
                         String nextId = choiceObj.has("nextId") ? choiceObj.get("nextId").getAsString() :
                                         (choiceObj.has("id") ? choiceObj.get("id").getAsString() : null);
                         int healthEffect = choiceObj.has("healthEffect") ? choiceObj.get("healthEffect").getAsInt() : 0;
-                        GameChoice choice = new GameChoice(label, imagePath, nextId, healthEffect);
+                        GameChoice choice = new GameChoice(label, choiceImagePath, nextId, healthEffect);
                         choice.setCurrentSceneId(sceneId);
                         choices.add(choice);
                     }
@@ -52,6 +54,8 @@ public class SceneLoader {
                     } else {
                         scene = new GameScene(sceneId, prompt, healthChange, choices);
                     }
+
+                    scene.setImagePath(imagePath);
 
                     scene.setThreatLevel(threatLevel);
                     int fightNumber = sceneObj.has("fightNumber") ? sceneObj.get("fightNumber").getAsInt() : 1;

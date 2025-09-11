@@ -30,6 +30,8 @@ public class StoryTurnstileView extends BorderPane {
 
     private final int activeSaveSlot; 
 
+    private Label topLeftLabel;
+
     public StoryTurnstileView(boolean darkMode, int activeSaveSlot) {
         this.activeSaveSlot = activeSaveSlot;
 
@@ -37,14 +39,41 @@ public class StoryTurnstileView extends BorderPane {
         topBar.applyTheme(darkMode);
         setTop(topBar);
 
+        topLeftLabel = new Label("Choose Your Story");
+        topLeftLabel.setStyle("-fx-font-size:16px;");
+        topBar.setLeft(topLeftLabel);
+        topBar.showChooseStoryButton(false);
+
         setPrefSize(800, 600);
         setPadding(new Insets(20));
 
-        story1Box = createStoryBox("file:imgs/armoredCarImg.jpg", "Drive", "A fast route to survival", "Play Drive", /*index*/1);
-        story2Box = createStoryBox("file:imgs/walkingImg.jpg", "Walk",  "Steady and safe on foot",   "Play Walk",  /*index*/2);
+        try {
+            story1Box = createStoryBox("file:imgs/armoredCarImg.jpg", "Drive", "A fast route to survival", "Play Drive", 1);
+        } catch (Exception ex) {
+            System.err.println("[DEBUG] Failed to create story1Box: " + ex);
+            story1Box = new VBox(10);
+            story1Box.setAlignment(Pos.CENTER);
+        }
 
-        decorateCompletedBadge(story1Box, "src/data/drive_story1.json");
-        decorateCompletedBadge(story2Box, "src/data/walk_story2.json");
+        try {
+            story2Box = createStoryBox("file:imgs/walkingImg.jpg", "Walk",  "Steady and safe on foot",   "Play Walk",  2);
+        } catch (Exception ex) {
+            System.err.println("[DEBUG] Failed to create story2Box: " + ex);
+            story2Box = new VBox(10);
+            story2Box.setAlignment(Pos.CENTER);
+        }
+
+        try {
+            decorateCompletedBadge(story1Box, "src/data/drive_story1.json");
+        } catch (Exception ex) {
+            System.err.println("[DEBUG] decorateCompletedBadge failed for drive_story1: " + ex);
+        }
+
+        try {
+            decorateCompletedBadge(story2Box, "src/data/walk_story2.json");
+        } catch (Exception ex) {
+            System.err.println("[DEBUG] decorateCompletedBadge failed for walk_story2: " + ex);
+        }
 
         container = new HBox(50, story1Box, story2Box);
         container.setAlignment(Pos.CENTER);
@@ -65,6 +94,7 @@ public class StoryTurnstileView extends BorderPane {
         });
 
         setCenter(scrollPane);
+
         applyTheme(darkMode);
     }
 
@@ -115,7 +145,7 @@ public class StoryTurnstileView extends BorderPane {
 
         Label badge = new Label("✓");
         badge.setStyle(
-            "-fx-background-color: #16a34a;" +  
+            "-fx-background-color: #16a34a;" +
             "-fx-text-fill: white;" +
             "-fx-font-weight: 800;" +
             "-fx-background-radius: 12;" +
@@ -195,6 +225,11 @@ public class StoryTurnstileView extends BorderPane {
         if (story2Button != null) Theme.applyButtonStyle(story2Button, darkMode);
 
         if (topBar != null) topBar.applyTheme(darkMode);
+
+        if (topLeftLabel != null) {
+            topLeftLabel.setStyle("-fx-font-size:16px; -fx-text-fill: " + (darkMode ? DARK_TEXT : LIGHT_TEXT) + ";");
+        }
+
         if (container != null) container.setBackground(new Background(new BackgroundFill(Color.web(containerColor), CornerRadii.EMPTY, Insets.EMPTY)));
         if (scrollPane != null) scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
 

@@ -12,8 +12,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
-import javafx.scene.Node;
 import java.io.File;
+import java.util.function.IntConsumer;
+
 
 import static view.Theme.*;
 
@@ -27,6 +28,9 @@ public class TitleView extends BorderPane {
     private final Text titleText = new Text("Zombie Choice Game");
     private final Text creditText = new Text("Created by Tyler J. Thomas");
     private final Text instructionText = new Text("Make your choices wisely.\nEvery decision affects your survival.\nCan you make it out alive?");
+
+    private Button winningAlbumButton;
+    private IntConsumer winningAlbumHandler; 
 
     public TitleView() {
         contentBox.setAlignment(Pos.TOP_CENTER);
@@ -58,11 +62,31 @@ public class TitleView extends BorderPane {
             instructionsButton
         );
 
-        VBox topBarContainer = new VBox(topBar);
-        topBarContainer.setPadding(new Insets(20, 30, 0, 0)); 
-        topBarContainer.setAlignment(Pos.TOP_RIGHT);
+        winningAlbumButton = new Button("Winning Photo Album");
+        winningAlbumButton.setOnAction(e -> {
+            java.util.List<String> options = new java.util.ArrayList<>();
+            for (int i = 1; i <= 3; i++) {
+                String label = "Slot " + i + " - " + model.SaveManager.peekPlayerName(i).orElse("Empty");
+                options.add(label);
+            }
+            javafx.scene.control.ChoiceDialog<String> dialog = new javafx.scene.control.ChoiceDialog<>(options.get(0), options);
+            dialog.setTitle("Select Save Slot");
+            dialog.setHeaderText("Choose a save slot to view its Winning Photo Album:");
+            dialog.setContentText("Save Slot:");
 
-        setTop(topBarContainer);
+            dialog.showAndWait().ifPresent(selected -> {
+                int slot = options.indexOf(selected) + 1;
+                if (winningAlbumHandler != null) {
+                    winningAlbumHandler.accept(slot);
+                }
+            });
+        });
+
+        winningAlbumButton.setFocusTraversable(false);
+        contentBox.getChildren().add(winningAlbumButton);
+
+        setTop(topBar);
+
         setCenter(contentBox);
     }
 
@@ -82,5 +106,10 @@ public class TitleView extends BorderPane {
         Theme.applyButtonStyle(startButton, isDarkMode);
         Theme.applyButtonStyle(loadButton, isDarkMode);
         Theme.applyButtonStyle(instructionsButton, isDarkMode);
+        Theme.applyButtonStyle(winningAlbumButton, isDarkMode);
+    }
+
+    public void setWinningAlbumHandler(IntConsumer handler) {
+        this.winningAlbumHandler = handler;
     }
 }

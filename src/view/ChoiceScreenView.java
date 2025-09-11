@@ -47,7 +47,7 @@ public class ChoiceScreenView extends BorderPane {
             Consumer<GameChoice> onChoice,
             Runnable onToggleTheme,
             Runnable onReset,
-            Runnable onChooseStory,    // keep this
+            Runnable onChooseStory,
             Consumer<InventoryItem> onConsumeItem
     ) {
         this.health = health;
@@ -65,6 +65,10 @@ public class ChoiceScreenView extends BorderPane {
         topBar.resetButton.setOnAction(e -> onReset.run());
         topBar.showChooseStoryButton(true);
         topBar.chooseStoryButton.setOnAction(e -> onChooseStory.run());
+
+        Label left = new Label("Current Scene: " + "");
+        left.setStyle("-fx-font-size:16px;");
+        topBar.setLeft(left);
 
         VBox inventoryView = buildInventoryUI(inventory, darkMode);
         inventoryView.setPrefWidth(300); 
@@ -192,10 +196,6 @@ public class ChoiceScreenView extends BorderPane {
     public TopBarView getTopBar() {
         return topBar;
     }
-
-    // public VBox getLayout() {
-    //     return this;
-    // }
 
     private VBox buildInventoryUI(Map<ItemType, List<InventoryItem>> inventory, boolean darkMode) {
         VBox inventoryBox = new VBox(10);
