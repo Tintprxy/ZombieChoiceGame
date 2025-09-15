@@ -1,7 +1,7 @@
 [
   {
     "id": "start",
-    "prompt": "You walk down the street and find a hidden alley. There could be supplies or danger but you can't tell from here. Do you want to explore it or keep walking?",
+    "prompt": "Night air clings to the city like smoke. A narrow alley yawns between two buildings—promises of loot, whispers of teeth. Do you slip into the gloom or keep to the open street?",
     "healthChange": 0,
     "choices": [
       {
@@ -14,93 +14,646 @@
         "imagePath": "imgs/streetImg.jpg",
         "id": "startRunning"
       }
-      ]
-    },
+    ]
+  },
 
-    {
-      "id": "weapon_choice",
-      "prompt": "You discover a stash of weapons! Which one do you take?",
-      "choices": [
-        {
-          "label": "Take Sword",
-          "imagePath": "imgs/swordImg.jpg",
-          "id": "sword_taken"
-        },
-        {
-          "label": "Take Baseball Bat",
-          "imagePath": "imgs/baseballBatImg.jpg",
-          "id": "bat_taken"
-        },
-        {
-          "label": "Take Neither",
-          "imagePath": "imgs/emptyHandsImg.jpg",
-          "id": "neither_taken"
-        }
-      ]
-    },
-
-    {
-      "id": "sword_taken",
-      "prompt": "You take the sword and leave the bat behind.",
-      "choices": [
-        {
-          "label": "Continue",
-          "imagePath": "imgs/swordTakenImg.jpg",
-          "id": "startRunning"
-        }
-      ],
-      "addItem": {
-        "name": "Sword",
-        "type": "WEAPON",
-        "durability": 12,
-        "power": 9
+  {
+    "id": "weapon_choice",
+    "prompt": "A busted door gives way to a stash on a dusty shelf. Metal gleams. Tape-wrapped wood waits heavy in your hands. Which Weapon do you choose?",
+    "choices": [
+      {
+        "label": "Take Sword",
+        "imagePath": "imgs/swordImg.jpg",
+        "id": "sword_taken"
+      },
+      {
+        "label": "Take Baseball Bat",
+        "imagePath": "imgs/baseballBatImg.jpg",
+        "id": "bat_taken"
+      },
+      {
+        "label": "Take Neither",
+        "imagePath": "imgs/emptyHandsImg.jpg",
+        "id": "neither_taken"
       }
-    },
+    ]
+  },
 
-    {
-      "id": "bat_taken",
-      "prompt": "You take the baseball bat and leave the sword behind.",
-      "choices": [
-        {
-          "label": "Continue",
-          "imagePath": "imgs/batTakenImg.jpg",
-          "id": "startRunning"
-        }
-      ],
-      "addItem": {
-        "name": "Baseball Bat",
-        "type": "WEAPON",
-        "durability": 10,
-        "power": 7
+  {
+    "id": "sword_taken",
+    "prompt": "Cold steel settles into your grip—weighty, certain. You leave the bat to gather dust and step back into the night.",
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/swordTakenImg.jpg",
+        "id": "startRunning"
       }
-    },
+    ],
+    "addItem": {
+      "name": "Sword",
+      "type": "WEAPON",
+      "durability": 12,
+      "power": 9
+    }
+  },
 
-    {
-      "id": "neither_taken",
-      "prompt": "You decide to leave both weapons behind and continue unarmed. You feel vulnerable, but lighter on your feet.",
-      "choices": [
-        {
-          "label": "Continue",
-          "imagePath": "imgs/titleImg.jpg",
-          "id": "startRunning"
-        }
+  {
+    "id": "bat_taken",
+    "prompt": "Splinters kiss your palms as you heft the bat. It’s battered but honest. You leave the sword behind and move on.",
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/batTakenImg.jpg",
+        "id": "startRunning"
+      }
+    ],
+    "addItem": {
+      "name": "Baseball Bat",
+      "type": "WEAPON",
+      "durability": 10,
+      "power": 7
+    }
+  },
+
+  {
+    "id": "neither_taken",
+    "prompt": "You walk away empty handed lighter on your feet, louder in your heartbeat.",
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/titleImg.jpg",
+        "id": "startRunning"
+      }
     ]
   },
 
   {
     "id": "startRunning",
-    "prompt": "You keep walking down the alley till you make it to a street, staying alert for any signs of danger. The city is eerily quiet, but you can hear distant moans and shuffling feet. Then suddenly, you hear a loud crash and a scream behind you. Do you want to start running or find a place to hide?",
+    "prompt": "The alley spills you onto a hollow street. Somewhere behind, metal shrieks and a scream rips the dark. Run and risk the open or vanish into cover?",
     "choices": [
       {
         "label": "Start Running",
         "imagePath": "imgs/startRunningImg.jpg",
-        "id": "next_id"
+        "id": "alley_escape"
       },
       {
         "label": "Find a Place to Hide",
         "imagePath": "imgs/hideImg.jpg",
+        "id": "find_shelter"
+      }
+    ]
+  },
+
+  {
+    "id": "alley_escape",
+    "prompt": "Footfalls drum. A doorway belches out a lurching corpse, all teeth and hunger. Do you meet it head on or slide past the grave it drags with it?",
+    "threatLevel": 4,
+    "fightNumber": 1,
+    "choices": [
+      {
+        "label": "Fight",
+        "imagePath": "imgs/fightZombieAlley.jpg",
+        "id": "fight_result_win_1"
+      },
+      {
+        "label": "Dodge Past",
+        "imagePath": "imgs/dodgeZombieAlley.jpg",
+        "id": "dodge_fail"
+      }
+    ]
+  },
+
+  {
+    "id": "fight_result_win_1",
+    "prompt": "Bone cracks. Rot falls. Breath rasps hot in your throat as silence returns in shivers. You press on.",
+    "choices": [
+      {
+        "label": "Keep Moving",
+        "imagePath": "imgs/continueImg.jpg",
+        "id": "find_shelter"
+      }
+    ]
+  },
+
+  {
+    "id": "fight_result_lose_1",
+    "prompt": "You swing, you miss, you drown beneath claw and weight. The world tilts and the pavement rises to meet you.",
+    "healthChange": -1,
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/gameOverImg.jpg",
+        "id": "game_over_zero"
+      }
+    ]
+  },
+
+  {
+    "id": "dodge_fail",
+    "prompt": "Fingers like hooks bite into your arm as the zombie bites down into you tissue. Fire races your veins as you wrench free, leaving skin and luck behind.",
+    "healthChange": -20,
+    "fightNumber": 1,
+    "threatLevel": 5,
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/runShelterImg.jpg",
+        "id": "infection_choice"
+      }
+    ]
+  },
+
+  {
+    "id": "infection_choice",
+    "prompt": "Heat blooms under your skin an ugly sunrise. The world wobbles. Do you reach for the Antidote, or let the dark finish its work?",
+    "choices": [
+      {
+        "label": "Antidote",
+        "imagePath": "imgs/antidoteUse.jpg",
+        "id": "antidote_win",
+        "requiresItem": "Antidote"
+      },
+      {
+        "label": "Let Infection Take Over",
+        "imagePath": "imgs/gameOverInfectionImg.jpg",
+        "id": "game_over_infection"
+      }
+    ]
+  },
+
+  {
+    "id": "find_shelter",
+    "prompt": "A convenience store slumps behind boards and dust. Salvation or a mousetrap? Do you pry your way in or keep moving toward the safe haven?",
+    "choices": [
+      {
+        "label": "Break In",
+        "imagePath": "imgs/storeBreakIn.jpg",
+        "id": "store_scene"
+      },
+      {
+        "label": "Keep Moving",
+        "imagePath": "imgs/cityCenter.jpg",
+        "id": "keep_moving_path"
+      }
+    ]
+  },
+
+  {
+    "id": "keep_moving_path",
+    "prompt": "You leave the store to its ghosts. A dumpster rattles metal quivers like a warning bell. Investigate the noise, or let curiosity starve?",
+    "choices": [
+      {
+        "label": "Check It Out",
+        "imagePath": "imgs/checkDumpster.jpg",
+        "id": "check_dumpster"
+      },
+      {
+        "label": "Keep Moving",
+        "imagePath": "imgs/keepMoving.jpg",
+        "id": "keep_moving"
+      }
+    ]
+  },
+
+  {
+    "id": "check_dumpster",
+    "prompt": "You lift the lid. Death explodes in your face—claws, breath, rot. You hammer it back until it staggers away, leaving you shaking and bleeding.",
+    "healthChange": -20,
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/keepMoving.jpg",
+        "id": "keep_moving"
+      }
+    ]
+  },
+
+  {
+    "id": "keep_moving",
+    "prompt": "You push toward the city center, nerves strung tight. Ahead, a child huddles against brick, shoulders hitching with sobs. Mercy or momentum?",
+    "choices": [
+      {
+        "label": "Approach the Kid",
+        "imagePath": "imgs/approachKid.jpg",
+        "id": "approach_kid"
+      },
+      {
+        "label": "Keep Moving",
+        "imagePath": "imgs/keepMoving.jpg",
+        "id": "city_center"
+      }
+    ]
+  },
+
+  {
+    "id": "approach_kid",
+    "prompt": "The sobs die. Small hands become claws desperation wearing a human face. Do you strike, or try to reach the person still trapped inside?",
+    "threatLevel": 6,
+    "fightNumber": 2,
+    "choices": [
+      {
+        "label": "Fight",
+        "imagePath": "imgs/fightKid.jpg",
+        "id": "fight_result_win_2"
+      },
+      {
+        "label": "Reason",
+        "imagePath": "imgs/reasonWithKid.jpg",
+        "id": "reason_with_kid"
+      }
+    ]
+  },
+
+  {
+    "id": "fight_result_win_2",
+    "prompt": "The scuffle ends with hard breaths and harder choices. You leave the survivor behind and keep moving through the concrete canyons.",
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/cityCenter.jpg",
+        "id": "city_center"
+      }
+    ]
+  },
+
+  {
+    "id": "fight_result_lose_2",
+    "prompt": "Rage and fear crash over you like a tide. Hands pin you down; the world narrows to black.",
+    "ending": "LOSE",
+    "healthChange": -1,
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/gameOverSurvivor.jpg",
         "id": "next_id"
       }
     ]
+  },
+
+  {
+    "id": "reason_with_kid",
+    "prompt": "Your voice threads the needle calm, low, human. The kid’s fists loosen. A crumpled packet of food changes hands, and warmth returns to your limbs.",
+    "healthChange": 10,
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/continueImg.jpg",
+        "id": "city_center"
+      }
+    ]
+  },
+
+  {
+    "id": "store_scene",
+    "prompt": "Inside, aisles lean like broken ribs. A kit glows red behind the counter, and something hungry scratches from the shadows. Risk the reach or leave the prize?",
+    "choices": [
+      {
+        "label": "Grab Supplies",
+        "imagePath": "imgs/grabSupplies.jpg",
+        "id": "grab_supplies"
+      },
+      {
+        "label": "Leave Quickly",
+        "imagePath": "imgs/leaveStore.jpg",
+        "id": "keep_moving_path"
+      }
+    ]
+  },
+
+  {
+    "id": "grab_supplies",
+    "prompt": "You snatch the kit as rotten nails rake your skin. Pain blooms; hope heavier than the bag on your shoulder.",
+    "healthChange": -10,
+    "choices": [
+      {
+        "label": "Leave With The Bag",
+        "imagePath": "imgs/leaveStore.jpg",
+        "id": "leave_with_bag"
+      },
+      {
+        "label": "Open The Bag In The Store",
+        "imagePath": "imgs/openBagStore.jpg",
+        "id": "open_bag_in_store"
+      }
+    ]
+  },
+
+  {
+    "id": "leave_with_bag",
+    "prompt": "You burst back into the night, heart thrashing against your ribs. For a few precious seconds, the city forgets you exist.",
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/cityCenter.jpg",
+        "id": "city_center"
+      }
+    ],
+    "addItem": {
+      "name": "Antidote",
+      "type": "KEY_ITEM",
+      "durability": 1,
+      "power": 0
+    }
+  },
+
+  {
+    "id": "open_bag_in_store",
+    "prompt": "Zipper, breath, relief the Antidote glints beside a handful of gauze. You patch what you can and step back into the ruins.",
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/cityCenter.jpg",
+        "id": "a_survivor_attacks_you"
+      }
+    ],
+    "addItem": {
+      "name": "Antidote",
+      "type": "KEY_ITEM",
+      "durability": 1,
+      "power": 0
+    }
+  },
+
+  {
+    "id": "a_survivor_attacks_you",
+    "prompt": "Footsteps slap tile. Another survivor barrels in—eyes wild, knuckles white. Do you stand your ground or bolt for daylight?",
+    "threatLevel": 7,
+    "fightNumber": 3,
+    "choices": [
+      {
+        "label": "Fight",
+        "imagePath": "imgs/survivorDefeated.jpg",
+        "id": "fight_result_win_3"
+      },
+      {
+        "label": "Run",
+        "imagePath": "imgs/runFromSurvivor.jpg",
+        "id": "survivor_run_result"
+      }
+    ]
+  },
+
+  {
+    "id": "fight_result_win_3",
+    "prompt": "A shove, a gasp, a narrow escape. You leave the anger echoing between dusty aisles and head for the city’s broken heart.",
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/cityCenter.jpg",
+        "id": "city_center"
+      }
+    ]
+  },
+
+  {
+    "id": "fight_result_lose_3",
+    "prompt": "The blow comes blind and final. The floor takes you. The world forgets your name.",
+    "ending": "LOSE",
+    "healthChange": -1,
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/gameOverSurvivor.jpg",
+        "id": "next_id"
+      }
+    ]
+  },
+
+  {
+    "id": "survivor_run_result",
+    "prompt": "You tear free and sprint into the open—alive, rattled, unbroken. The city center looms like a promise you’re not sure you can keep.",
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/cityCenter.jpg",
+        "id": "city_center"
+      }
+    ]
+  },
+
+  {
+    "id": "city_center",
+    "prompt": "The crossroads is a graveyard of steel. Doors hang open like mouths. A pack gathers low, hungry thunder. Sneak through the wreckage or make a stand?",
+    "threatLevel": 8,
+    "fightNumber": 4,
+    "choices": [
+      {
+        "label": "Sneak Around",
+        "imagePath": "imgs/sneakAround.jpg",
+        "id": "sneak_fail"
+      },
+      {
+        "label": "Fight",
+        "imagePath": "imgs/fightPack.jpg",
+        "id": "fight_result_win_4"
+      }
+    ]
+  },
+
+  {
+    "id": "fight_result_win_4",
+    "prompt": "When the last body stills, you stand in a hush thick as fog. Shattered glass catches a label: ‘Antidote.’ Fate, bottled.",
+    "choices": [
+      {
+        "label": "Take Antidote",
+        "imagePath": "imgs/antidoteImg.jpg",
+        "id": "add_antidote"
+      },
+      {
+        "label": "Leave It",
+        "imagePath": "imgs/emptyHandsImg.jpg",
+        "id": "toward_base"
+      }
+    ]
+  },
+
+  {
+    "id": "fight_result_lose_4",
+    "prompt": "They come like weather—too many, too fast. You disappear beneath the storm.",
+    "ending": "LOSE",
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/gameOverImg.jpg",
+        "id": "next_id"
+      }
+    ]
+  },
+
+  {
+    "id": "sneak_fail",
+    "prompt": "A can skitters. Heads snap toward you as if yanked by string. Claws, teeth, chaos your blood keeps the beat.",
+    "healthChange": -20,
+    "fightNumber": 4,
+    "choices": [
+      {
+        "label": "Continue to Fight",
+        "imagePath": "imgs/fightPack.jpg",
+        "id": "fight_result_win_4"
+      },
+      {
+        "label": "Run",
+        "imagePath": "imgs/runShelterImg.jpg",
+        "id": "Beaten_by_the_horde"
+      }
+    ]
+  },
+
+  {
+    "id": "Beaten_by_the_horde",
+    "prompt": "You run. They run faster. The street swallows your footsteps and leaves only silence behind.",
+    "ending": "LOSE",
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/gameOverImg.jpg",
+        "id": "next_id"
+      }
+    ]
+  },
+
+  {
+    "id": "add_antidote",
+    "prompt": "The vial is cool against your skin—one last sunrise sealed in glass.",
+    "addItem": {
+      "name": "Antidote",
+      "type": "KEY_ITEM",
+      "durability": 1,
+      "power": 0
+    },
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/continueImg.jpg",
+        "id": "toward_base"
+      }
+    ]
+  },
+
+  {
+    "id": "toward_base",
+    "prompt": "Far ahead, floodlights comb the dark. A military gate bites into the skyline. Between you and salvation: one last shadow, swaying.",
+    "threatLevel": 9,
+    "fightNumber": 5,
+    "choices": [
+      {
+        "label": "Fight",
+        "imagePath": "imgs/finalFight.jpg",
+        "id": "fight_result_win_5"
+      },
+      {
+        "label": "Run",
+        "imagePath": "imgs/runFinal.jpg",
+        "id": "run_fail"
+      }
+    ]
+  },
+
+  {
+    "id": "fight_result_win_5",
+    "prompt": "Steel sings. Silence answers. Gates yawn wide and voices shout your name. For now against all odds you live.",
+    "ending": "WIN",
+    "imagePath": "imgs/winImg.jpg",
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/winImg.jpg",
+        "id": "next_id"
+      }
+    ]
+  },
+
+  {
+    "id": "fight_result_lose_5",
+    "prompt": "You fall within sight of salvation, the floodlights smearing into stars. A thought surfaces Antidote.",
+    "choices": [
+      {
+        "label": "Antidote",
+        "imagePath": "imgs/antidoteUse.jpg",
+        "id": "antidote_final_win",
+        "requiresItem": "Antidote"
+      },
+      {
+        "label": "Accept Fate",
+        "imagePath": "imgs/gameOverImg.jpg",
+        "id": "next_id"
+      }
+    ]
+  },
+
+  {
+    "id": "antidote_final_win",
+    "prompt": "Glass breaks, fire fades. Strength returns in shaky breaths. The gates swing open and the night finally loosens its grip.",
+    "ending": "WIN",
+    "imagePath": "imgs/winImg.jpg",
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/winImg.jpg",
+        "id": "next_id"
+      }
+    ]
+  },
+
+  {
+    "id": "run_fail",
+    "prompt": "You bolt—and a jaw like a bear trap finds your arm. Fever howls through your blood. Antidote or oblivion?",
+    "choices": [
+      {
+        "label": "Antidote",
+        "imagePath": "imgs/antidoteUse.jpg",
+        "id": "antidote_win",
+        "requiresItem": "Antidote"
+      },
+      {
+        "label": "Accept Fate",
+        "imagePath": "imgs/gameOverInfectionImg.jpg",
+        "id": "game_over_infection"
+      }
+    ]
+  },
+
+  {
+    "id": "antidote_win",
+    "prompt": "The sting is sharp; the relief, sharper. The fire guttering in your veins shrinks to embers as you steady yourself and move on.",
+    "imagePath": "imgs/antidoteUse.jpg",
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/continueImg.jpg",
+        "id": "toward_base"
+      }
+    ]
+  },
+
+  {
+    "id": "game_over_infection",
+    "prompt": "The world softens at the edges. Streetlights blur like candles in rain. Darkness steps forward and takes your hand.",
+    "healthChange": -1,
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/gameOverInfectionImg.jpg",
+        "id": "next_id"
+      }
+    ]
+  },
+
+  {
+    "id": "game_over_zero",
+    "prompt": "Your strength drains to the last drop. Concrete cradles you. Somewhere, something howls, and then it’s just the wind.",
+    "choices": [
+      {
+        "label": "Continue",
+        "imagePath": "imgs/gameOverZeroImg.jpg",
+        "id": "next_id"
+      }
+    ]
+  },
+
+  {
+    "id": "next_id",
+    "prompt": "reset the game",
+    "choices": []
   }
 ]

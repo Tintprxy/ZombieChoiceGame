@@ -1,6 +1,7 @@
 # Usage:
 #   python validate_and_sanitize_json.py src/data/drive_story1.json
 #   python validate_and_sanitize_json.py src/data/drive_story1.json --sanitize --out src/data/drive_story1.sanitized.json --mode replace
+#   python validate_and_sanitize_json.py src/data/drive_story1.json --sanitize --sanitize-text --out src/data/drive_story1.sanitized.json
 import json
 import re
 import sys
@@ -8,19 +9,15 @@ from pathlib import Path
 import argparse
 import unicodedata
 
-# Allow underscore as a normal character (don't flag "_").
 ID_RE = re.compile(r'^[A-Za-z0-9_]+$')
-# Match any character that is NOT alphanumeric or underscore (e.g. @, #, punctuation, weird Unicode)
 NON_ALNUM_RE = re.compile(r'[^A-Za-z0-9_]')
 
 def find_ids(data):
-    # data is expected to be a list of scene objects
     issues = []
     for i, scene in enumerate(data):
         sid = scene.get('id')
         if isinstance(sid, str) and not ID_RE.match(sid):
             issues.append(('scene.id', i, sid))
-        # choices
         for j, choice in enumerate(scene.get('choices', [])):
             cid = choice.get('id')
             if isinstance(cid, str) and not ID_RE.match(cid):
@@ -34,7 +31,6 @@ def sanitize_id(s, mode='underscore'):
         return NON_ALNUM_RE.sub('', s)
 
 def apply_sanitization(data, mode='underscore'):
-    # build mapping old -> new for scene ids & choice ids
     mapping = {}
     for scene in data:
         sid = scene.get('id')
@@ -42,7 +38,6 @@ def apply_sanitization(data, mode='underscore'):
             new = sanitize_id(sid, mode)
             if new != sid:
                 mapping[sid] = new
-    # also sanitize choice target ids
     for scene in data:
         for choice in scene.get('choices', []):
             cid = choice.get('id')
@@ -50,7 +45,6 @@ def apply_sanitization(data, mode='underscore'):
                 new = sanitize_id(cid, mode)
                 if new != cid:
                     mapping[cid] = new
-    # Apply mapping to scene ids and choice ids (only exact matches)
     for scene in data:
         sid = scene.get('id')
         if sid in mapping:
@@ -69,12 +63,72 @@ def describe_chars(s):
         described.append(f"'{c}' U+{ord(c):04X} ({name})")
     return described
 
+REPLACEMENTS = {
+    '\u2010': '-',  # hyphen
+    '\u2011': '-',  # non-breaking hyphen
+    '\u2012': '-',  # figure dash
+    '\u2013': '-',  # en dash –
+    '\u2014': '-',  # em dash —
+    '\u2015': '-',  # horizontal bar
+    '\u2212': '-',  # minus sign −
+    '\u2018': "'",  # left single quote ‘
+    '\u2019': "'",  # right single quote ’
+    '\u201B': "'",  # single high-reversed-9 quote
+    '\u2032': "'",  # prime ′
+    '\u201C': '"',  # left double quote “
+    '\u201D': '"',  # right double quote ”
+    '\u201F': '"',  # double high-reversed-9 quote
+    '\u2033': '"',  # double prime ″
+    '\u2026': '...',# ellipsis …
+    '\u00A0': ' ',  # no-break space
+    '\u2000': ' ',  # en quad
+    '\u2001': ' ',  # em quad
+    '\u2002': ' ',  # en space
+    '\u2003': ' ',  # em space
+    '\u2004': ' ',  # three-per-em space
+    '\u2005': ' ',  # four-per-em space
+    '\u2006': ' ',  # six-per-em space
+    '\u2007': ' ',  # figure space
+    '\u2008': ' ',  # punctuation space
+    '\u2009': ' ',  # thin space
+    '\u200A': ' ',  # hair space
+    '\u202F': ' ',  # narrow no-break space
+    '\u205F': ' ',  # medium mathematical space
+    '\u3000': ' ',  # ideographic space
+    '\u00AD': '',   # soft hyphen
+    '\u200B': '',   # zero-width space
+    '\u200C': '',   # zero-width non-joiner
+    '\u200D': '',   # zero-width joiner
+    '\u2060': '',   # word joiner
+    '\uFEFF': '',   # zero-width no-break space (BOM)
+}
+
+def sanitize_ascii(s: str) -> str:
+    if not isinstance(s, str):
+        return s
+    s = unicodedata.normalize('NFC', s)
+    for k, v in REPLACEMENTS.items():
+        if k in s:
+            s = s.replace(k, v)
+    return s
+
+def apply_text_sanitization(data):
+    for scene in data:
+        if 'prompt' in scene and isinstance(scene['prompt'], str):
+            scene['prompt'] = sanitize_ascii(scene['prompt'])
+        if 'choices' in scene and isinstance(scene['choices'], list):
+            for choice in scene['choices']:
+                if 'label' in choice and isinstance(choice['label'], str):
+                    choice['label'] = sanitize_ascii(choice['label'])
+
 def main():
     p = argparse.ArgumentParser(description='Validate and optionally sanitize scene IDs in story JSON.')
     p.add_argument('file', help='path to story json (list of scenes)')
-    p.add_argument('--sanitize', action='store_true', help='write a sanitized copy')
+    p.add_argument('--sanitize', action='store_true', help='write a sanitized copy (IDs; see --mode)')
+    p.add_argument('--sanitize-text', action='store_true', help='clean non-ASCII/fancy punctuation from prompts and labels')
     p.add_argument('--out', default=None, help='output path when --sanitize (defaults to <input>.sanitized.json)')
-    p.add_argument('--mode', choices=['underscore','remove'], default='underscore', help='how to replace non-alnum: underscore or remove')
+    p.add_argument('--mode', choices=['underscore','remove'], default='underscore',
+                   help='how to replace non-alnum in IDs: underscore or remove')
     p.add_argument('--details', action='store_true', help='show offending characters with Unicode names/codepoints')
     args = p.parse_args()
 
@@ -103,15 +157,24 @@ def main():
             else:
                 print(f'  {kind} @ {loc}: "{val}" (non-alnum chars: {chars})')
 
-    if args.sanitize:
+    if args.sanitize or args.sanitize_text:
         out_path = Path(args.out) if args.out else path.with_suffix('.sanitized.json')
-        mapping = apply_sanitization(data, args.mode)
+
+        mapping = {}
+        if args.sanitize:
+            mapping = apply_sanitization(data, args.mode)
+
+        if args.sanitize_text:
+            apply_text_sanitization(data)
+
         if mapping:
             print('\nApplied sanitization mapping (old -> new):')
-            for k,v in mapping.items():
+            for k, v in mapping.items():
                 print(f'  {k} -> {v}')
         else:
-            print('\nNo ids required sanitization.')
+            if args.sanitize:
+                print('\nNo ids required sanitization.')
+
         out_path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding='utf-8')
         print('Wrote sanitized file to', out_path)
 

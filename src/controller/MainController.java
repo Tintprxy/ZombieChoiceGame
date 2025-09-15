@@ -144,13 +144,21 @@ public class MainController {
              autosaveIfPossible(); 
         });
         
-        Button walkButton = (Button) view.getStory2Box().getChildren().get(3);
-        walkButton.setOnAction(e -> {
-            activeStoryFilePath = "src/data/walk_story2.json";
-            activeSceneLoader = new SceneLoader(activeStoryFilePath);
-            showInventoryChoiceView(activeSceneLoader, "start");
-            autosaveIfPossible();
-        });
+        Button walkButton = null;
+        for (javafx.scene.Node node : view.getStory2Box().getChildren()) {
+            if (node instanceof Button btn) {
+                walkButton = btn;
+                break;
+            }
+        }
+        if (walkButton != null) {
+            walkButton.setOnAction(e -> {
+                activeStoryFilePath = "src/data/walk_story2.json";
+                activeSceneLoader = new SceneLoader(activeStoryFilePath);
+                showInventoryChoiceView(activeSceneLoader, "start");
+                autosaveIfPossible();
+            });
+        }
         
         rootPane.setCenter(view);
         System.out.println("Story1Box children: " + view.getStory1Box().getChildren().size());
@@ -316,6 +324,20 @@ public class MainController {
         System.out.println("[DEBUG] Scene " + scene.getId() + " bitten flag: " + scene.isBitten());
         this.currentScene = scene;
         GameScene modifiedScene = scene;
+
+        if (scene.hasAddItem() && !addItemProcessedScenes.contains(scene.getId())) {
+            InventoryItem item = scene.getAddItem();
+            if (item != null) {
+                if (item.isWeapon()) {
+                    addWeaponToInventory(item, scene.getId(), sceneLoader);
+                    return;
+                } else {
+                    model.addItem(item); 
+                    addItemProcessedScenes.add(scene.getId());
+                    System.out.println("[DEBUG] Added item from scene: " + scene.getId() + " -> " + item.getName());
+                }
+            }
+        }
 
         if (modifiedScene.isBitten()) {
             boolean hasAntidote = false;
@@ -719,27 +741,10 @@ public class MainController {
                 }
                 this.lastHealthAppliedSceneId = data.lastHealthAppliedSceneId;
 
-                boolean hasSavedWin =
-                        data.currentSceneId != null && !data.currentSceneId.isBlank() &&
-                        data.storyFilePath != null && !data.storyFilePath.isBlank();
-
-                if (!hasSavedWin) {
-                    System.out.println("[DEBUG] Slot " + slot + " has no wins. Opening Choose Story.");
-                    this.activeStoryFilePath = null;
-                    this.activeSceneLoader = null;
-                    showChooseStoryView();
-                    return;
-                }
+                // Always show Choose Story view after loading
+                showChooseStoryView();
+                return;
                 
-                this.activeStoryFilePath = data.storyFilePath;
-                this.activeSceneLoader = new SceneLoader(this.activeStoryFilePath);
-                GameScene scene = this.activeSceneLoader.getSceneById(data.currentSceneId);
-                if (scene == null) {
-                    System.out.println("[DEBUG] Saved scene not found. Opening Choose Story.");
-                    showChooseStoryView();
-                    return;
-                }
-                showSceneView(scene, this.activeSceneLoader);
             } catch (Exception ex) {
                 Alert a = new Alert(Alert.AlertType.ERROR);
                 a.setTitle("Load Failed");

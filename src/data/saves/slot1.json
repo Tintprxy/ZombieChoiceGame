@@ -1,11 +1,13 @@
 {
-  "playerName": "vrsfv",
-  "storyFilePath": "src/data/drive_story1.json",
-  "currentSceneId": "Run_em_Over_win",
+  "playerName": "eWFw",
+  "storyFilePath": "src/data/walk_story2.json",
+  "currentSceneId": "fight_result_win_4",
   "health": 80,
   "darkMode": true,
-  "addItemProcessedScenes": [],
-  "lastHealthAppliedSceneId": "Run_em_Over_win",
+  "addItemProcessedScenes": [
+    "add_antidote"
+  ],
+  "lastHealthAppliedSceneId": "fight_result_win_4",
   "inventory": {
     "CONSUMABLE": [
       {
@@ -18,10 +20,10 @@
     ],
     "KEY_ITEM": [
       {
-        "name": "Map",
+        "name": "Antidote",
         "type": "KEY_ITEM",
         "healthRestore": 0,
-        "durability": 0,
+        "durability": 1,
         "power": 0
       }
     ],
@@ -30,7 +32,7 @@
         "name": "Pistol",
         "type": "WEAPON",
         "healthRestore": 0,
-        "durability": 8,
+        "durability": 4,
         "power": 10
       },
       {

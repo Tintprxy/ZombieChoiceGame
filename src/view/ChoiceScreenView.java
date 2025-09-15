@@ -113,17 +113,22 @@ public class ChoiceScreenView extends BorderPane {
 
             Button button = new Button(choice.getLabel());
 
-            if (choice.getLabel().toLowerCase().contains("use antidote") || choice.getLabel().toLowerCase().contains("administer antidote")) {
+            String lbl = choice.getLabel().toLowerCase();
+            if (lbl.contains("antidote")) {
                 boolean hasAntidote = false;
                 List<InventoryItem> keyItems = inventory.get(ItemType.KEY_ITEM);
                 if (keyItems != null) {
-                    hasAntidote = keyItems.stream().anyMatch(
-                        item -> item.getName().equalsIgnoreCase("Antidote")
-                    );
+                    hasAntidote = keyItems.stream()
+                        .anyMatch(item -> item.getName().equalsIgnoreCase("Antidote"));
                 }
                 if (!hasAntidote && !model.isAntidoteUsed()) {
                     button.setDisable(true);
                     button.setStyle("-fx-opacity: 0.5;");
+                }
+               
+                if (lbl.equals("take antidote")) {
+                    button.setDisable(false);
+                    button.setStyle(""); 
                 }
             }
             
@@ -217,6 +222,16 @@ public class ChoiceScreenView extends BorderPane {
             categoryLabel.setStyle("-fx-text-fill: " + Theme.getTextColor(darkMode) + ";");
 
             VBox itemList = new VBox(5);
+            // Apply the same style as inventoryBox
+            itemList.setAlignment(Pos.CENTER_LEFT);
+            itemList.setPadding(new Insets(0)); // Or new Insets(10) if you want more spacing
+            itemList.setMaxWidth(250);
+            itemList.setStyle(
+                "-fx-background-color: " + Theme.getInventoryBackground(darkMode) + ";" +
+                "-fx-border-color: " + Theme.getBorderColor(darkMode) + ";" +
+                "-fx-border-width: 1px;"
+            );
+
             List<InventoryItem> items = inventory.get(type);
             if (items == null || items.isEmpty()) {
                 Label emptyLabel = new Label("- none");
