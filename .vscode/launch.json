@@ -6,7 +6,8 @@
       "name": "Run JavaFX",
       "request": "launch",
       "mainClass": "Main",
-      "vmArgs": "--module-path \"C:/Users/tthom/Documents/--Main/ZombieChoiceGame/lib\" --add-modules javafx.controls,javafx.fxml -Djava.library.path=\"C:/Users/tthom/Documents/--Main/ZombieChoiceGame/lib\""
+      "vmArgs": "--module-path \"${workspaceFolder}/lib\" --add-modules javafx.controls,javafx.fxml -Djava.library.path=\"${workspaceFolder}/lib\""
+
     }
   ]
 }
