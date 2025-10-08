@@ -1,13 +1,14 @@
 {
   "playerName": "eWFw",
-  "storyFilePath": "src/data/walk_story2.json",
-  "currentSceneId": "fight_result_win_4",
+  "storyFilePath": "src/data/drive_story1.json",
+  "currentSceneId": "zombie_woman_win",
   "health": 80,
   "darkMode": true,
   "addItemProcessedScenes": [
+    "sword_taken",
     "add_antidote"
   ],
-  "lastHealthAppliedSceneId": "fight_result_win_4",
+  "lastHealthAppliedSceneId": "zombie_woman_win",
   "inventory": {
     "CONSUMABLE": [
       {
@@ -20,10 +21,10 @@
     ],
     "KEY_ITEM": [
       {
-        "name": "Antidote",
+        "name": "Map",
         "type": "KEY_ITEM",
         "healthRestore": 0,
-        "durability": 1,
+        "durability": 0,
         "power": 0
       }
     ],
@@ -32,14 +33,14 @@
         "name": "Pistol",
         "type": "WEAPON",
         "healthRestore": 0,
-        "durability": 4,
+        "durability": 6,
         "power": 10
       },
       {
         "name": "Knife",
         "type": "WEAPON",
         "healthRestore": 0,
-        "durability": 6,
+        "durability": 5,
         "power": 5
       }
     ]
@@ -47,6 +48,7 @@
   "lastUpdatedEpochMillis": 0,
   "completedWinSceneIds": [
     "Run_em_Over_win",
-    "fight_result_win_4"
+    "fight_result_win_5",
+    "zombie_woman_win"
   ]
 }

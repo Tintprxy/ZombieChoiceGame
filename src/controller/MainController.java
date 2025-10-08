@@ -238,19 +238,19 @@ public class MainController {
         model.clearInventory();
         switch (choiceLabel.toLowerCase()) {
             case "health heavy":
-                List<InventoryItem> healthItems = loadInventoryFromJson("c:\\Users\\tthom\\documents\\--Main\\ZombieChoiceGame\\src\\data\\health_inventory.json");
+                List<InventoryItem> healthItems = loadInventoryFromJson("src\\data\\health_inventory.json");
                 for (InventoryItem item : healthItems) {
                     model.addItem(item);
                 }
                 break;
             case "attack heavy":
-                List<InventoryItem> attackItems = loadInventoryFromJson("c:\\Users\\tthom\\documents\\--Main\\ZombieChoiceGame\\src\\data\\attack_inventory.json");
+                List<InventoryItem> attackItems = loadInventoryFromJson("src\\data\\attack_inventory.json");
                 for (InventoryItem item : attackItems) {
                     model.addItem(item);
                 }
                 break;
             case "balanced":
-                List<InventoryItem> balancedItems = loadInventoryFromJson("c:\\Users\\tthom\\documents\\--Main\\ZombieChoiceGame\\src\\data\\balanced_inventory.json");
+                List<InventoryItem> balancedItems = loadInventoryFromJson("src\\data\\balanced_inventory.json");
                 for (InventoryItem item : balancedItems) {
                     model.addItem(item);
                 }
