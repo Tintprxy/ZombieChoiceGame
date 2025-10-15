@@ -177,4 +177,29 @@ public class GameModel {
             System.out.println("[DEBUG] Broken weapons removed. Current weapons: " + weapons);
         }
     }
+
+    // NEW: decrement durability on a key item and remove it when it reaches 0
+    public boolean decrementKeyItemDurabilityByName(String itemName, int amount, boolean removeOnZero) {
+        List<InventoryItem> keyItems = inventory.get(ItemType.KEY_ITEM);
+        if (keyItems == null || keyItems.isEmpty()) return false;
+
+        for (int i = 0; i < keyItems.size(); i++) {
+            InventoryItem it = keyItems.get(i);
+            if (it != null && itemName.equalsIgnoreCase(it.getName())) {
+                int before = it.getDurability();
+                it.decreaseDurability(amount);
+                int after = it.getDurability();
+                System.out.printf("[DEBUG] Decremented key item \"%s\" durability %d -> %d%n", it.getName(), before, after);
+                if (after <= 0 && removeOnZero) {
+                    keyItems.remove(i);
+                    if ("Antidote".equalsIgnoreCase(it.getName())) {
+                        setAntidoteUsed(true);
+                    }
+                    System.out.println("[DEBUG] Removed key item \"" + it.getName() + "\" because durability <= 0");
+                }
+                return true;
+            }
+        }
+        return false;
+    }
 }

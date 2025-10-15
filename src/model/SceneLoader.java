@@ -66,6 +66,9 @@ public class SceneLoader {
                     System.out.println("[DEBUG] Loaded scene: " + scene.getId() + ", addItem: " + scene.getAddItem());
 
                     sceneMap.put(sceneId, scene);
+
+                    // NEW: store raw JSON so scene logic can read custom flags like decrementKeyItemDurability/useAntidote
+                    scene.setRawJson(sceneObj);
                 } catch (Exception ex) {
                     System.err.println("[ERROR] Failed to parse scene: " + sceneElem);
                     ex.printStackTrace();

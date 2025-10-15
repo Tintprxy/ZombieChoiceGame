@@ -114,22 +114,16 @@ public class ChoiceScreenView extends BorderPane {
             Button button = new Button(choice.getLabel());
 
             String lbl = choice.getLabel().toLowerCase();
+            // Antidote buttons: enable "Use" when player has Antidote (and hasn't used it);
+            // disable "Pickup" when player already has Antidote (or it's already used)
             if (lbl.contains("antidote")) {
-                boolean hasAntidote = false;
-                List<InventoryItem> keyItems = inventory.get(ItemType.KEY_ITEM);
-                if (keyItems != null) {
-                    hasAntidote = keyItems.stream()
-                        .anyMatch(item -> item.getName().equalsIgnoreCase("Antidote"));
-                }
-                if (!hasAntidote && !model.isAntidoteUsed()) {
-                    button.setDisable(true);
-                    button.setStyle("-fx-opacity: 0.5;");
-                }
-               
-                if (lbl.equals("take antidote")) {
-                    button.setDisable(false);
-                    button.setStyle(""); 
-                }
+                boolean hasAntidote = hasKeyItemNamed("Antidote");
+                boolean used = model.isAntidoteUsed();
+                boolean isUseAction = lbl.contains("use"); // e.g., "Use Antidote"
+                boolean allow = isUseAction ? (hasAntidote && !used)   // ungrey use when owned
+                                            : (!hasAntidote && !used); // grey pickup when owned
+                button.setDisable(!allow);
+                button.setStyle(allow ? "" : "-fx-opacity: 0.5;");
             }
             
             button.setOnAction(e -> {
@@ -291,5 +285,11 @@ public class ChoiceScreenView extends BorderPane {
 
     public List<Button> getChoiceButtons() {
         return choiceButtons;
+    }
+
+    private boolean hasKeyItemNamed(String name) {
+        List<InventoryItem> keyItems = inventory.get(ItemType.KEY_ITEM);
+        return keyItems != null && keyItems.stream()
+            .anyMatch(i -> i != null && name.equalsIgnoreCase(i.getName()));
     }
 }

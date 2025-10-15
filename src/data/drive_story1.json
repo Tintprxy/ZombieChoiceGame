@@ -391,7 +391,7 @@
     "prompt": "You cautiously approach the afflicted woman. As you get closer, you notice that while the infection has already begun to take hold of her, her eyes still hold a glimpse of the person she once was. Do you risk administering the antidote in hopes of saving a life, or do you decide that it's safer to walk away and focus on your own survival?",
     "choices": [
       {
-        "label": "Administer Antidote",
+        "label": "Use Antidote",
         "imagePath": "imgs/administerAntidoteImg.jpg",
         "id": "infection_cured"
       },
@@ -406,6 +406,7 @@
   {
     "id": "infection_cured",
     "prompt": "You carefully administer the antidote to the woman. As the serum enters her system, you watch in awe as the signs of infection begin to recede. Her eyes regain their focus, and for a moment, she seems to be herself again. \"Thank you,\" she whispers, before collapsing into unconsciousness.",
+    "useAntidote": true,
     "choices": [
       {
         "label": "Continue",

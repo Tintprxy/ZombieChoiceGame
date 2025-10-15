@@ -235,6 +235,11 @@ public class MainController {
     }
 
     private void applyInventoryChoice(String choiceLabel) {
+        // Reset per-run flags so item pickup (like Antidote) can happen again
+        lastHealthAppliedSceneId = null;
+        addItemProcessedScenes.clear();
+        model.setAntidoteUsed(false);
+
         model.clearInventory();
         switch (choiceLabel.toLowerCase()) {
             case "health heavy":
@@ -325,21 +330,8 @@ public class MainController {
         this.currentScene = scene;
         GameScene modifiedScene = scene;
 
-        if (scene.hasAddItem() && !addItemProcessedScenes.contains(scene.getId())) {
-            InventoryItem item = scene.getAddItem();
-            if (item != null) {
-                if (item.isWeapon()) {
-                    addWeaponToInventory(item, scene.getId(), sceneLoader);
-                    return;
-                } else {
-                    model.addItem(item); 
-                    addItemProcessedScenes.add(scene.getId());
-                    System.out.println("[DEBUG] Added item from scene: " + scene.getId() + " -> " + item.getName());
-                }
-            }
-        }
-
-        if (modifiedScene.isBitten()) {
+        // resolve bitten -> infection/game over first (use current inventory to decide)
+        if (scene.isBitten()) {
             boolean hasAntidote = false;
             List<InventoryItem> keyItems = model.getInventory().get(ItemType.KEY_ITEM);
             if (keyItems != null) {
@@ -354,9 +346,56 @@ public class MainController {
             }
         }
 
+        // NEW: apply scene-level flags to decrement key-item durability (e.g., using Antidote)
+        if (modifiedScene.getRawJson() != null) {
+            JsonObject raw = modifiedScene.getRawJson();
+            try {
+                // Simple flag for Antidote
+                if (raw.has("useAntidote") && raw.get("useAntidote").getAsBoolean()) {
+                    boolean ok = model.decrementKeyItemDurabilityByName("Antidote", 1, true);
+                    System.out.println("[DEBUG] useAntidote flag processed, decremented: " + ok);
+                }
+                // Generic flag for any key item
+                if (raw.has("decrementKeyItemDurability") && raw.get("decrementKeyItemDurability").isJsonObject()) {
+                    JsonObject dk = raw.getAsJsonObject("decrementKeyItemDurability");
+                    String name = dk.has("name") ? dk.get("name").getAsString() : null;
+                    int amount = dk.has("amount") ? dk.get("amount").getAsInt() : 1;
+                    boolean removeOnZero = !dk.has("removeOnZero") || dk.get("removeOnZero").getAsBoolean();
+                    if (name != null) {
+                        boolean ok = model.decrementKeyItemDurabilityByName(name, amount, removeOnZero);
+                        System.out.println("[DEBUG] decrementKeyItemDurability processed for " + name + ", decremented: " + ok);
+                    }
+                }
+            } catch (Exception ex) {
+                System.out.println("[DEBUG] decrementKeyItemDurability processing error: " + ex.getMessage());
+            }
+        }
+
+        // process addItem using the scene we will actually show
+        if (modifiedScene.hasAddItem() && !addItemProcessedScenes.contains(modifiedScene.getId())) {
+            InventoryItem item = modifiedScene.getAddItem();
+            if (item != null) {
+                if (item.isWeapon()) {
+                    // handle weapon flow (may open removal dialog) and return early
+                    addWeaponToInventory(item, modifiedScene.getId(), sceneLoader);
+                    return;
+                } else {
+                    // model.addItem returns true only if the player accepted (handles key-item swap dialog)
+                    boolean added = model.addItem(item);
+                    if (added) {
+                        addItemProcessedScenes.add(modifiedScene.getId());
+                        System.out.println("[DEBUG] Added item from scene: " + modifiedScene.getId() + " -> " + item.getName());
+                    } else {
+                        System.out.println("[DEBUG] Player declined or addItem failed for scene: " + modifiedScene.getId() + " -> " + item.getName());
+                    }
+                }
+            }
+        }
+
         final GameScene currentSceneFinal = modifiedScene;
 
-        if (!scene.getId().equals(lastHealthAppliedSceneId)) {
+        // apply health changes guarded by the final shown scene id
+        if (!currentSceneFinal.getId().equals(lastHealthAppliedSceneId)) {
             if (currentSceneFinal.getHealthChange() == -1) {
                 model.setHealth(0);
                 System.out.println("[DEBUG] HealthChange is -1 for scene " + currentSceneFinal.getId() + ". Health set to 0.");
@@ -367,9 +406,9 @@ public class MainController {
                     + currentSceneFinal.getHealthChange() + " | Health before: " 
                     + before + ", after: " + model.getHealth());
             }
-            lastHealthAppliedSceneId = scene.getId();
+            lastHealthAppliedSceneId = currentSceneFinal.getId();
         }
-        
+
         ChoiceScreenView view = new ChoiceScreenView(
             model.getHealth(),
             currentSceneFinal.getPrompt(),
@@ -445,7 +484,8 @@ public class MainController {
                 if (consumed) {
                     System.out.println("[DEBUG] Consumed item: " + item.getName() +
                         " | Health after: " + model.getHealth());
-                    showSceneView(scene, sceneLoader);
+                    // after consuming, re-show the scene currently being displayed (use currentSceneFinal)
+                    showSceneView(currentSceneFinal, sceneLoader);
                 } else {
                     System.out.println("[DEBUG] Failed to consume item: " + item.getName());
                 }
@@ -675,15 +715,25 @@ public class MainController {
         this.playerName = nameOpt.get().trim();
         this.activeSaveSlot = slot;
 
+        // Ensure a truly fresh run state for the new game/save
+        this.addItemProcessedScenes.clear();
+        this.lastHealthAppliedSceneId = null;
+        model.setAntidoteUsed(false);
+        model.clearInventory();
+        model.resetHealth();
+        activeStoryFilePath = null;
+        activeSceneLoader = null;
+
         SaveData data = new SaveData();
         data.playerName = this.playerName;
         data.darkMode = model.isDarkMode();
-        data.health = model.getHealth();
-        data.inventory = new HashMap<>(model.getInventory());
-        data.addItemProcessedScenes = new ArrayList<>(this.addItemProcessedScenes);
-        data.lastHealthAppliedSceneId = this.lastHealthAppliedSceneId;
-        data.storyFilePath = this.activeStoryFilePath; 
+        data.health = model.getHealth(); // fresh health
+        data.inventory = new HashMap<>(model.getInventory()); // empty
+        data.addItemProcessedScenes = new ArrayList<>(); // empty so Antidote can be picked up again
+        data.lastHealthAppliedSceneId = null;
+        data.storyFilePath = null; // choose story next
         data.currentSceneId = null;
+
         System.out.println("[DEBUG] Writing initial save for slot " + this.activeSaveSlot + " name=" + this.playerName);
         SaveManager.save(this.activeSaveSlot, data);
         System.out.println("[DEBUG] Initial save written.");
@@ -816,6 +866,65 @@ public class MainController {
                     winAlert.close();
                     lastHealthAppliedSceneId = null;
                     addItemProcessedScenes.clear();
+
+                    // Persist the cleared addItemProcessedScenes (and remove Antidote from saved KEY_ITEM)
+                    try {
+                        if (activeSaveSlot >= 0) {
+                            SaveData sd = getCurrentSaveData();
+                            // clear processed add-item flags for fresh replay
+                            sd.addItemProcessedScenes = new ArrayList<>();
+                            sd.lastHealthAppliedSceneId = null;
+
+                            // remove Antidote from saved KEY_ITEM if present (support enum or string keys)
+                            try {
+                                if (sd.inventory != null) {
+                                    List<InventoryItem> keyItems = null;
+                                    Object raw;
+
+                                    // try enum key first
+                                    raw = sd.inventory.get(ItemType.KEY_ITEM);
+                                    if (raw instanceof List) {
+                                        @SuppressWarnings("unchecked")
+                                        List<InventoryItem> list = (List<InventoryItem>) raw;
+                                        keyItems = list;
+                                    } else {
+                                        // try string key produced by Gson after deserialization
+                                        raw = sd.inventory.get("KEY_ITEM");
+                                        if (raw instanceof List) {
+                                            @SuppressWarnings("unchecked")
+                                            List<InventoryItem> list = (List<InventoryItem>) raw;
+                                            keyItems = list;
+                                        }
+                                    }
+
+                                    if (keyItems != null) {
+                                        boolean removed = keyItems.removeIf(it -> it != null && "Antidote".equalsIgnoreCase(it.getName()));
+                                        if (removed) {
+                                            System.out.println("[DEBUG] Removed Antidote from saved KEY_ITEM in slot " + activeSaveSlot);
+                                        }
+                                    } else {
+                                        System.out.println("[DEBUG] No KEY_ITEM list found in save slot " + activeSaveSlot + " to remove Antidote from.");
+                                    }
+                                }
+                            } catch (Exception ex) {
+                                System.out.println("[DEBUG] Error while removing Antidote from save: " + ex.getMessage());
+                            }
+
+                            // write save JSON directly to the slot file (preserve enum keys)
+                            String slotPath = "src/data/saves/slot" + activeSaveSlot + ".json";
+                            try (java.io.FileWriter fw = new java.io.FileWriter(slotPath)) {
+                                com.google.gson.Gson gson = new com.google.gson.GsonBuilder()
+                                    .enableComplexMapKeySerialization()
+                                    .setPrettyPrinting()
+                                    .create();
+                                gson.toJson(sd, fw);
+                            }
+                            System.out.println("[DEBUG] Cleared addItemProcessedScenes and Antidote in save slot " + activeSaveSlot);
+                        }
+                    } catch (Exception ex) {
+                        System.out.println("[DEBUG] Failed to clear save slot data: " + ex.getMessage());
+                    }
+
                     resetInventoryToDefault();
                     model.resetHealth();
                     activeStoryFilePath = null;

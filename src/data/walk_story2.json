@@ -445,13 +445,13 @@
       {
         "label": "Fight",
         "imagePath": "imgs/fightPack.jpg",
-        "id": "fight_result_win_4"
+        "id": "fight_result_win_4_walk"
       }
     ]
   },
 
   {
-    "id": "fight_result_win_4",
+    "id": "fight_result_win_4_walk",
     "prompt": "When the last body stills, you stand in a hush thick as fog. Shattered glass catches a label: ‘Antidote.’ Fate, bottled.",
     "choices": [
       {
@@ -489,7 +489,7 @@
       {
         "label": "Continue to Fight",
         "imagePath": "imgs/fightPack.jpg",
-        "id": "fight_result_win_4"
+        "id": "fight_result_win_4_walk"
       },
       {
         "label": "Run",

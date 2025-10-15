@@ -1,15 +1,30 @@
 {
-  "playerName": "eWFw",
+  "playerName": "g",
   "storyFilePath": "src/data/drive_story1.json",
-  "currentSceneId": "zombie_woman_win",
-  "health": 80,
+  "currentSceneId": "win_infection_cured",
+  "health": 60,
   "darkMode": true,
   "addItemProcessedScenes": [
-    "sword_taken",
     "add_antidote"
   ],
-  "lastHealthAppliedSceneId": "zombie_woman_win",
+  "lastHealthAppliedSceneId": "win_infection_cured",
   "inventory": {
+    "WEAPON": [
+      {
+        "name": "Pistol",
+        "type": "WEAPON",
+        "healthRestore": 0,
+        "durability": 8,
+        "power": 10
+      },
+      {
+        "name": "Knife",
+        "type": "WEAPON",
+        "healthRestore": 0,
+        "durability": 6,
+        "power": 5
+      }
+    ],
     "CONSUMABLE": [
       {
         "name": "Energy Drink",
@@ -19,36 +34,12 @@
         "power": 0
       }
     ],
-    "KEY_ITEM": [
-      {
-        "name": "Map",
-        "type": "KEY_ITEM",
-        "healthRestore": 0,
-        "durability": 0,
-        "power": 0
-      }
-    ],
-    "WEAPON": [
-      {
-        "name": "Pistol",
-        "type": "WEAPON",
-        "healthRestore": 0,
-        "durability": 6,
-        "power": 10
-      },
-      {
-        "name": "Knife",
-        "type": "WEAPON",
-        "healthRestore": 0,
-        "durability": 5,
-        "power": 5
-      }
-    ]
+    "KEY_ITEM": []
   },
   "lastUpdatedEpochMillis": 0,
   "completedWinSceneIds": [
-    "Run_em_Over_win",
-    "fight_result_win_5",
-    "zombie_woman_win"
+    "fight_result_win_4",
+    "win_infection_cured",
+    "Bitten_from_behind_win"
   ]
 }
