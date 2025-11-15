@@ -1,51 +1,9 @@
 {
-  "playerName": "Tyler",
-  "storyFilePath": "src/data/drive_story1.json",
-  "currentSceneId": "win_infection_cured",
-  "health": 80,
+  "playerName": "123",
+  "health": 100,
   "darkMode": true,
-  "addItemProcessedScenes": [
-    "add_antidote"
-  ],
-  "lastHealthAppliedSceneId": "win_infection_cured",
-  "inventory": {
-    "WEAPON": [
-      {
-        "name": "Pistol",
-        "type": "WEAPON",
-        "healthRestore": 0,
-        "durability": 6,
-        "power": 10
-      },
-      {
-        "name": "Knife",
-        "type": "WEAPON",
-        "healthRestore": 0,
-        "durability": 6,
-        "power": 5
-      }
-    ],
-    "KEY_ITEM": [
-      {
-        "name": "Antidote",
-        "type": "KEY_ITEM",
-        "healthRestore": 0,
-        "durability": 1,
-        "power": 0
-      }
-    ],
-    "CONSUMABLE": [
-      {
-        "name": "Energy Drink",
-        "type": "CONSUMABLE",
-        "healthRestore": 10,
-        "durability": 0,
-        "power": 0
-      }
-    ]
-  },
+  "addItemProcessedScenes": [],
+  "inventory": {},
   "lastUpdatedEpochMillis": 0,
-  "completedWinSceneIds": [
-    "win_infection_cured"
-  ]
+  "completedWinSceneIds": []
 }

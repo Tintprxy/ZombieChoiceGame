@@ -1,13 +1,11 @@
 {
-  "playerName": "g",
+  "playerName": "Jamal",
   "storyFilePath": "src/data/drive_story1.json",
-  "currentSceneId": "win_infection_cured",
-  "health": 60,
+  "currentSceneId": "Run_em_Over_win",
+  "health": 80,
   "darkMode": true,
-  "addItemProcessedScenes": [
-    "add_antidote"
-  ],
-  "lastHealthAppliedSceneId": "win_infection_cured",
+  "addItemProcessedScenes": [],
+  "lastHealthAppliedSceneId": "Run_em_Over_win",
   "inventory": {
     "WEAPON": [
       {
@@ -34,12 +32,19 @@
         "power": 0
       }
     ],
-    "KEY_ITEM": []
+    "KEY_ITEM": [
+      {
+        "name": "Map",
+        "type": "KEY_ITEM",
+        "healthRestore": 0,
+        "durability": 0,
+        "power": 0
+      }
+    ]
   },
   "lastUpdatedEpochMillis": 0,
   "completedWinSceneIds": [
-    "fight_result_win_4",
     "win_infection_cured",
-    "Bitten_from_behind_win"
+    "Run_em_Over_win"
   ]
 }
