@@ -23,15 +23,6 @@
         "power": 8
       }
     ],
-    "KEY_ITEM": [
-      {
-        "name": "Map",
-        "type": "KEY_ITEM",
-        "healthRestore": 0,
-        "durability": 0,
-        "power": 0
-      }
-    ],
     "CONSUMABLE": [
       {
         "name": "Medkit",
@@ -44,6 +35,15 @@
         "name": "Energy Drink",
         "type": "CONSUMABLE",
         "healthRestore": 10,
+        "durability": 0,
+        "power": 0
+      }
+    ],
+    "KEY_ITEM": [
+      {
+        "name": "Map",
+        "type": "KEY_ITEM",
+        "healthRestore": 0,
         "durability": 0,
         "power": 0
       }

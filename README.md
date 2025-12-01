@@ -1,19 +1,21 @@
 <div align="center">
   <h1>Zombie Choice Game</h1>
-  <p><strong>A JavaFX, JSON-driven survival narrative with branching paths, resource pressure, and persistent saves.</strong></p>
-  <p>Make choices, manage a fragile inventory, and survive—or get eaten. All story, screens, items, and transitions are data‑driven.</p>
-  
-  <!-- Gameplay Video -->
+  <p><strong>A JavaFX survival narrative driven entirely by external JSON data.</strong></p>
+  <p>Make choices, manage a fragile inventory, and survive—or get eaten. Every scene, item, and transition comes from JSON files.</p>
+
+  <!-- Gameplay Video Link -->
+  <p><strong>Gameplay Demo:</strong><br>
   <a href="https://youtu.be/zVVuPGwZjk0?si=paLymdgsn23uQ_OE" target="_blank">
-    <img src="imgs/video_placeholder.png" width="520" alt="Gameplay Video Preview">
-  </a>
-  <p><em>Click the thumbnail to watch the gameplay demo</em></p>
+    https://youtu.be/zVVuPGwZjk0?si=paLymdgsn23uQ_OE
+  </a></p>
 </div>
 
 ---
 
 ## Overview
-Zombie Choice Game is a lightweight but fully‑engineered interactive fiction game in pure Java + JavaFX. It showcases clean MVC design, a declarative content pipeline (JSON), a simple state machine, and persistent save slots. This README consolidates architecture, diagrams, and gameplay docs for a recruiter‑ready snapshot of the project.
+Zombie Choice Game is a lightweight but fully engineered interactive fiction game built with Java + JavaFX.  
+It uses **JSON files for all story, scene definitions, inventories, and saves**, and **Gson** as the JSON-parsing library.  
+The project demonstrates clean MVC structure, a declarative content pipeline, and a simple state machine that drives the entire experience.
 
 ## UI Showcase
 
@@ -48,14 +50,14 @@ Zombie Choice Game is a lightweight but fully‑engineered interactive fiction g
 </p>
 
 ## Highlights
-- **Clean MVC:** Clear separation of `model`, `view`, and `controller` directories.
-- **JavaFX GUI:** Dynamic scene construction, consistent HUD/top bar, theme support.
-- **State Machine:** Explicit `GameState` enum drives progression & screen routing.
-- **JSON Content:** Scenes, inventories, titles, and save files are all external.
-- **Inventory System:** Item categories, limits, durability, health/power effects.
-- **Threat & Combat Logic:** Scene `threatLevel` influences weapon effectiveness & survival chances.
-- **Persistent Saves:** Three slot system (classic console style) with replay tracking.
-- **Extensible Pipeline:** Adding new narrative arcs is a matter of dropping JSON.
+- **Clean MVC:** model / view / controller separation.
+- **JavaFX GUI:** modular views, dynamic scene construction, theme support.
+- **State Machine:** a `GameState` enum controls screen flow and scene transitions.
+- **JSON Content Pipeline:** all gameplay logic and story data are externalized in JSON.
+- **Gson Integration:** Gson handles parsing and mapping JSON into model objects.
+- **Inventory System:** item types, limits, power, durability, effects.
+- **Threat & Combat Logic:** scene threat levels + weapon stats determine outcomes.
+- **Persistent Saves:** three save slots stored as JSON in `src/data/saves/`.
 
 ---
 
@@ -102,6 +104,14 @@ src/data/
   saves/slot1.json .. slot3.json
 ```
 Edit / add files → restart → new content live. No recompilation of logic layer required.
+
+## JSON vs Gson (Clear Explanation)
+To avoid confusion:
+
+- **JSON** = the data format used for scenes, saves, titles, items, and story branching.
+- **Gson** = the Java library used to parse those JSON files into Java objects.
+
+Your game is JSON-driven, and uses Gson to read that JSON.
 
 ## Core Architecture
 | Layer | Responsibilities | Key Classes |
