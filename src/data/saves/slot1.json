@@ -9,27 +9,18 @@
   "inventory": {
     "WEAPON": [
       {
-        "name": "Pistol",
+        "name": "Baseball Bat",
         "type": "WEAPON",
         "healthRestore": 0,
-        "durability": 8,
-        "power": 10
+        "durability": 10,
+        "power": 8
       },
       {
         "name": "Knife",
         "type": "WEAPON",
         "healthRestore": 0,
         "durability": 6,
-        "power": 5
-      }
-    ],
-    "CONSUMABLE": [
-      {
-        "name": "Energy Drink",
-        "type": "CONSUMABLE",
-        "healthRestore": 10,
-        "durability": 0,
-        "power": 0
+        "power": 8
       }
     ],
     "KEY_ITEM": [
@@ -37,6 +28,22 @@
         "name": "Map",
         "type": "KEY_ITEM",
         "healthRestore": 0,
+        "durability": 0,
+        "power": 0
+      }
+    ],
+    "CONSUMABLE": [
+      {
+        "name": "Medkit",
+        "type": "CONSUMABLE",
+        "healthRestore": 25,
+        "durability": 0,
+        "power": 0
+      },
+      {
+        "name": "Energy Drink",
+        "type": "CONSUMABLE",
+        "healthRestore": 10,
         "durability": 0,
         "power": 0
       }

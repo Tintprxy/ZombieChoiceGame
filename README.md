@@ -1,81 +1,215 @@
-# Zombie Choice Game
+<div align="center">
+  <h1>Zombie Choice Game</h1>
+  <p><strong>A JavaFX, JSON-driven survival narrative with branching paths, resource pressure, and persistent saves.</strong></p>
+  <p>Make choices, manage a fragile inventory, and survive—or get eaten. All story, screens, items, and transitions are data‑driven.</p>
+  
+  <!-- Gameplay Video -->
+  <a href="https://youtu.be/zVVuPGwZjk0?si=paLymdgsn23uQ_OE" target="_blank">
+    <img src="imgs/video_placeholder.png" width="520" alt="Gameplay Video Preview">
+  </a>
+  <p><em>Click the thumbnail to watch the gameplay demo</em></p>
+</div>
 
-A JavaFX choice-driven survival mini‑game. Make tough calls, manage your inventory, and try to win without getting bitten.
+---
 
-## Features
-- JSON-driven branching story engine
-- Inventory system with item types and durability
-- Threat-level combat with weapon selection logic
-- 3-save-slot persistence + winning album
-- Dark/Light mode UI
+## Overview
+Zombie Choice Game is a lightweight but fully‑engineered interactive fiction game in pure Java + JavaFX. It showcases clean MVC design, a declarative content pipeline (JSON), a simple state machine, and persistent save slots. This README consolidates architecture, diagrams, and gameplay docs for a recruiter‑ready snapshot of the project.
 
-## Demo
-*(Video coming soon)*
+## UI Showcase
 
-## Screenshot
-![Game Screenshot](imgs/screenshot_placeholder.png)
+<p align="center">
+  <img src="imgs/Title_Screen.png" width="650" />
+  <br/>
+  <em>Title Screen</em>
+  </p>
 
-## Quick Start
+<p align="center">
+  <img src="imgs/Choose_Story_View.png" width="650" />
+  <br/>
+  <em>Story Selection Screen</em>
+</p>
 
-Recommended: run in VS Code or IntelliJ with JavaFX support.
+<p align="center">
+  <img src="imgs/Choice_Screen_View.png" width="650" />
+  <br/>
+  <em>Choice Screen with Dynamic Inventory + Threat Logic</em>
+</p>
 
-### Prerequisites
-- JDK 17+ (LTS recommended)
-- JavaFX SDK (matching your JDK and OS)
-- VS Code with Java Extension Pack (or IntelliJ IDEA)
+<p align="center">
+  <img src="imgs/Win_screen_view.png" width="650" />
+  <br/>
+  <em>Victory Screen with Save Slot Confirmation</em>
+</p>
 
-### Run in VS Code (easiest)
-1. Open this folder in VS Code.
-2. Install extensions if prompted (Java, JavaFX helpers, Markdown Mermaid for docs preview).
-3. Open `src/Main.java` and click “Run”.
-   - If JavaFX modules aren’t found, point VS Code to your JavaFX SDK or run with VM args like below.
+<p align="center">
+  <img src="imgs/winning_photo_album_view.png" width="650" />
+  <br/>
+  <em>Winning Photo Album (unlocked endings)</em>
+</p>
 
-### Run from command line (Windows PowerShell)
-Replace `C:\path\to\javafx\lib` with your JavaFX SDK `lib` directory. Gson is required; place the jar under `lib/` first.
+## Highlights
+- **Clean MVC:** Clear separation of `model`, `view`, and `controller` directories.
+- **JavaFX GUI:** Dynamic scene construction, consistent HUD/top bar, theme support.
+- **State Machine:** Explicit `GameState` enum drives progression & screen routing.
+- **JSON Content:** Scenes, inventories, titles, and save files are all external.
+- **Inventory System:** Item categories, limits, durability, health/power effects.
+- **Threat & Combat Logic:** Scene `threatLevel` influences weapon effectiveness & survival chances.
+- **Persistent Saves:** Three slot system (classic console style) with replay tracking.
+- **Extensible Pipeline:** Adding new narrative arcs is a matter of dropping JSON.
 
-Download Gson jar (one-time):
+---
 
-```powershell
-# from e:\programs\ZombieChoiceGame
-New-Item -ItemType Directory -Path lib -Force | Out-Null
-Invoke-WebRequest -Uri "https://repo1.maven.org/maven2/com/google/code/gson/gson/2.10.1/gson-2.10.1.jar" -OutFile "lib\gson-2.10.1.jar"
+ 
+
+## Feature Breakdown
+### Choice-Driven Narrative
+- Each scene loaded from JSON (`src/data/*.json`).
+- Choices produce: next scene id, health deltas, item acquisition, or win/loss flags.
+- Scene objects (`GameScene`) retain raw JSON for meta inspection.
+
+### Inventory System
+- `InventoryLoader` parses arrays of items and key item files.
+- Item attributes: health restore, durability, power, type (`ItemType`).
+- Logical limits (e.g., constrain weapon count) enforced in controller/model logic.
+- Enables gating choices or mitigating damage.
+
+### Threat & Combat Logic
+- `threatLevel` per scene; player weapon power + threat influences outcomes (bitten / eaten flags).
+- Durable weapons degrade via fights (`fightNumber`).
+- Health changes aggregated per scene + choice effect.
+
+### Save System
+- `SaveManager` / `SaveData` implement three slot persistence under `src/data/saves/`.
+- Slot JSON includes player status, progress markers (ending state), and inventory snapshot.
+- Quick load on app start; manual overwrites on progression.
+
+### Dynamic UI
+- Views (`view/*View.java`) modular: Title, Instructions, ChoiceScreen, InventoryChoice, StoryTurnstile, WinningPhotoAlbum, TopBar.
+- Consistent HUD with health & key items; theme (`Theme.java`) allows light/dark adjustments.
+
+### JSON Content Pipeline
+```
+src/data/
+  inventory.json
+  health_inventory.json
+  attack_inventory.json
+  balanced_inventory.json
+  antidote.json
+  new_weapon.json
+  titles.json
+  drive_story1.json
+  walk_story2.json
+  saves/slot1.json .. slot3.json
+```
+Edit / add files → restart → new content live. No recompilation of logic layer required.
+
+## Core Architecture
+| Layer | Responsibilities | Key Classes |
+|-------|------------------|-------------|
+| Model | Domain, game state, inventory, scene graph | `GameScene`, `GameChoice`, `InventoryItem`, `InventoryLoader`, `SaveData`, `SaveManager`, `GameState`, `ItemType`, `SceneLoader`, `GameModel` |
+| View  | JavaFX UI components & layout | `ChoiceScreenView`, `InventoryChoiceView`, `TitleView`, `InstructionsView`, `TopBarView`, `StoryTurnstileView`, `WinningPhotoAlbumView`, `Theme` |
+| Controller | Orchestrates transitions, enforces rules, wires model↔view | `MainController` |
+
+### State Flow
+```
+TITLE → INSTRUCTIONS → INTRO → FIRST_CHOICE → (SCENE ... SCENE) → ENDING (WIN / LOSS)
+            │                                    │
+            └─────────────── Save Slot Update ───┘
 ```
 
-```powershell
-# Compile
-javac -d out -cp "src;lib\gson-2.10.1.jar" --module-path "C:\path\to\javafx\lib" --add-modules javafx.controls,javafx.graphics,javafx.fxml src\Main.java src\controller\MainController.java src\model\*.java src\view\*.java
-
-# Run
-java -cp "out;lib\gson-2.10.1.jar" --module-path "C:\path\to\javafx\lib" --add-modules javafx.controls,javafx.graphics,javafx.fxml Main
+### Scene JSON Example
+```jsonc
+{
+  "id": "drive_start",
+  "prompt": "You wake up in a crashed car...",
+  "imagePath": "imgs/crash.png",
+  "threatLevel": 2,
+  "choices": [
+    { "label": "Grab weapon", "nextId": "grab_knife", "healthEffect": 0 },
+    { "label": "Run", "nextId": "run_road", "healthEffect": -5 }
+  ]
+}
 ```
+Parsed by loader classes → converted to `GameScene` + `GameChoice` objects → rendered by view layer → player picks → next scene fetched.
 
-If you prefer Maven/Gradle, you can add a build later; this repo currently runs as a simple JavaFX app without a build tool.
-
-## Project Structure
+## Project Structure (Condensed)
 ```
 src/
-  Main.java
+  Main.java                # Entry point
   controller/
+    MainController.java    # Central orchestrator
   model/
+    GameModel.java         # Aggregates & exposes runtime state
+    GameScene.java         # Scene definition + threat/item logic
+    GameChoice.java        # User-selectable branch item
+    InventoryItem.java     # Item stats & effects
+    InventoryLoader.java   # JSON parsing
+    ItemType.java          # Enum categories
+    SaveData.java          # Persistence DTO
+    SaveManager.java       # Slot read/write
+    SceneLoader.java       # Scene JSON parsing
+    GameState.java         # Enum for UI/game phases
   view/
-docs/
-  ARCHITECTURE.md
-  CLASS_DIAGRAM.md
-  GAMEPLAY_SEQUENCE.md 
-  GAMESTATE_DIAGRAM.md 
-imgs/
-lib/
+    ...View classes        # JavaFX modular screens
+docs/                      # Deep-dive architecture & diagrams
+imgs/                      # Visual assets
+lib/                       # External jars (e.g., Gson)
 ```
 
-## Documentation
-- Architecture: `docs/ARCHITECTURE.md` (high‑level design, data flow)
-- Class Diagram: `docs/CLASS_DIAGRAM.md` (Mermaid, preview in VS Code)
-- Extras (optional):
-  - Gameplay Sequence: `docs/GAMEPLAY_SEQUENCE.md`
-  - GameState Diagram: `docs/GAMESTATE_DIAGRAM.md`
-  - Class Reference: `docs/CLASS_REFERENCE.md`
+## Running the Game
+### Prerequisites
+- JDK 17+ (LTS recommended)
+- JavaFX SDK (matching OS & JDK)
+- Gson (JSON parsing) → `lib/gson-2.10.1.jar`
 
-## Notes
-- Story content and saves are JSON under `src/data/`.
-- Diagrams are written in Mermaid; preview via VS Code (Ctrl+Shift+V) with the Mermaid preview extension enabled.
-- Images are loaded from `imgs/` and scene `imagePath` fields.
+### VS Code (Fast Path)
+1. Open folder.
+2. Install Java extensions when prompted.
+3. Run `Main.java`.
+4. If JavaFX errors: add VM args:
+   ```
+   --module-path "C:\path\to\javafx\lib" --add-modules javafx.controls,javafx.fxml,javafx.graphics
+   ```
+
+### PowerShell Manual Build
+Download Gson (if absent):
+```powershell
+Invoke-WebRequest -Uri "https://repo1.maven.org/maven2/com/google/code/gson/gson/2.10.1/gson-2.10.1.jar" -OutFile "lib\gson-2.10.1.jar"
+```
+Compile:
+```powershell
+javac -d out -cp "src;lib\gson-2.10.1.jar" --module-path "C:\path\to\javafx\lib" --add-modules javafx.controls,javafx.fxml,javafx.graphics src\Main.java src\controller\*.java src\model\*.java src\view\*.java
+```
+Run:
+```powershell
+java -cp "out;lib\gson-2.10.1.jar" --module-path "C:\path\to\javafx\lib" --add-modules javafx.controls,javafx.fxml,javafx.graphics Main
+```
+
+## Documentation Set
+- `ARCHITECTURE.md` – Deep overview & layering.
+- `CLASS_DIAGRAM.md` – UML (Mermaid) relationships.
+- `CLASS_REFERENCE.md` – Field & method catalogue.
+- `GAMESTATE_DIAGRAM.md` – Progression & transitions.
+- `GAMEPLAY_SEQUENCE.md` – Typical play loop & timing.
+
+## Future Improvements
+- Audio: ambient/hit SFX & adaptive soundtrack.
+- Achievements & meta progression.
+- Additional branching arcs (expansion packs JSON drop‑in).
+- Animated transitions & tweened UI.
+- Rich combat resolution (multiple weapon stats, evasion).
+- Mobile-friendly layout & scaling.
+
+## Contributing
+Fork → feature branch → PR. Keep additions data‑driven where possible (prefer JSON over hardcoding). Maintain MVC boundaries.
+
+## License
+MIT License (or adapt as needed). Include a `LICENSE` file before distribution.
+
+## Why This Matters
+This repository demonstrates practical architecture decisions, clean separation of concerns, externalized content, and readable expansion points—exactly what an engineer needs to scale a narrative system without rewrites.
+
+Enjoy surviving the outbreak.
+
+---
+> Built with JavaFX, Gson, and your choices.
